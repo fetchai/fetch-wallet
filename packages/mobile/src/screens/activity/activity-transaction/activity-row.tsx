@@ -17,7 +17,7 @@ export const ActivityRow: FunctionComponent<{
   setDate: any;
 }> = ({ node, setDate }) => {
   const style = useStyle();
-  const { chainStore } = useStore();
+  const { chainStore, analyticsStore } = useStore();
   const [isAmountDeducted, setIsAmountDeducted] = useState(false);
 
   useEffect(() => {
@@ -37,14 +37,18 @@ export const ActivityRow: FunctionComponent<{
   return (
     <TouchableOpacity
       style={style.flatten(["flex-row", "items-center"]) as ViewStyle}
-      onPress={() =>
+      onPress={() => {
         navigation.navigate("Others", {
           screen: "ActivityDetails",
           params: {
             details: details,
           },
-        })
-      }
+        });
+        analyticsStore.logEvent("activity_transactions_click", {
+          tabName: "Transactions",
+          pageName: "Activity",
+        });
+      }}
     >
       <View
         style={
@@ -120,8 +124,12 @@ export const ActivityRow: FunctionComponent<{
             <React.Fragment>
               Confirmed • {moment(details.timestamp).format("hh:mm A")}
             </React.Fragment>
+          ) : node.transaction.status === "Pending" ? (
+            <Text style={style.flatten(["color-white@60%", "h7"]) as ViewStyle}>
+              Pending
+            </Text>
           ) : (
-            <Text style={style.flatten(["color-white", "h7"]) as ViewStyle}>
+            <Text style={style.flatten(["color-white@60%", "h7"]) as ViewStyle}>
               Error
             </Text>
           )}

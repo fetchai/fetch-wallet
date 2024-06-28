@@ -7,8 +7,6 @@ import Svg, {
   LinearGradient,
   Stop,
 } from "react-native-svg";
-/* SVGR has dropped some elements not supported by react-native-svg: filter */
-
 export const RocketIcon: FunctionComponent = (props) => {
   return (
     <Svg width={100} height={152} viewBox="0 0 100 152" fill="none" {...props}>

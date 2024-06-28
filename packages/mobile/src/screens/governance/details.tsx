@@ -19,7 +19,6 @@ import { Governance } from "@keplr-wallet/stores";
 import { GovernanceProposalStatusChip } from "./card";
 import { IntPretty } from "@keplr-wallet/unit";
 import { useIntl } from "react-intl";
-import { registerModal } from "modals/base";
 import { RectButton } from "components/rect-button";
 import { useSmartNavigation } from "navigation/smart-navigation";
 import { MarkdownView } from "react-native-markdown-view";
@@ -92,7 +91,9 @@ export const TallyVoteInfoView: FunctionComponent<{
             {text}
           </Text>
           <Text
-            style={style.flatten(["text-button3", "color-text-middle"])}
+            style={
+              style.flatten(["text-button3", "color-text-middle"]) as ViewStyle
+            }
           >{`${percentage.trim(true).maxDecimals(1).toString()}%`}</Text>
         </View>
       </View>
@@ -145,7 +146,7 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
             }
           >
             <Text
-              style={style.flatten(["h6", "color-text-high"])}
+              style={style.flatten(["h6", "color-text-high"]) as ViewStyle}
             >{`#${proposal.id}`}</Text>
             <View style={style.flatten(["flex-1"])} />
             <GovernanceProposalStatusChip status={proposal.proposalStatus} />
@@ -174,12 +175,16 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
                 ]) as ViewStyle
               }
             >
-              <Text style={style.flatten(["h7", "color-text-middle"])}>
+              <Text
+                style={style.flatten(["h7", "color-text-middle"]) as ViewStyle}
+              >
                 Turnout
               </Text>
               <View style={style.flatten(["flex-1"])} />
               <Text
-                style={style.flatten(["body3", "color-text-middle"])}
+                style={
+                  style.flatten(["body3", "color-text-middle"]) as ViewStyle
+                }
               >{`${proposal.turnout
                 .trim(true)
                 .maxDecimals(1)
@@ -258,15 +263,19 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
             style={style.flatten(["flex-row", "margin-bottom-24"]) as ViewStyle}
           >
             <View style={style.flatten(["flex-1"])}>
-              <Text style={style.flatten(["h7", "color-text-middle"])}>
+              <Text
+                style={style.flatten(["h7", "color-text-middle"]) as ViewStyle}
+              >
                 Voting Start
               </Text>
               <Text
-                style={style.flatten([
-                  "body3",
-                  "color-text-middle",
-                  "dark:color-platinum-200",
-                ])}
+                style={
+                  style.flatten([
+                    "body3",
+                    "color-text-middle",
+                    "dark:color-platinum-200",
+                  ]) as ViewStyle
+                }
               >
                 {`${dateToLocalStringFormatGMT(
                   intl,
@@ -275,15 +284,19 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
               </Text>
             </View>
             <View style={style.flatten(["flex-1"])}>
-              <Text style={style.flatten(["h7", "color-text-middle"])}>
+              <Text
+                style={style.flatten(["h7", "color-text-middle"]) as ViewStyle}
+              >
                 Voting End
               </Text>
               <Text
-                style={style.flatten([
-                  "body3",
-                  "color-text-middle",
-                  "dark:color-platinum-200",
-                ])}
+                style={
+                  style.flatten([
+                    "body3",
+                    "color-text-middle",
+                    "dark:color-platinum-200",
+                  ]) as ViewStyle
+                }
               >
                 {`${dateToLocalStringFormatGMT(
                   intl,
@@ -331,243 +344,251 @@ export const GovernanceVoteModal: FunctionComponent<{
   // Modal can't use the `useSmartNavigation` hook directly.
   // So need to get the props from the parent.
   smartNavigation: ReturnType<typeof useSmartNavigation>;
-}> = registerModal(
-  observer(({ proposalId, close, smartNavigation, isOpen }) => {
-    const { chainStore, accountStore, queriesStore, analyticsStore } =
-      useStore();
+}> = observer(({ proposalId, close, smartNavigation, isOpen }) => {
+  const { chainStore, accountStore, analyticsStore } = useStore();
 
-    const account = accountStore.getAccount(chainStore.current.chainId);
-    const queries = queriesStore.get(chainStore.current.chainId);
+  const account = accountStore.getAccount(chainStore.current.chainId);
+  const style = useStyle();
 
-    const proposal = queries.cosmos.queryGovernance.getProposal(proposalId);
+  const [vote, setVote] = useState<
+    "Yes" | "No" | "NoWithVeto" | "Abstain" | "Unspecified"
+  >("Unspecified");
 
-    const style = useStyle();
-
-    const [vote, setVote] = useState<
-      "Yes" | "No" | "NoWithVeto" | "Abstain" | "Unspecified"
-    >("Unspecified");
-
-    const renderBall = (selected: boolean) => {
-      if (selected) {
-        return (
+  const renderBall = (selected: boolean) => {
+    if (selected) {
+      return (
+        <View
+          style={
+            style.flatten([
+              "width-24",
+              "height-24",
+              "border-radius-32",
+              "background-color-blue-400",
+              "dark:background-color-blue-300",
+              "items-center",
+              "justify-center",
+            ]) as ViewStyle
+          }
+        >
           <View
             style={
               style.flatten([
-                "width-24",
-                "height-24",
-                "border-radius-32",
-                "background-color-blue-400",
-                "dark:background-color-blue-300",
-                "items-center",
-                "justify-center",
-              ]) as ViewStyle
-            }
-          >
-            <View
-              style={
-                style.flatten([
-                  "width-12",
-                  "height-12",
-                  "border-radius-32",
-                  "background-color-white",
-                ]) as ViewStyle
-              }
-            />
-          </View>
-        );
-      } else {
-        return (
-          <View
-            style={
-              style.flatten([
-                "width-24",
-                "height-24",
+                "width-12",
+                "height-12",
                 "border-radius-32",
                 "background-color-white",
-                "dark:background-color-platinum-600",
-                "border-width-1",
-                "border-color-gray-100",
-                "dark:border-color-platinum-300",
               ]) as ViewStyle
             }
           />
-        );
-      }
-    };
-
-    const [isSendingTx, setIsSendingTx] = useState(false);
-
-    if (!isOpen) {
-      return null;
-    }
-
-    return (
-      <View style={style.flatten(["padding-page"]) as ViewStyle}>
-        <View
-          style={style.flatten([
-            "border-radius-8",
-            "overflow-hidden",
-            "background-color-white",
-            "dark:background-color-platinum-600",
-          ])}
-        >
-          <RectButton
-            style={
-              style.flatten(
-                [
-                  "height-64",
-                  "padding-left-36",
-                  "padding-right-28",
-                  "flex-row",
-                  "items-center",
-                  "justify-between",
-                ],
-                [
-                  vote === "Yes" && "background-color-blue-50",
-                  vote === "Yes" && "dark:background-color-platinum-500",
-                ]
-              ) as ViewStyle
-            }
-            onPress={() => setVote("Yes")}
-          >
-            <Text style={style.flatten(["subtitle1", "color-text-middle"])}>
-              Yes
-            </Text>
-            {renderBall(vote === "Yes")}
-          </RectButton>
-          <RectButton
-            style={
-              style.flatten(
-                [
-                  "height-64",
-                  "padding-left-36",
-                  "padding-right-28",
-                  "flex-row",
-                  "items-center",
-                  "justify-between",
-                ],
-                [
-                  vote === "No" && "background-color-blue-50",
-                  vote === "No" && "dark:background-color-platinum-500",
-                ]
-              ) as ViewStyle
-            }
-            onPress={() => setVote("No")}
-          >
-            <Text style={style.flatten(["subtitle1", "color-text-middle"])}>
-              No
-            </Text>
-            {renderBall(vote === "No")}
-          </RectButton>
-          <RectButton
-            style={
-              style.flatten(
-                [
-                  "height-64",
-                  "padding-left-36",
-                  "padding-right-28",
-                  "flex-row",
-                  "items-center",
-                  "justify-between",
-                ],
-                [
-                  vote === "NoWithVeto" && "background-color-blue-50",
-                  vote === "NoWithVeto" && "dark:background-color-platinum-500",
-                ]
-              ) as ViewStyle
-            }
-            onPress={() => setVote("NoWithVeto")}
-          >
-            <Text style={style.flatten(["subtitle1", "color-text-middle"])}>
-              No with veto
-            </Text>
-            {renderBall(vote === "NoWithVeto")}
-          </RectButton>
-          <RectButton
-            style={
-              style.flatten(
-                [
-                  "height-64",
-                  "padding-left-36",
-                  "padding-right-28",
-                  "flex-row",
-                  "items-center",
-                  "justify-between",
-                ],
-                [
-                  vote === "Abstain" && "background-color-blue-50",
-                  vote === "Abstain" && "dark:background-color-platinum-500",
-                ]
-              ) as ViewStyle
-            }
-            onPress={() => setVote("Abstain")}
-          >
-            <Text style={style.flatten(["subtitle1", "color-text-middle"])}>
-              Abstain
-            </Text>
-            {renderBall(vote === "Abstain")}
-          </RectButton>
         </View>
-        <Button
-          containerStyle={style.flatten(["margin-top-12"]) as ViewStyle}
-          text="Vote"
-          size="large"
-          disabled={vote === "Unspecified" || !account.isReadyToSendTx}
-          loading={isSendingTx || account.txTypeInProgress === "govVote"}
-          onPress={async () => {
-            if (vote !== "Unspecified" && account.isReadyToSendTx) {
-              const tx = account.cosmos.makeGovVoteTx(proposalId, vote);
-
-              setIsSendingTx(true);
-
-              try {
-                let gas = account.cosmos.msgOpts.govVote.gas;
-
-                // Gas adjustment is 1.5
-                // Since there is currently no convenient way to adjust the gas adjustment on the UI,
-                // Use high gas adjustment to prevent failure.
-                try {
-                  gas = (await tx.simulate()).gasUsed * 1.5;
-                } catch (e) {
-                  // Some chain with older version of cosmos sdk (below @0.43 version) can't handle the simulation.
-                  // Therefore, the failure is expected. If the simulation fails, simply use the default value.
-                  console.log(e);
-                }
-                close();
-                await tx.send(
-                  { amount: [], gas: gas.toString() },
-                  "",
-                  {},
-                  {
-                    onBroadcasted: (txHash) => {
-                      analyticsStore.logEvent("Vote tx broadcasted", {
-                        chainId: chainStore.current.chainId,
-                        chainName: chainStore.current.chainName,
-                        proposalId,
-                        proposalTitle: proposal?.title,
-                      });
-                      smartNavigation.pushSmart("TxPendingResult", {
-                        txHash: Buffer.from(txHash).toString("hex"),
-                      });
-                    },
-                  }
-                );
-              } catch (e) {
-                if (e?.message === "Request rejected") {
-                  return;
-                }
-                console.log(e);
-                smartNavigation.navigateSmart("Home", {});
-              } finally {
-                setIsSendingTx(false);
-              }
-            }
-          }}
+      );
+    } else {
+      return (
+        <View
+          style={
+            style.flatten([
+              "width-24",
+              "height-24",
+              "border-radius-32",
+              "background-color-white",
+              "dark:background-color-platinum-600",
+              "border-width-1",
+              "border-color-gray-100",
+              "dark:border-color-platinum-300",
+            ]) as ViewStyle
+          }
         />
+      );
+    }
+  };
+
+  const [isSendingTx, setIsSendingTx] = useState(false);
+
+  if (!isOpen) {
+    return null;
+  }
+
+  return (
+    <View style={style.flatten(["padding-page"]) as ViewStyle}>
+      <View
+        style={style.flatten([
+          "border-radius-8",
+          "overflow-hidden",
+          "background-color-white",
+          "dark:background-color-platinum-600",
+        ])}
+      >
+        <RectButton
+          style={
+            style.flatten(
+              [
+                "height-64",
+                "padding-left-36",
+                "padding-right-28",
+                "flex-row",
+                "items-center",
+                "justify-between",
+              ],
+              [
+                vote === "Yes" && "background-color-blue-50",
+                vote === "Yes" && "dark:background-color-platinum-500",
+              ]
+            ) as ViewStyle
+          }
+          onPress={() => setVote("Yes")}
+        >
+          <Text
+            style={
+              style.flatten(["subtitle1", "color-text-middle"]) as ViewStyle
+            }
+          >
+            Yes
+          </Text>
+          {renderBall(vote === "Yes")}
+        </RectButton>
+        <RectButton
+          style={
+            style.flatten(
+              [
+                "height-64",
+                "padding-left-36",
+                "padding-right-28",
+                "flex-row",
+                "items-center",
+                "justify-between",
+              ],
+              [
+                vote === "No" && "background-color-blue-50",
+                vote === "No" && "dark:background-color-platinum-500",
+              ]
+            ) as ViewStyle
+          }
+          onPress={() => setVote("No")}
+        >
+          <Text
+            style={
+              style.flatten(["subtitle1", "color-text-middle"]) as ViewStyle
+            }
+          >
+            No
+          </Text>
+          {renderBall(vote === "No")}
+        </RectButton>
+        <RectButton
+          style={
+            style.flatten(
+              [
+                "height-64",
+                "padding-left-36",
+                "padding-right-28",
+                "flex-row",
+                "items-center",
+                "justify-between",
+              ],
+              [
+                vote === "NoWithVeto" && "background-color-blue-50",
+                vote === "NoWithVeto" && "dark:background-color-platinum-500",
+              ]
+            ) as ViewStyle
+          }
+          onPress={() => setVote("NoWithVeto")}
+        >
+          <Text
+            style={
+              style.flatten(["subtitle1", "color-text-middle"]) as ViewStyle
+            }
+          >
+            No with veto
+          </Text>
+          {renderBall(vote === "NoWithVeto")}
+        </RectButton>
+        <RectButton
+          style={
+            style.flatten(
+              [
+                "height-64",
+                "padding-left-36",
+                "padding-right-28",
+                "flex-row",
+                "items-center",
+                "justify-between",
+              ],
+              [
+                vote === "Abstain" && "background-color-blue-50",
+                vote === "Abstain" && "dark:background-color-platinum-500",
+              ]
+            ) as ViewStyle
+          }
+          onPress={() => setVote("Abstain")}
+        >
+          <Text
+            style={
+              style.flatten(["subtitle1", "color-text-middle"]) as ViewStyle
+            }
+          >
+            Abstain
+          </Text>
+          {renderBall(vote === "Abstain")}
+        </RectButton>
       </View>
-    );
-  })
-);
+      <Button
+        containerStyle={style.flatten(["margin-top-12"]) as ViewStyle}
+        text="Vote"
+        size="large"
+        disabled={vote === "Unspecified" || !account.isReadyToSendTx}
+        loading={isSendingTx || account.txTypeInProgress === "govVote"}
+        onPress={async () => {
+          if (vote !== "Unspecified" && account.isReadyToSendTx) {
+            const tx = account.cosmos.makeGovVoteTx(proposalId, vote);
+
+            setIsSendingTx(true);
+
+            try {
+              let gas = account.cosmos.msgOpts.govVote.gas;
+
+              // Gas adjustment is 1.5
+              // Since there is currently no convenient way to adjust the gas adjustment on the UI,
+              // Use high gas adjustment to prevent failure.
+              try {
+                gas = (await tx.simulate()).gasUsed * 1.5;
+              } catch (e) {
+                // Some chain with older version of cosmos sdk (below @0.43 version) can't handle the simulation.
+                // Therefore, the failure is expected. If the simulation fails, simply use the default value.
+                console.log(e);
+              }
+              close();
+              await tx.send(
+                { amount: [], gas: gas.toString() },
+                "",
+                {},
+                {
+                  onBroadcasted: (txHash) => {
+                    analyticsStore.logEvent("Vote tx broadcasted", {
+                      chainId: chainStore.current.chainId,
+                      chainName: chainStore.current.chainName,
+                    });
+                    console.log("Hash", txHash);
+                    // smartNavigation.pushSmart("TxPendingResult", {
+                    //   txHash: Buffer.from(txHash).toString("hex"),
+                    // });
+                  },
+                }
+              );
+            } catch (e) {
+              if (e?.message === "Request rejected") {
+                return;
+              }
+              console.log(e);
+              smartNavigation.navigateSmart("Home", {});
+            } finally {
+              setIsSendingTx(false);
+            }
+          }
+        }}
+      />
+    </View>
+  );
+});
 
 export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
   const { chainStore, queriesStore, accountStore } = useStore();

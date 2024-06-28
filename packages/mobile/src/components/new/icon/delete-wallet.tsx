@@ -7,7 +7,6 @@ import Svg, {
   LinearGradient,
   Stop,
 } from "react-native-svg";
-/* SVGR has dropped some elements not supported by react-native-svg: filter */
 
 export const DeleteWalletIcon: FunctionComponent = (props) => {
   return (

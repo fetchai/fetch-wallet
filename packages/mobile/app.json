@@ -7,11 +7,10 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "fetchwallet",
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "bundleIdentifier": "com.fetchai.wallet",
+      "googleServicesFile": "./GoogleService-Info.plist",
       "permissions": [
         "CAMERA",
         "BLUETOOTH_ADMIN",
@@ -24,7 +23,16 @@
     },
     "android": {
       "package": "com.fetchai.wallet",
-      "permissions": ["CAMERA", "BLUETOOTH_ADMIN", "BLUETOOTH_CONNECT", "BLUETOOTH_ADVERTISE", "BLUETOOTH_SCAN", "BLUETOOTH", "ACCESS_FINE_LOCATION"]
+      "googleServicesFile": "./google-services.json",
+      "permissions": [
+        "CAMERA",
+        "BLUETOOTH_ADMIN",
+        "BLUETOOTH_CONNECT",
+        "BLUETOOTH_ADVERTISE",
+        "BLUETOOTH_SCAN",
+        "BLUETOOTH",
+        "ACCESS_FINE_LOCATION"
+      ]
     },
     "plugins": [
       [

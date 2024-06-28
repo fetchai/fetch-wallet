@@ -89,6 +89,7 @@ export function init(
   );
 
   const addressBookService = new AddressBook.AddressBookService(
+    storeCreator("address-book"),
     chainsService,
     permissionService
   );

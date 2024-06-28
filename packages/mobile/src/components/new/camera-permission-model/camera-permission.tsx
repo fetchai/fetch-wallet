@@ -21,12 +21,7 @@ export const CameraPermissionModal: FunctionComponent<{
 
   return (
     <React.Fragment>
-      <CardModal
-        isOpen={isOpen}
-        disableGesture={true}
-        cardStyle={style.flatten(["padding-bottom-32"]) as ViewStyle}
-        close={close}
-      >
+      <CardModal isOpen={isOpen} close={close} showCloseButton={false}>
         <IconWithText
           icon={icon}
           iconStyle={{ marginRight: -45 }}

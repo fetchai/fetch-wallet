@@ -1,4 +1,3 @@
-/* eslint-disable react/display-name */
 import React, { useState } from "react";
 import {
   Platform,
@@ -137,7 +136,7 @@ export const TextInput = React.forwardRef<
                 android: {
                   // On android, the text input's height does not equals to the line height by strange.
                   // To fix this problem, set the height explicitly.
-                  height: style.get("body2-in-text-input")?.lineHeight,
+                  height: 19,
                 },
               }),
               propsStyle,
@@ -207,3 +206,4 @@ export const TextInput = React.forwardRef<
     </View>
   );
 });
+TextInput.displayName = "TextInput";

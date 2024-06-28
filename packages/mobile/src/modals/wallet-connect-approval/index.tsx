@@ -30,6 +30,10 @@ export const WalletConnectApprovalModal: FunctionComponent<{
 
   const style = useStyle();
 
+  if (!isOpen) {
+    return null;
+  }
+
   return (
     <CardModal isOpen={isOpen} title="Wallet Connect">
       <WCAppLogoAndName
@@ -44,7 +48,7 @@ export const WalletConnectApprovalModal: FunctionComponent<{
         >
           {appName}
         </Text>
-        <Text style={style.flatten(["body1", "color-text-low"])}>
+        <Text style={style.flatten(["body1", "color-text-low"]) as ViewStyle}>
           {" is requesting to connect to your Fetch account on "}
         </Text>
         <Text

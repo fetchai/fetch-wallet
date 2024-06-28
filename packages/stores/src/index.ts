@@ -7,3 +7,4 @@ export * from "./core";
 export * from "./ibc";
 export * from "./chat";
 export * from "./proposal";
+export * from "./activity";

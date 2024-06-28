@@ -61,7 +61,9 @@ buck-out/
 
 # CocoaPods
 /ios/Pods/
+/ios/GoogleService-Info.plist
 
+/android/app/google-services.json
 index.android.bundle
 *.hprof
 
@@ -76,3 +78,4 @@ injected-provider.bundle.js
 *.certSigningRequest
 *.zip
 *.mobileprovision
+.env

@@ -43,7 +43,6 @@ export class SmartNavigator<
     const targetScreen = this.config[screenName];
 
     if (currentScreen.upperScreenName === targetScreen.upperScreenName) {
-      // eslint-disable-next-line @typescript-eslint/ban-types
       navigation.navigate(screenName as string, params as object | undefined);
     } else {
       navigation.navigate(targetScreen.upperScreenName, {
@@ -72,7 +71,6 @@ export class SmartNavigator<
 
     if (currentScreen.upperScreenName === targetScreen.upperScreenName) {
       navigation.dispatch(
-        // eslint-disable-next-line @typescript-eslint/ban-types
         StackActions.push(screenName as string, params as object | undefined)
       );
     } else {
@@ -104,7 +102,6 @@ export class SmartNavigator<
 
     if (currentScreen.upperScreenName === targetScreen.upperScreenName) {
       navigation.dispatch(
-        // eslint-disable-next-line @typescript-eslint/ban-types
         StackActions.replace(screenName as string, params as object | undefined)
       );
     } else {
@@ -152,7 +149,6 @@ export const createSmartNavigatorProvider = <
   );
 
   return {
-    // eslint-disable-next-line react/display-name
     SmartNavigatorProvider: ({ children }) => {
       return <context.Provider value={navigator}>{children}</context.Provider>;
     },

@@ -3,35 +3,43 @@ import React, {
   useCallback,
   useEffect,
   useRef,
+  useState,
 } from "react";
 import { PageWithScrollViewInBottomTabView } from "components/page";
-import { AccountCard } from "./account-card";
 import {
   AppState,
   AppStateStatus,
+  Dimensions,
+  Platform,
   RefreshControl,
   ScrollView,
   View,
   ViewStyle,
 } from "react-native";
 import { useStore } from "stores/index";
-import { StakingInfoCard } from "./staking-info-card";
-import { useStyle } from "styles/index";
-import { GovernanceCard } from "./governance-card";
 import { observer } from "mobx-react-lite";
-import { MyRewardCard } from "./my-reward-card";
-import { TokensCard } from "./tokens-card";
-import { usePrevious } from "hooks/use-previous";
-import { BIP44Selectable } from "./bip44-selectable";
 import { useFocusEffect } from "@react-navigation/native";
-import { Dec } from "@keplr-wallet/unit";
+import { AccountSection } from "./account-section";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { usePrevious } from "hooks/use-previous";
+import { LineGraphView } from "components/new/line-graph";
+import { useStyle } from "styles/index";
+import { useFocusedScreen } from "providers/focused-screen";
 
-export const HomeScreen: FunctionComponent = observer(() => {
-  const [refreshing, setRefreshing] = React.useState(false);
+export const NewHomeScreen: FunctionComponent = observer(() => {
+  const safeAreaInsets = useSafeAreaInsets();
+  const style = useStyle();
+  const windowHeight = Dimensions.get("window").height;
 
+  const [refreshing, setRefreshing] = useState(false);
   const { chainStore, accountStore, queriesStore, priceStore } = useStore();
 
-  const style = useStyle();
+  const [tokenState, setTokenState] = useState({
+    diff: 0,
+    time: "TODAY",
+    type: "positive",
+  });
+  const [graphHeight, setGraphHeight] = useState(4.2);
 
   const scrollViewRef = useRef<ScrollView | null>(null);
 
@@ -39,6 +47,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
   const currentChainId = currentChain.chainId;
   const previousChainId = usePrevious(currentChainId);
   const chainStoreIsInitializing = chainStore.isInitializing;
+  const focusedScreen = useFocusedScreen();
   const previousChainStoreIsInitializing = usePrevious(
     chainStoreIsInitializing,
     true
@@ -46,23 +55,6 @@ export const HomeScreen: FunctionComponent = observer(() => {
 
   const account = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
-
-  const queryStakable = queries.queryBalances.getQueryBech32Address(
-    account.bech32Address
-  ).stakable;
-  const stakable = queryStakable.balance;
-  const queryDelegated = queries.cosmos.queryDelegations.getQueryBech32Address(
-    account.bech32Address
-  );
-  const queryUnbonding =
-    queries.cosmos.queryUnbondingDelegations.getQueryBech32Address(
-      account.bech32Address
-    );
-  const delegated = queryDelegated.total;
-  const unbonding = queryUnbonding.total;
-
-  const stakedSum = delegated.add(unbonding);
-  const total = stakable.add(stakedSum);
 
   const checkAndUpdateChainInfo = useCallback(() => {
     if (!chainStoreIsInitializing) {
@@ -117,7 +109,7 @@ export const HomeScreen: FunctionComponent = observer(() => {
   const onRefresh = React.useCallback(async () => {
     // Because the components share the states related to the queries,
     // fetching new query responses here would make query responses on all other components also refresh.
-
+    setRefreshing(true);
     await Promise.all([
       priceStore.waitFreshResponse(),
       ...queries.queryBalances
@@ -134,82 +126,48 @@ export const HomeScreen: FunctionComponent = observer(() => {
       queries.cosmos.queryUnbondingDelegations
         .getQueryBech32Address(account.bech32Address)
         .waitFreshResponse(),
-    ]);
-
-    setRefreshing(false);
+    ]).finally(() => {
+      setRefreshing(false);
+    });
   }, [accountStore, chainStore, priceStore, queriesStore]);
+
+  /// Hide Refreshing when tab change
+  useEffect(() => {
+    if (focusedScreen.name !== "Home" && refreshing) {
+      setRefreshing(false);
+    }
+  }, [focusedScreen.name, refreshing]);
 
   return (
     <PageWithScrollViewInBottomTabView
-      backgroundMode="gradient"
+      backgroundMode={"image"}
+      isTransparentHeader={true}
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-      ref={scrollViewRef}
-    >
-      <BIP44Selectable />
-      <AccountCard
-        containerStyle={style.flatten(["margin-y-card-gap"]) as ViewStyle}
-      />
-      {total.toDec().gt(new Dec(0)) ? (
-        <View>
-          <MyRewardCard
-            containerStyle={
-              style.flatten(["margin-bottom-card-gap"]) as ViewStyle
-            }
-          />
-          {/* There is a reason to use TokensCardRenderIfTokenExists. Check the comments on TokensCardRenderIfTokenExists */}
-          <TokensCardRenderIfTokenExists />
-          <StakingInfoCard
-            containerStyle={
-              style.flatten(["margin-bottom-card-gap"]) as ViewStyle
-            }
-          />
-          <GovernanceCard
-            containerStyle={
-              style.flatten(["margin-bottom-card-gap"]) as ViewStyle
-            }
-          />
-        </View>
-      ) : null}
-    </PageWithScrollViewInBottomTabView>
-  );
-});
-
-/**
- * TokensCardRenderIfTokenExists is used to reduce the re-rendering of HomeScreen component.
- * Because HomeScreen is screen of the app, if it is re-rendered, all children component will be re-rendered.
- * If all components on screen are re-rendered, performance problems may occur and users may feel delay.
- * Therefore, the screen should not have state as much as possible.
- *
- * In fact, re-rendering took place because home screen had to check the user's balances
- * when deciding whether to render the tokens card on the screen and this makes some delay.
- * To solve this problem, this component has been separated.
- */
-const TokensCardRenderIfTokenExists: FunctionComponent = observer(() => {
-  const { chainStore, accountStore, queriesStore } = useStore();
-
-  const style = useStyle();
-
-  const queryBalances = queriesStore
-    .get(chainStore.current.chainId)
-    .queryBalances.getQueryBech32Address(
-      accountStore.getAccount(chainStore.current.chainId).bech32Address
-    );
-
-  const tokens = queryBalances.positiveNativeUnstakables.concat(
-    queryBalances.nonNativeBalances
-  );
-
-  return (
-    <React.Fragment>
-      {tokens.length > 0 ? (
-        <TokensCard
-          containerStyle={
-            style.flatten(["margin-bottom-card-gap"]) as ViewStyle
+        <RefreshControl
+          tintColor={"white"}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          progressViewOffset={
+            Platform.OS === "ios" ? safeAreaInsets.top + 10 : 48
           }
         />
-      ) : null}
-    </React.Fragment>
+      }
+      contentContainerStyle={[
+        style.get("flex-grow-1"),
+        {
+          paddingTop: Platform.OS === "ios" ? safeAreaInsets.top + 10 : 48,
+        },
+      ]}
+      containerStyle={style.flatten(["overflow-scroll"]) as ViewStyle}
+      ref={scrollViewRef}
+    >
+      <AccountSection tokenState={tokenState} setGraphHeight={setGraphHeight} />
+      <View style={style.flatten(["flex-2"])} />
+      <LineGraphView
+        setTokenState={setTokenState}
+        tokenName={chainStore.current.feeCurrencies[0].coinGeckoId}
+        height={windowHeight / graphHeight}
+      />
+    </PageWithScrollViewInBottomTabView>
   );
 });

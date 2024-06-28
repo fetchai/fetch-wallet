@@ -18,7 +18,8 @@ import {
 export const NativeTokensSection: FunctionComponent = observer(() => {
   const style = useStyle();
 
-  const { chainStore, queriesStore, accountStore, priceStore } = useStore();
+  const { chainStore, queriesStore, accountStore, priceStore, analyticsStore } =
+    useStore();
   const current = chainStore.current;
   const queries = queriesStore.get(current.chainId);
 
@@ -64,15 +65,18 @@ export const NativeTokensSection: FunctionComponent = observer(() => {
     <TokenCardView
       containerStyle={style.flatten(["margin-y-4"]) as ViewStyle}
       key={stakable.currency.coinMinimalDenom}
-      onPress={() =>
+      onPress={() => {
+        analyticsStore.logEvent("native_token_click", {
+          pageName: "Portfolio",
+        });
         navigation.navigate("Others", {
           screen: "NativeTokens",
           params: {
             tokenString: NativeTokenDetailsString,
             tokenBalanceString: NativeTokenBalanceString,
           },
-        })
-      }
+        });
+      }}
       leadingIcon={
         <TokenSymbolUsingChainInfo
           size={44}

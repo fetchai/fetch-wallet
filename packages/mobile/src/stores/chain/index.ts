@@ -148,6 +148,51 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
     }
   }
 
+  @flow
+  *toggleMultipleChainInfoInUI(chainIds: string[], isVisible: boolean) {
+    let disableChainIds = [...this.chainInfoInUIConfig.disabledChains];
+
+    for (let chainId of chainIds) {
+      chainId = ChainIdHelper.parse(chainId).identifier;
+
+      if (this.chainInfoInUIConfig.disabledChains.includes(chainId)) {
+        disableChainIds = disableChainIds.filter((chain) => chain !== chainId);
+      }
+
+      if (!isVisible) {
+        if (this.enabledChainInfosInUI.length === 1) {
+          // Can't turn off all chains.
+          return;
+        }
+
+        disableChainIds.push(chainId);
+      }
+    }
+
+    yield this.kvStore.set<{ disabledChains: string[] }>(
+      "chain_info_in_ui_config",
+      {
+        disabledChains: disableChainIds,
+      }
+    );
+
+    this.chainInfoInUIConfig.disabledChains = disableChainIds;
+
+    if (
+      chainIds.includes(ChainIdHelper.parse(this.current.chainId).identifier)
+    ) {
+      const other = this.chainInfosInUI.find(
+        (chainInfo) =>
+          !chainIds.includes(ChainIdHelper.parse(chainInfo.chainId).identifier)
+      );
+
+      if (other) {
+        this.selectChain(other.chainId);
+        this.saveLastViewChainId();
+      }
+    }
+  }
+
   get selectedChainId(): string {
     return this._selectedChainId;
   }
@@ -203,7 +248,17 @@ export class ChainStore extends BaseChainStore<ChainInfoWithCoreTypes> {
 
     if (chainInfoUI) {
       this.chainInfoInUIConfig.disabledChains =
-        chainInfoUI.disabledChains ?? [];
+        chainInfoUI?.disabledChains?.length > 0
+          ? chainInfoUI.disabledChains
+          : this.chainInfos
+              .filter((chainInfo) => chainInfo.hideInUI)
+              .map(
+                (element) => ChainIdHelper.parse(element.chainId).identifier
+              );
+    } else {
+      this.chainInfoInUIConfig.disabledChains = this.chainInfos
+        .filter((chainInfo) => chainInfo.hideInUI)
+        .map((element) => ChainIdHelper.parse(element.chainId).identifier);
     }
   }
 

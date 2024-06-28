@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { CardModal } from "../card";
-import { Animated, ScrollView, Text, View, ViewStyle } from "react-native";
+import { ScrollView, Text, View, ViewStyle } from "react-native";
 import { useStyle } from "styles/index";
 import { useStore } from "stores/index";
 import {
@@ -21,16 +21,12 @@ import { renderAminoMessage } from "./amino";
 import { renderDirectMessage } from "./direct";
 import { AnyWithUnpacked } from "@keplr-wallet/cosmos";
 import { unescapeHTML } from "@keplr-wallet/common";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useUnmount } from "hooks/use-unmount";
 import { MemoInputView } from "components/new/card-view/memo-input";
 import { BlurBackground } from "components/new/blur-background/blur-background";
 import { FeeInSign } from "modals/sign/fee";
 import { TabBarView } from "components/new/tab-bar/tab-bar";
 import { DataTab } from "./data-tab";
-const AnimatedKeyboardAwareScrollView = Animated.createAnimatedComponent(
-  KeyboardAwareScrollView
-);
 
 enum TransactionTabEnum {
   Details = "Details",
@@ -172,13 +168,22 @@ export const SignModal: FunctionComponent<{
                   scrollEnabled={true}
                   showsVerticalScrollIndicator={false}
                 >
-                  <Text style={style.flatten(["body3", "color-text-low"])}>
+                  <Text
+                    style={
+                      style.flatten(["body3", "color-text-low"]) as ViewStyle
+                    }
+                  >
                     {content}
                   </Text>
                 </ScrollView>
               ) : (
                 <Text
-                  style={style.flatten(["text-caption2", "color-gray-300"])}
+                  style={
+                    style.flatten([
+                      "text-caption2",
+                      "color-gray-300",
+                    ]) as ViewStyle
+                  }
                 >
                   {content}
                 </Text>
@@ -210,7 +215,9 @@ export const SignModal: FunctionComponent<{
         return (
           <View key={i.toString()}>
             <Msg title={title}>
-              <Text style={style.flatten(["body3", "color-text-low"])}>
+              <Text
+                style={style.flatten(["body3", "color-text-low"]) as ViewStyle}
+              >
                 {content}
               </Text>
             </Msg>
@@ -239,15 +246,14 @@ export const SignModal: FunctionComponent<{
   }
 
   return (
-    <CardModal
-      isOpen={isOpen}
-      title="Confirm transaction"
-      close={() => close()}
-    >
+    <CardModal isOpen={isOpen} title="Confirm transaction" close={close}>
       <TabBarView
         listItem={TransactionTabEnum}
         selected={selectedId}
         setSelected={setSelectedId}
+        containerStyle={
+          style.flatten(["margin-y-0", "margin-bottom-10"]) as ViewStyle
+        }
       />
       {wcSession ? (
         <WCAppLogoAndName
@@ -259,10 +265,18 @@ export const SignModal: FunctionComponent<{
         <React.Fragment>
           <View style={style.flatten(["margin-y-16"]) as ViewStyle}>
             <Text style={style.flatten(["margin-bottom-3"]) as ViewStyle}>
-              <Text style={style.flatten(["subtitle3", "color-gray-300"])}>
+              <Text
+                style={
+                  style.flatten(["subtitle3", "color-gray-300"]) as ViewStyle
+                }
+              >
                 {`${msgs.length.toString()} `}
               </Text>
-              <Text style={style.flatten(["subtitle3", "color-gray-300"])}>
+              <Text
+                style={
+                  style.flatten(["subtitle3", "color-gray-300"]) as ViewStyle
+                }
+              >
                 {msgs.length > 1 ? "Messages" : "Message"}
               </Text>
             </Text>
@@ -289,8 +303,11 @@ export const SignModal: FunctionComponent<{
               </ScrollView>
             </BlurBackground>
           </View>
-          <MemoInputView label="Memo" memoConfig={memoConfig} />
-          <View style={style.flatten(["height-page-pad"]) as ViewStyle} />
+          <MemoInputView
+            label="Memo"
+            memoConfig={memoConfig}
+            containerStyle={style.flatten(["margin-bottom-16"]) as ViewStyle}
+          />
           <FeeInSign
             feeConfig={feeConfig}
             gasConfig={gasConfig}
@@ -327,7 +344,6 @@ export const SignModal: FunctionComponent<{
           }
         }}
       />
-      <View style={style.flatten(["height-page-pad"]) as ViewStyle} />
     </CardModal>
   );
 });

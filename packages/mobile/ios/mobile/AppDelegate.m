@@ -16,7 +16,8 @@
 
 #import <AppCenterReactNative.h>
 #import <AppCenterReactNativeAnalytics.h>
-
+#import <Firebase.h>
+#import <FirebaseCrashlytics.h>
 // #import <Bugsnag/Bugsnag.h>
 
 #ifdef FB_SONARKIT_ENABLED
@@ -51,6 +52,7 @@ static void InitializeFlipper(UIApplication *application) {
 //   [Bugsnag start];
   [AppCenterReactNative register];
   [AppCenterReactNativeAnalytics registerWithInitiallyEnabled:true];
+  [FIRApp configure];
 
 #ifdef FB_SONARKIT_ENABLED
   InitializeFlipper(application);
@@ -92,10 +94,7 @@ static void InitializeFlipper(UIApplication *application) {
 #if DEBUG
   return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index"];
 #else
-  NSString *path = [[NSBundle mainBundle] pathForResource:@"main" ofType:@"jsbundle"];
-  NSURL *jsBundleURL = [NSURL URLWithString:path];
-
-  return jsBundleURL;
+  return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
 #endif
 }
 

@@ -13,11 +13,10 @@ import {
 import { TextInput } from "components/input";
 import { useStyle } from "styles/index";
 import * as RNLocalize from "react-native-localize";
-import { ReloadIcon } from "../icon/reload-icon";
 import { CoinPretty, Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { useStore } from "stores/index";
 import { parseDollarAmount } from "utils/format/format";
-import { BlurButton } from "../button/blur-button";
+import { UseMaxButton } from "../button/use-max-button";
 
 export const AmountInputSection: FunctionComponent<{
   amountConfig: IAmountConfig;
@@ -26,17 +25,6 @@ export const AmountInputSection: FunctionComponent<{
   const { priceStore } = useStore();
   const [isToggleClicked, setIsToggleClicked] = useState<boolean>(false);
   const [inputInUsd, setInputInUsd] = useState<string | undefined>("");
-  const [selection, setSelection] = useState<
-    | {
-        start: number;
-      }
-    | undefined
-  >({
-    start: 0,
-  });
-  const handleFocus = () => {
-    setSelection(undefined);
-  };
 
   const convertToUsd = (currency: any) => {
     const value = priceStore.calculatePrice(currency);
@@ -136,8 +124,6 @@ export const AmountInputSection: FunctionComponent<{
             ? parseDollarAmount(inputInUsd).toString()
             : amountConfig.amount
         }
-        selection={selection}
-        onSelectionChange={handleFocus}
         onChangeText={(value) => {
           if (validateDecimalNumber(value)) {
             if (value !== "0") {
@@ -210,83 +196,12 @@ export const AmountInputSection: FunctionComponent<{
         })()}
       />
       <View style={style.flatten(["flex-1"])} />
-      <View
-        style={
-          style.flatten([
-            "flex-row",
-            "justify-evenly",
-            "margin-top-28",
-          ]) as ViewStyle
-        }
-      >
-        <View style={style.flatten(["flex-1"]) as ViewStyle}>
-          <BlurButton
-            text={`Change to ${
-              isToggleClicked
-                ? amountConfig.sendCurrency.coinDenom
-                : priceStore.defaultVsCurrency.toUpperCase()
-            }`}
-            backgroundBlur={false}
-            leftIcon={
-              <View style={style.flatten(["margin-right-2"]) as ViewStyle}>
-                <ReloadIcon
-                  size={20}
-                  color={
-                    amountConfig.sendCurrency["coinGeckoId"]
-                      ? "white"
-                      : "#323C4A"
-                  }
-                />
-              </View>
-            }
-            disable={!amountConfig.sendCurrency["coinGeckoId"]}
-            borderRadius={32}
-            onPress={() => {
-              setIsToggleClicked(!isToggleClicked);
-            }}
-            containerStyle={
-              style.flatten([
-                "border-width-1",
-                "margin-4",
-                "padding-6",
-                "justify-center",
-                amountConfig.sendCurrency["coinGeckoId"]
-                  ? "border-color-gray-300"
-                  : "border-color-platinum-400",
-              ]) as ViewStyle
-            }
-            textStyle={
-              style.flatten([
-                "body3",
-                amountConfig.sendCurrency["coinGeckoId"]
-                  ? "color-white"
-                  : "color-platinum-400",
-              ]) as ViewStyle
-            }
-          />
-        </View>
-        <View style={style.flatten(["flex-1"]) as ViewStyle}>
-          <BlurButton
-            text="Use max available"
-            backgroundBlur={false}
-            borderRadius={32}
-            onPress={() => {
-              setSelection({ start: 0 });
-              amountConfig.toggleIsMax();
-            }}
-            containerStyle={
-              style.flatten([
-                "border-width-1",
-                "border-color-gray-300",
-                "padding-6",
-                "margin-4",
-                "justify-center",
-              ]) as ViewStyle
-            }
-            textStyle={style.flatten(["body3", "color-white"]) as ViewStyle}
-          />
-        </View>
-      </View>
+      <UseMaxButton
+        amountConfig={amountConfig}
+        isToggleClicked={isToggleClicked}
+        setIsToggleClicked={setIsToggleClicked}
+        containerStyle={style.flatten(["margin-top-28"]) as ViewStyle}
+      />
     </React.Fragment>
   );
 });

@@ -61,6 +61,7 @@ export const ColorPalette = {
   "red-600": "#911830",
   "red-700": "#440B17",
   "coral-red": "#FF3E3E",
+  "vibrant-red-500": "#F04646",
 
   "pink-50": "#FDF4F9",
   "pink-100": "#FFE9F4",
@@ -97,6 +98,7 @@ export const ColorPalette = {
   "gray-500": "#37373E",
   "gray-600": "#1E1E24",
   "gray-700": "#09090A",
+  "new-gray-500": "#8A9FB8",
   "new-gray-700": "#556578",
 
   black: "#000000",
@@ -113,12 +115,15 @@ export const ColorPalette = {
   indigo: "#5F38FB",
   "indigo-100": "#5f38fb12",
   "indigo-200": "#fbfaff40",
+  "indigo-250": "#BFAFFD",
   "indigo-400": "#000D3D",
   "indigo-800": "#270E8D",
   "indigo-900": "#000D3D",
   "indigo-backdrop": "#270e8dcc",
 
   "orange-400": "#fa8f6b",
+
+  "yellow-500": "#EDC32C",
 };
 
 export const TextColors = {
@@ -278,6 +283,12 @@ export const { StyleProvider, useStyle, useStyleThemeController } =
         "text-caption2": {
           fontSize: 12,
           letterSpacing: 0.3,
+          fontFamily: getPlatformFontFamily("400"),
+          fontWeight: "400",
+        },
+        "text-caption3": {
+          fontSize: 11,
+          letterSpacing: 0.5,
           fontFamily: getPlatformFontFamily("400"),
           fontWeight: "400",
         },

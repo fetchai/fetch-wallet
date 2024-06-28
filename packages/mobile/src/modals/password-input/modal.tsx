@@ -8,6 +8,7 @@ import { InputCardView } from "components/new/card-view/input-card";
 import { IconButton } from "components/new/button/icon";
 import { EyeIcon } from "components/new/icon/eye";
 import { HideEyeIcon } from "components/new/icon/hide-eye-icon";
+import { useStore } from "stores/index";
 
 export const PasswordInputModal: FunctionComponent<{
   isOpen: boolean;
@@ -20,6 +21,7 @@ export const PasswordInputModal: FunctionComponent<{
   onEnterPassword: (password: string) => Promise<void>;
 }> = ({ close, title, onEnterPassword, isOpen }) => {
   const style = useStyle();
+  const { analyticsStore } = useStore();
 
   const [password, setPassword] = useState("");
   const [isInvalidPassword, setIsInvalidPassword] = useState(false);
@@ -37,6 +39,7 @@ export const PasswordInputModal: FunctionComponent<{
     } catch (e) {
       console.log(e);
       setIsInvalidPassword(true);
+      setPassword("");
     } finally {
       setIsLoading(false);
     }
@@ -47,14 +50,12 @@ export const PasswordInputModal: FunctionComponent<{
   }
 
   return (
-    <CardModal
-      isOpen={isOpen}
-      close={close}
-      title={title}
-      cardStyle={style.flatten(["padding-bottom-12"]) as ViewStyle}
-    >
+    <CardModal isOpen={isOpen} close={close} title={title}>
       <InputCardView
         label="Password"
+        labelStyle={
+          style.flatten(["margin-y-0", "margin-bottom-12"]) as ViewStyle
+        }
         keyboardType={"default"}
         rightIcon={
           !showPassword ? (
@@ -84,16 +85,20 @@ export const PasswordInputModal: FunctionComponent<{
         value={password}
         returnKeyType="done"
         onSubmitEditing={submitPassword}
-        containerStyle={style.flatten(["margin-bottom-8"]) as ViewStyle}
       />
       <Button
         text="Continue"
         size="large"
         loading={isLoading}
-        onPress={submitPassword}
+        onPress={() => {
+          submitPassword();
+          analyticsStore.logEvent("continue_click", {
+            pageName: "More",
+          });
+        }}
         disabled={!password}
         containerStyle={
-          style.flatten(["border-radius-32", "margin-y-20"]) as ViewStyle
+          style.flatten(["border-radius-32", "margin-top-24"]) as ViewStyle
         }
       />
       <KeyboardSpacerView />

@@ -1,3 +1,4 @@
+import { ActivityStore } from "src/activity";
 import {
   ChainedFunctionifyTuple,
   ChainGetter,
@@ -21,7 +22,7 @@ export class AccountStore<
     AccountSetBaseSuper,
     // chainGetter: ChainGetter,
     // chainId: string,
-    [ChainGetter, string],
+    [ChainGetter, string, ActivityStore],
     Injects
   >;
 
@@ -31,12 +32,13 @@ export class AccountStore<
       removeEventListener: (type: string, fn: () => unknown) => void;
     },
     protected readonly chainGetter: ChainGetter,
+    protected readonly activityStore: ActivityStore,
     protected readonly storeOptsCreator: (chainId: string) => AccountSetOpts,
     ...accountSetCreators: ChainedFunctionifyTuple<
       AccountSetBaseSuper,
       // chainGetter: ChainGetter,
       // chainId: string,
-      [ChainGetter, string],
+      [ChainGetter, string, ActivityStore],
       Injects
     >
   ) {
@@ -50,7 +52,7 @@ export class AccountStore<
 
       return mergeStores(
         accountSetBase,
-        [this.chainGetter, chainId],
+        [this.chainGetter, chainId, this.activityStore],
         ...this.accountSetCreators
       );
     });

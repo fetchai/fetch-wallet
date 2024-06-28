@@ -60,6 +60,7 @@ export const getDetails = (node: any, chainStore: any): any => {
   const { nodes } = node.transaction.messages;
   const { timestamp } = node.block;
   const { typeUrl, json } = nodes[0];
+  const status = node.transaction.status;
   const parsedJson = JSON.parse(json);
   const toAddress = parsedJson.toAddress;
   const { delegatorAddress, validatorAddress, validatorDstAddress, receiver } =
@@ -123,6 +124,7 @@ export const getDetails = (node: any, chainStore: any): any => {
     delegatorAddress,
     validatorDstAddress,
     receiver,
+    status,
   };
 };
 

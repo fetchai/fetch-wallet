@@ -119,7 +119,6 @@ export const createStyleProvider = <
   >();
 
   return {
-    // eslint-disable-next-line react/display-name
     StyleProvider: ({ children }) => {
       const [isDarkMode, setIsDarkMode] = useState(
         Appearance.getColorScheme() === "dark"

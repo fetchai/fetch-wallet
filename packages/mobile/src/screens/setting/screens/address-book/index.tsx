@@ -25,7 +25,7 @@ import { ConfirmCardModel } from "components/new/confirm-modal";
 import { Button } from "components/button";
 
 export const AddressBookScreen: FunctionComponent = observer(() => {
-  const { chainStore } = useStore();
+  const { chainStore, analyticsStore } = useStore();
 
   const route = useRoute<
     RouteProp<
@@ -74,13 +74,15 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
 
   useEffect(() => {
     smartNavigation.setOptions({
-      // eslint-disable-next-line react/display-name
       headerRight: () => (
         <HeaderRightButton
           onPress={() => {
             smartNavigation.navigateSmart("AddAddressBook", {
               chainId,
               addressBookConfig,
+            });
+            analyticsStore.logEvent("add_new_address_book_click", {
+              pageName: "More",
             });
           }}
         >
@@ -173,7 +175,6 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
                       "color-white",
                     ])}
                   >
-                    {/* {Bech32Address.shortenAddress(data.address, 35)} */}
                     {data.address}
                   </Text>
                 </View>
@@ -192,6 +193,9 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
                       switch (option) {
                         case ManageAddressOption.renameAddress:
                           setIsOpenModal(false);
+                          analyticsStore.logEvent("rename_address_click", {
+                            pageName: "More",
+                          });
                           smartNavigation.navigateSmart("EditAddressBook", {
                             chainId,
                             addressBookConfig,
@@ -203,18 +207,28 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
                           setConfirmModal(true);
                           // deleteAddress(i);
                           setIsOpenModal(false);
+                          analyticsStore.logEvent("delete_address_click", {
+                            pageName: "More",
+                            action: "No",
+                          });
                           break;
                       }
                     }}
                   />
                   <ConfirmCardModel
                     isOpen={showConfirmModal}
-                    close={() => setConfirmModal(false)}
+                    close={() => {
+                      setConfirmModal(false);
+                    }}
                     title={"Delete address"}
                     subtitle={"Are you sure you want to delete this address?"}
                     select={(confirm: boolean) => {
                       if (confirm) {
                         addressBookConfig.removeAddressBook(i);
+                        analyticsStore.logEvent("delete_address_click", {
+                          pageName: "More",
+                          action: "Yes",
+                        });
                       }
                     }}
                   />
@@ -264,6 +278,9 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
           smartNavigation.navigateSmart("AddAddressBook", {
             chainId,
             addressBookConfig,
+          });
+          analyticsStore.logEvent("add_new_address_click", {
+            pageName: "Address book",
           });
         }}
       />

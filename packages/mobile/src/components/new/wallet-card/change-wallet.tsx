@@ -1,15 +1,21 @@
 import React, { FunctionComponent } from "react";
 import { CardModal } from "modals/card";
-import { ScrollView, Text, View, ViewStyle } from "react-native";
+import { Text, View, ViewStyle } from "react-native";
 import { useStyle } from "styles/index";
 import { RectButton } from "components/rect-button";
 import { CheckIcon } from "components/new/icon/check";
 import { useStore } from "stores/index";
-import { MultiKeyStoreInfoWithSelectedElem } from "@keplr-wallet/background";
+import {
+  MultiKeyStoreInfoElem,
+  MultiKeyStoreInfoWithSelectedElem,
+} from "@keplr-wallet/background";
 import { observer } from "mobx-react-lite";
 import { KeyRingStore } from "@keplr-wallet/stores";
 import { BlurBackground } from "../blur-background/blur-background";
 import { Bech32Address } from "@keplr-wallet/cosmos";
+import { IconButton } from "../button/icon";
+import { SimpleGoogleIcon } from "../icon/simple-google";
+import { SimpleAppleIcon } from "../icon/simple-apple";
 
 export const ChangeWalletCardModel: FunctionComponent<{
   isOpen: boolean;
@@ -29,52 +35,131 @@ export const ChangeWalletCardModel: FunctionComponent<{
     return null;
   }
 
-  return (
-    <CardModal
-      isOpen={isOpen}
-      title={title}
-      cardStyle={style.flatten(["padding-bottom-32"]) as ViewStyle}
-      disableGesture={true}
-      close={() => close()}
-    >
-      <ScrollView
-        style={style.flatten(["max-height-600"]) as ViewStyle}
-        showsHorizontalScrollIndicator={false}
-        showsVerticalScrollIndicator={false}
-      >
-        {keyRingStore.multiKeyStoreInfo.map((keyStore, i) => {
-          return (
-            <BlurBackground
-              key={i.toString()}
-              borderRadius={12}
-              blurIntensity={15}
-              containerStyle={style.flatten(["margin-y-4"]) as ViewStyle}
-            >
-              <RectButton
-                onPress={async () => {
-                  if (!keyStore?.selected) {
-                    close();
-                    analyticsStore.logEvent("Account changed");
-                    await onChangeAccount(keyStore);
-                  }
-                }}
-                activeOpacity={0.5}
-                style={
-                  style.flatten(
-                    [
-                      "flex-row",
-                      "items-center",
-                      "padding-x-18",
-                      "padding-y-12",
+  const getKeyStoreTypeLabel = (keyStore: MultiKeyStoreInfoElem) => {
+    switch (keyStore.type) {
+      case "ledger":
+        return (
+          <Text
+            style={
+              [
+                style.flatten([
+                  "font-medium",
+                  "color-white",
+                  "margin-left-6",
+                  "border-width-1",
+                  "border-color-new-gray-500",
+                  "border-radius-4",
+                  "padding-x-4",
+                  "text-center",
+                  "padding-top-1",
+                ]),
+                {
+                  fontSize: 10,
+                  textTransform: "uppercase",
+                },
+              ] as ViewStyle
+            }
+          >
+            ledger
+          </Text>
+        );
 
-                      "border-radius-12",
-                    ],
-                    [keyStore.selected && "background-color-indigo"]
-                  ) as ViewStyle
+      case "privateKey":
+        // Torus key
+        if (
+          keyStore.meta &&
+          keyStore.meta?.["email"] &&
+          keyStore.meta?.["socialType"] === "apple"
+        ) {
+          return (
+            <IconButton
+              icon={<SimpleAppleIcon />}
+              backgroundBlur={false}
+              iconStyle={
+                style.flatten([
+                  "border-width-1",
+                  "border-radius-4",
+                  "border-color-new-gray-500",
+                  "width-24",
+                  "height-20",
+                  "items-center",
+                  "justify-center",
+                  "margin-left-6",
+                ]) as ViewStyle
+              }
+            />
+          );
+        } else if (
+          keyStore.meta &&
+          keyStore.meta?.["email"] &&
+          keyStore.meta?.["socialType"] === "google"
+        ) {
+          return (
+            <IconButton
+              icon={<SimpleGoogleIcon />}
+              backgroundBlur={false}
+              iconStyle={
+                style.flatten([
+                  "border-width-1",
+                  "border-radius-4",
+                  "border-color-new-gray-500",
+                  "width-24",
+                  "height-20",
+                  "items-center",
+                  "justify-center",
+                  "margin-left-6",
+                ]) as ViewStyle
+              }
+            />
+          );
+        }
+        return;
+    }
+  };
+
+  return (
+    <CardModal isOpen={isOpen} title={title} close={() => close()}>
+      {keyRingStore.multiKeyStoreInfo.map((keyStore, i) => {
+        return (
+          <BlurBackground
+            key={i.toString()}
+            borderRadius={12}
+            blurIntensity={15}
+            containerStyle={style.flatten(["margin-bottom-6"]) as ViewStyle}
+          >
+            <RectButton
+              onPress={async () => {
+                if (!keyStore?.selected) {
+                  close();
+
+                  await onChangeAccount(keyStore);
+                  analyticsStore.logEvent("select_account_click", {
+                    pageName: "Home",
+                  });
                 }
-                underlayColor={style.flatten(["color-gray-50"]).color}
-              >
-                <View style={style.flatten(["flex-5"]) as ViewStyle}>
+              }}
+              activeOpacity={0.5}
+              style={
+                style.flatten(
+                  [
+                    "flex-row",
+                    "items-center",
+                    "padding-x-16",
+                    "padding-y-18",
+
+                    "border-radius-12",
+                  ],
+                  [keyStore.selected && "background-color-indigo"]
+                ) as ViewStyle
+              }
+              underlayColor={style.flatten(["color-gray-50"]).color}
+            >
+              <View style={style.flatten(["flex-5"]) as ViewStyle}>
+                <View
+                  style={
+                    style.flatten(["flex-row", "items-center"]) as ViewStyle
+                  }
+                >
                   <Text
                     style={
                       style.flatten([
@@ -85,32 +170,32 @@ export const ChangeWalletCardModel: FunctionComponent<{
                   >
                     {keyStore.meta?.["name"] || "Fetch Account"}
                   </Text>
-                  {keyStore.selected ? (
-                    <Text
-                      style={
-                        style.flatten([
-                          "text-caption2",
-                          "color-white",
-                        ]) as ViewStyle
-                      }
-                    >
-                      {Bech32Address.shortenAddress(
-                        accountInfo.bech32Address,
-                        32
-                      )}
-                    </Text>
-                  ) : null}
+                  {getKeyStoreTypeLabel(keyStore)}
                 </View>
-                <View
-                  style={style.flatten(["flex-1", "items-end"]) as ViewStyle}
-                >
-                  {keyStore.selected ? <CheckIcon /> : null}
-                </View>
-              </RectButton>
-            </BlurBackground>
-          );
-        })}
-      </ScrollView>
+                {keyStore.selected ? (
+                  <Text
+                    style={
+                      style.flatten([
+                        "text-caption2",
+                        "color-white",
+                        "margin-top-2",
+                      ]) as ViewStyle
+                    }
+                  >
+                    {Bech32Address.shortenAddress(
+                      accountInfo.bech32Address,
+                      32
+                    )}
+                  </Text>
+                ) : null}
+              </View>
+              <View style={style.flatten(["flex-1", "items-end"]) as ViewStyle}>
+                {keyStore.selected ? <CheckIcon /> : null}
+              </View>
+            </RectButton>
+          </BlurBackground>
+        );
+      })}
     </CardModal>
   );
 });

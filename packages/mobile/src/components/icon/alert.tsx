@@ -2,35 +2,27 @@ import React, { FunctionComponent } from "react";
 import Svg, { Path } from "react-native-svg";
 
 export const AlertIcon: FunctionComponent<{
-  color: string;
-  size: number;
-}> = ({ color, size = 24 }) => {
+  size?: number;
+  color?: string;
+}> = ({ size = 24, color = "white" }) => {
   return (
-    <Svg
-      width={size}
-      height={size}
-      fill="none"
-      viewBox="0 0 24 24"
-      style={{
-        width: size,
-        height: size,
-      }}
-    >
+    <Svg width={size} height={size} fill="none" viewBox="0 0 100 100">
       <Path
-        d="M21 12c0-4.969-4.031-9-9-9s-9 4.031-9 9 4.031 9 9 9 9-4.031 9-9z"
         stroke={color}
-        strokeWidth={1.5}
-        strokeMiterlimit={10}
+        strokeMiterlimit="10"
+        strokeWidth="6.25"
+        d="M87.5 50c0-20.703-16.797-37.5-37.5-37.5S12.5 29.297 12.5 50 29.297 87.5 50 87.5 87.5 70.703 87.5 50z"
       />
       <Path
-        d="M11.669 7.279l.269 5.719.268-5.717A.269.269 0 0011.935 7v0a.269.269 0 00-.266.279v0z"
         stroke={color}
         strokeLinecap="round"
         strokeLinejoin="round"
+        strokeWidth="4.167"
+        d="M48.62 30.329l1.12 23.828 1.12-23.818a1.12 1.12 0 00-1.131-1.172v0a1.12 1.12 0 00-1.11 1.162v0z"
       />
       <Path
-        d="M11.938 16.741a.937.937 0 110-1.875.937.937 0 010 1.875z"
         fill={color}
+        d="M49.74 69.754a3.906 3.906 0 110-7.812 3.906 3.906 0 010 7.812z"
       />
     </Svg>
   );

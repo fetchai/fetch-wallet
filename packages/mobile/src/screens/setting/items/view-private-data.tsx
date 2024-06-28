@@ -7,10 +7,10 @@ import { useSmartNavigation } from "navigation/smart-navigation";
 import { getPrivateDataTitle } from "screens/setting/screens/view-private-data";
 import { useStyle } from "styles/index";
 import { ViewStyle } from "react-native";
-import { KeyIcon } from "components/new/icon/key";
+import { KeyIconSmall } from "components/new/icon/key";
 
 export const SettingViewPrivateDataItem: FunctionComponent = observer(() => {
-  const { keyRingStore } = useStore();
+  const { keyRingStore, analyticsStore } = useStore();
 
   const style = useStyle();
 
@@ -22,9 +22,12 @@ export const SettingViewPrivateDataItem: FunctionComponent = observer(() => {
     <React.Fragment>
       <SettingItem
         label={getPrivateDataTitle(keyRingStore.keyRingType)}
-        left={<KeyIcon size={16} />}
+        left={<KeyIconSmall />}
         onPress={() => {
           setIsOpenModal(true);
+          analyticsStore.logEvent("view_mnemonic_seed_click", {
+            pageName: "More",
+          });
         }}
         style={style.flatten(["height-72", "padding-18"]) as ViewStyle}
       />

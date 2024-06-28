@@ -1,6 +1,5 @@
 import React, { FunctionComponent, useContext, useState } from "react";
 import { LoadingScreenModal } from "./modal";
-import EventEmitter from "eventemitter3";
 
 export interface LoadingScreen {
   isLoading: boolean;
@@ -16,21 +15,12 @@ export const LoadingScreenContext = React.createContext<LoadingScreen | null>(
 export const LoadingScreenProvider: FunctionComponent = ({ children }) => {
   const [isLoading, setIsLoading] = useState(false);
 
-  const [events] = useState(() => new EventEmitter());
-
   const openAsync = (): Promise<void> => {
     setIsLoading(true);
     return new Promise<void>((resolve) => {
       if (isLoading) {
         resolve();
       }
-
-      const handler = () => {
-        resolve();
-        events.removeListener("open", handler);
-      };
-
-      events.addListener("open", handler);
     });
   };
 
@@ -39,15 +29,7 @@ export const LoadingScreenProvider: FunctionComponent = ({ children }) => {
       value={{ isLoading, setIsLoading, openAsync }}
     >
       {children}
-      <LoadingScreenModal
-        isOpen={isLoading}
-        close={() => {
-          // noop
-        }}
-        onOpenComplete={() => {
-          events.emit("open");
-        }}
-      />
+      <LoadingScreenModal isOpen={isLoading} />
     </LoadingScreenContext.Provider>
   );
 };

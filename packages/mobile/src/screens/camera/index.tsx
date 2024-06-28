@@ -122,7 +122,7 @@ export const CameraScreen: FunctionComponent = observer(() => {
                       route.params.recipientConfig.setRawRecipient(data);
                       navigation.goBack();
                     } else {
-                      smartNavigation.pushSmart("SendNew", {
+                      smartNavigation.pushSmart("Send", {
                         chainId: chainId,
                         recipient: data,
                       });

@@ -16,7 +16,7 @@ export const BipButtons: FunctionComponent<{
         text="Advanced Settings"
         blurIntensity={16}
         borderRadius={32}
-        backgroundBlur={selected ? true : false}
+        backgroundBlur={selected}
         containerStyle={
           [
             style.flatten(

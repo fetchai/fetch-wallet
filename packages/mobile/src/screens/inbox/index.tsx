@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { PageWithScrollViewInBottomTabView } from "components/page";
 import { ScrollView, Text, View, ViewStyle } from "react-native";
 import { useStyle } from "styles/index";
@@ -6,6 +6,7 @@ import { TabBarView } from "components/new/tab-bar/tab-bar";
 import { ChatSection } from "screens/inbox/chat-section";
 import { AgentsSection } from "screens/inbox/agents-section";
 import { NotificationSection } from "screens/inbox/notification-section";
+import { useStore } from "stores/index";
 
 enum InboxEnum {
   Notification = "Notifications",
@@ -17,6 +18,13 @@ export const InboxScreen = () => {
   const scrollViewRef = useRef<ScrollView | null>(null);
   const style = useStyle();
   const [selectedId, setSelectedId] = useState(InboxEnum.Notification);
+  const { analyticsStore } = useStore();
+
+  useEffect(() => {
+    analyticsStore.logEvent(`${selectedId.toLowerCase()}_tab_click`, {
+      pageName: "Inbox",
+    });
+  }, [analyticsStore, selectedId]);
 
   return (
     <PageWithScrollViewInBottomTabView

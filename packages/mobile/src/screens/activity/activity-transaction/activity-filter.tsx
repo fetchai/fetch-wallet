@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { CardModal } from "modals/card";
 import { Text, View, ViewStyle } from "react-native";
 import { useStyle } from "styles/index";
@@ -15,6 +15,8 @@ import { ClaimIcon } from "components/new/icon/claim-icon";
 import { IbcUpDownIcon } from "components/new/icon/ibc-up-down";
 import { FilterItem } from "screens/activity";
 import { UpDownArrowIcon } from "components/new/icon/up-down-arrow";
+import { observer } from "mobx-react-lite";
+import { useStore } from "stores/index";
 
 export const activityFilterOptions: FilterItem[] = [
   {
@@ -74,11 +76,23 @@ export const ActivityFilterView: FunctionComponent<{
   close: () => void;
   filters: FilterItem[];
   handleFilterChange: (selectedFilters: FilterItem[]) => void;
-}> = ({ isOpen, close, filters, handleFilterChange }) => {
+}> = observer(({ isOpen, close, filters, handleFilterChange }) => {
   const style = useStyle();
+  const { chainStore, activityStore, accountStore } = useStore();
+  const current = chainStore.current;
+  const accountInfo = accountStore.getAccount(current.chainId);
+
   const [selectedFilter, setSelectedFilter] = useState<FilterItem[]>([
     ...filters,
   ]);
+
+  const accountOrChainChanged =
+    activityStore.getAddress !== accountInfo.bech32Address ||
+    activityStore.getChainId !== current.chainId;
+
+  useEffect(() => {
+    setSelectedFilter(activityFilterOptions);
+  }, [accountOrChainChanged]);
 
   const handleClicks = () => {
     const anyUnselected = selectedFilter.some(
@@ -98,14 +112,12 @@ export const ActivityFilterView: FunctionComponent<{
   );
   const selectAllButtonText = allSelected ? "Unselect all" : "Select all";
 
+  if (!isOpen) {
+    return null;
+  }
+
   return (
-    <CardModal
-      isOpen={isOpen}
-      title="Filter"
-      cardStyle={style.flatten(["padding-bottom-10"]) as ViewStyle}
-      disableGesture={true}
-      close={close}
-    >
+    <CardModal isOpen={isOpen} title="Filter" close={close}>
       <Button
         text={selectAllButtonText}
         size="small"
@@ -120,7 +132,11 @@ export const ActivityFilterView: FunctionComponent<{
         }
         onPress={handleClicks}
       />
-      <View style={style.flatten(["margin-y-12"]) as ViewStyle}>
+      <View
+        style={
+          style.flatten(["margin-top-24", "margin-bottom-18"]) as ViewStyle
+        }
+      >
         {activityFilterOptions.map((item: FilterItem, index: number) => (
           <BlurBackground
             key={index}
@@ -201,4 +217,4 @@ export const ActivityFilterView: FunctionComponent<{
       />
     </CardModal>
   );
-};
+});

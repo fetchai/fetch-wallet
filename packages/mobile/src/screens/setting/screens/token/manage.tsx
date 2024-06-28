@@ -2,18 +2,28 @@ import React, { FunctionComponent, useState } from "react";
 import { PageWithScrollView } from "components/page";
 import { observer } from "mobx-react-lite";
 import { useStore } from "stores/index";
-import { Text, View, ViewStyle } from "react-native";
+import { Image, Text, View, ViewStyle } from "react-native";
 import { CoinPretty } from "@keplr-wallet/unit";
 import { useStyle } from "styles/index";
 import { TrashCanIcon } from "components/icon";
 import { Currency } from "@keplr-wallet/types";
 import { BorderlessButton } from "react-native-gesture-handler";
-import { useNavigation } from "@react-navigation/native";
+
 import { BlurBackground } from "components/new/blur-background/blur-background";
 import { ConfirmCardModel } from "components/new/confirm-modal";
+import { Button } from "components/button";
+import { useSmartNavigation } from "navigation/smart-navigation";
 
 export const SettingManageTokensScreen: FunctionComponent = observer(() => {
-  const { chainStore, queriesStore, accountStore, tokensStore } = useStore();
+  const {
+    chainStore,
+    queriesStore,
+    accountStore,
+    tokensStore,
+    analyticsStore,
+  } = useStore();
+
+  const smartNavigation = useSmartNavigation();
 
   const style = useStyle();
 
@@ -32,19 +42,60 @@ export const SettingManageTokensScreen: FunctionComponent = observer(() => {
       style={style.flatten(["padding-x-page"]) as ViewStyle}
     >
       <View style={style.flatten(["height-card-gap"]) as ViewStyle} />
-      {tokensOf.tokens.length > 0
-        ? tokensOf.tokens.map((token) => {
-            const balance = queryBalances.getBalanceFromCurrency(token);
+      {tokensOf.tokens.length > 0 ? (
+        tokensOf.tokens.map((token) => {
+          const balance = queryBalances.getBalanceFromCurrency(token);
 
-            return (
-              <ManageTokenItem
-                key={token.coinMinimalDenom}
-                chainInfo={chainStore.current}
-                balance={balance}
+          return (
+            <ManageTokenItem
+              key={token.coinMinimalDenom}
+              chainInfo={chainStore.current}
+              balance={balance}
+            />
+          );
+        })
+      ) : (
+        <React.Fragment>
+          <View style={style.flatten(["flex-1"])} />
+          <View style={style.flatten(["justify-center", "items-center"])}>
+            <View style={style.flatten(["margin-bottom-21"]) as ViewStyle}>
+              <Image
+                style={{ width: 240, height: 60 }}
+                source={require("assets/image/emptystate-addressbook.png")}
+                fadeDuration={0}
+                resizeMode="contain"
               />
-            );
-          })
-        : null}
+            </View>
+            <Text
+              style={style.flatten([
+                "h3",
+                "font-medium",
+                "color-gray-100",
+                "dark:color-platinum-300",
+                "text-center",
+              ])}
+            >
+              {"You haven’t saved any\ntokens yet"}
+            </Text>
+          </View>
+          <View
+            style={style.flatten(["margin-top-68", "flex-1"]) as ViewStyle}
+          />
+          <Button
+            text="Add token"
+            size="large"
+            containerStyle={style.flatten(["border-radius-32"]) as ViewStyle}
+            textStyle={style.flatten(["body2", "font-normal"]) as ViewStyle}
+            onPress={() => {
+              smartNavigation.navigateSmart("Setting.AddToken", {});
+              analyticsStore.logEvent("add_token_icon_click", {
+                pageName: "Manage Tokens",
+              });
+            }}
+          />
+          <View style={style.flatten(["height-page-pad"]) as ViewStyle} />
+        </React.Fragment>
+      )}
       <View style={style.flatten(["height-page-pad"]) as ViewStyle} />
     </PageWithScrollView>
   );
@@ -58,13 +109,13 @@ export const ManageTokenItem: FunctionComponent<{
   };
   balance: CoinPretty;
 }> = observer(({ containerStyle, balance }) => {
-  const { chainStore, tokensStore } = useStore();
+  const { chainStore, tokensStore, analyticsStore } = useStore();
 
   const style = useStyle();
 
   const tokensOf = tokensStore.getTokensOf(chainStore.current.chainId);
 
-  const navigation = useNavigation();
+  const smartNavigation = useSmartNavigation();
 
   const [showConfirmModal, setConfirmModal] = useState(false);
 
@@ -115,8 +166,8 @@ export const ManageTokenItem: FunctionComponent<{
           onPress={() => {
             setConfirmModal(true);
 
-            if (tokensOf.tokens.length === 0 && navigation.canGoBack()) {
-              navigation.goBack();
+            if (tokensOf.tokens.length === 0 && smartNavigation.canGoBack()) {
+              smartNavigation.goBack();
             }
           }}
         >
@@ -126,6 +177,9 @@ export const ManageTokenItem: FunctionComponent<{
             title={"Delete token"}
             subtitle={"Are you sure you want to delete this token?"}
             select={async (confirm: boolean) => {
+              analyticsStore.logEvent("token_delete_click", {
+                action: confirm ? "Yes" : "No",
+              });
               if (confirm) {
                 await tokensOf.removeToken(balance.currency);
               }

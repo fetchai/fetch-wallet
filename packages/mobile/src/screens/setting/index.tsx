@@ -13,16 +13,29 @@ import { ShieldIcon } from "components/new/icon/shield";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CurrencyIcon } from "components/new/icon/currency";
 import { BranchIcon } from "components/new/icon/branch-icon";
+import { SignOutIcon } from "components/new/icon/sign-out";
+import {
+  NavigationProp,
+  ParamListBase,
+  useNavigation,
+} from "@react-navigation/native";
 
 export const SettingScreen: FunctionComponent = observer(() => {
-  const { chainStore, keychainStore, keyRingStore, tokensStore, priceStore } =
-    useStore();
+  const {
+    chainStore,
+    keychainStore,
+    keyRingStore,
+    tokensStore,
+    priceStore,
+    analyticsStore,
+  } = useStore();
 
   const style = useStyle();
 
   const safeAreaInsets = useSafeAreaInsets();
 
   const smartNavigation = useSmartNavigation();
+  const navigation = useNavigation<NavigationProp<ParamListBase>>();
 
   const showPrivateData = canShowPrivateData(keyRingStore.keyRingType);
   const showManageTokenButton = (() => {
@@ -43,6 +56,7 @@ export const SettingScreen: FunctionComponent = observer(() => {
       contentContainerStyle={{
         paddingTop: Platform.OS === "ios" ? safeAreaInsets.top + 10 : 48,
       }}
+      containerStyle={style.flatten(["overflow-scroll"]) as ViewStyle}
     >
       <Text
         style={
@@ -50,7 +64,8 @@ export const SettingScreen: FunctionComponent = observer(() => {
             "h1",
             "font-normal",
             "color-white",
-            "margin-y-16",
+            "margin-top-16",
+            "margin-bottom-20",
           ]) as ViewStyle
         }
       >
@@ -62,7 +77,13 @@ export const SettingScreen: FunctionComponent = observer(() => {
         left={<CurrencyIcon size={16} />}
         right={<Right paragraph={priceStore.defaultVsCurrency.toUpperCase()} />}
         onPress={() => {
-          smartNavigation.navigateSmart("Setting.Currency", {});
+          navigation.navigate("Setting", {
+            screen: "Setting.Currency",
+          });
+          // smartNavigation.navigateSmart("Setting.Currency", {});
+          analyticsStore.logEvent("currency_click", {
+            pageName: "More",
+          });
         }}
       />
       {showManageTokenButton ? (
@@ -77,7 +98,12 @@ export const SettingScreen: FunctionComponent = observer(() => {
             />
           }
           onPress={() => {
-            smartNavigation.navigateSmart("Setting.ManageTokens", {});
+            navigation.navigate("Setting", {
+              screen: "Setting.ManageTokens",
+            });
+            analyticsStore.logEvent("manage_tokens_click", {
+              pageName: "More",
+            });
           }}
         />
       ) : null}
@@ -85,7 +111,13 @@ export const SettingScreen: FunctionComponent = observer(() => {
         left={<ATIcon size={16} />}
         label="Address book"
         onPress={() => {
-          smartNavigation.navigateSmart("AddressBook", {});
+          navigation.navigate("AddressBooks", {
+            screen: "AddressBook",
+            params: {},
+          });
+          analyticsStore.logEvent("address_book_click", {
+            pageName: "More",
+          });
         }}
       />
       {showPrivateData ||
@@ -95,7 +127,12 @@ export const SettingScreen: FunctionComponent = observer(() => {
           label="Security & privacy"
           left={<ShieldIcon size={16} />}
           onPress={() => {
-            smartNavigation.navigateSmart("SecurityAndPrivacy", {});
+            navigation.navigate("Setting", {
+              screen: "Setting.SecurityAndPrivacy",
+            });
+            analyticsStore.logEvent("security_and_privacy_click", {
+              pageName: "More",
+            });
           }}
         />
       ) : null}
@@ -104,11 +141,28 @@ export const SettingScreen: FunctionComponent = observer(() => {
         label="Fetch Wallet version"
         left={<BranchIcon size={16} />}
         onPress={() => {
-          smartNavigation.navigateSmart("Setting.Version", {});
+          navigation.navigate("Setting", {
+            screen: "Setting.Version",
+          });
+        }}
+      />
+      <SettingItem
+        label="Sign out"
+        left={<SignOutIcon size={16} />}
+        onPress={async () => {
+          await keyRingStore.lock();
+          smartNavigation.reset({
+            index: 0,
+            routes: [
+              {
+                name: "Unlock",
+              },
+            ],
+          });
         }}
       />
       {/* Mock element for padding bottom */}
-      <View style={style.get("height-16") as ViewStyle} />
+      <View style={style.get("height-32") as ViewStyle} />
     </PageWithScrollViewInBottomTabView>
   );
 });

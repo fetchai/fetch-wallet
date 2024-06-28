@@ -151,3 +151,146 @@ export const getEip712TypedDataBasedOnChainId = (
   // Return default types for Evmos
   return types;
 };
+
+export const getJson = (addresses: any, type: string) => {
+  let json = {};
+
+  if (type === "withdrawRewards") {
+    json = {
+      delegatorAddress: addresses.delegator_address,
+      validatorAddress: addresses.validator_address,
+    };
+  }
+
+  if (type === "send") {
+    json = {
+      fromAddress: addresses.from_address,
+      toAddress: addresses.to_address,
+      amount: {
+        denom: addresses.amount[0].denom,
+        amount: addresses.amount[0].amount,
+      },
+    };
+  }
+
+  if (type === "delegate" || type === "undelegate") {
+    json = {
+      delegatorAddress: addresses.delegator_address,
+      validatorAddress: addresses.validator_address,
+      amount: {
+        denom: addresses.amount.denom,
+        amount: addresses.amount.amount,
+      },
+    };
+  }
+
+  if (type === "redelegate") {
+    json = {
+      delegatorAddress: addresses.delegator_address,
+      validatorSrcAddress: addresses.validator_src_address,
+      validatorDstAddress: addresses.validator_dst_address,
+      amount: {
+        denom: addresses.amount.denom,
+        amount: addresses.amount.amount,
+      },
+    };
+  }
+
+  if (type === "ibcTransfer") {
+    json = {
+      sourcePort: addresses.source_port,
+      sourceChannel: addresses.source_channel,
+      sender: addresses.sender,
+      receiver: addresses.receiver,
+      timeoutTimestamp: {
+        low: 0,
+        high: 0,
+        unsigned: true,
+      },
+      token: {
+        denom: addresses.token.denom,
+        amount: addresses.token.amount,
+      },
+      timeoutHeight: {
+        revisionNumber: addresses.timeout_height.revision_number,
+        revisionHeight: addresses.timeout_height.revision_height,
+      },
+    };
+  }
+
+  return JSON.stringify(json);
+};
+
+export const getNodes = (msgs: any, type: string) => {
+  const nodes = msgs.protoMsgs.map((node: any, index: number) => {
+    return {
+      typeUrl: node.typeUrl,
+      json: getJson(msgs.aminoMsgs[index].value, type),
+      __typename: "Message",
+    };
+  });
+
+  let balanceOffset = "";
+  let signerAddress = "";
+
+  if (type === "send") {
+    balanceOffset = `-${msgs.aminoMsgs[0].value.amount[0].amount}`;
+    signerAddress = msgs.aminoMsgs[0].value.from_address;
+  }
+
+  if (type === "withdrawRewards") {
+    balanceOffset = "";
+    signerAddress = msgs.aminoMsgs[0].value.delegator_address;
+  }
+
+  if (type === "delegate" || type === "redelegate" || type === "undelegate") {
+    balanceOffset = `${msgs.aminoMsgs[0].value.amount.amount}`;
+    signerAddress = msgs.aminoMsgs[0].value.delegator_address;
+  }
+
+  if (type === "ibcTransfer") {
+    balanceOffset = `${msgs.aminoMsgs[0].value.token.amount}`;
+    signerAddress = msgs.aminoMsgs[0].value.sender;
+  }
+
+  return { nodes, balanceOffset, signerAddress };
+};
+
+export const parseAmount = (amount: string): [string, string] => {
+  const matches = amount.match(/^(\d+(?:\.\d+)?)\s*([a-zA-Z]+)$/);
+
+  if (matches) {
+    const [, numberPart, alphabeticPart] = matches;
+    return [numberPart, alphabeticPart];
+  }
+
+  return ["", ""];
+};
+
+export const updateNodeOnTxnCompleted = (
+  type: string,
+  tx: any,
+  txId: string,
+  activityStore: any
+) => {
+  if (type === "withdrawRewards") {
+    let sum = 0;
+
+    JSON.parse(tx.log).map((txn: any, index: number) => {
+      const currentAmount = parseAmount(txn.events[0].attributes[1].value);
+      activityStore.updateTxnJson(txId, index, currentAmount);
+      sum += Number(currentAmount[0]);
+    });
+    activityStore.updateTxnBalance(txId, sum);
+  }
+
+  activityStore.updateTxnGas(txId, tx.gas_used, tx.gas_wanted);
+  // if txn fails, it will have tx.code.
+  if (tx.code) {
+    activityStore.setTxnStatus(txId, "Failed");
+  } else {
+    activityStore.setTxnStatus(txId, "Success");
+  }
+
+  activityStore.setIsNodeUpdated(true);
+};

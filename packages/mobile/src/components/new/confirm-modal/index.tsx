@@ -22,7 +22,6 @@ export const ConfirmCardModel: FunctionComponent<{
       isOpen={isOpen}
       showCloseButton={false}
       title={title}
-      cardStyle={style.flatten(["padding-bottom-12"]) as ViewStyle}
       disableGesture={true}
       titleStyle={style.flatten(["text-center"]) as ViewStyle}
     >
@@ -34,7 +33,7 @@ export const ConfirmCardModel: FunctionComponent<{
           style.flatten([
             "flex-row",
             "justify-between",
-            "margin-y-24",
+            "margin-top-24",
           ]) as ViewStyle
         }
       >

@@ -4,7 +4,7 @@ import Svg, { Path } from "react-native-svg";
 export const SearchIcon: FunctionComponent<{
   size?: number;
   color?: string;
-}> = ({ size = 13, color = "white" }) => {
+}> = ({ size = 12, color = "white" }) => {
   return (
     <Svg
       width={size}

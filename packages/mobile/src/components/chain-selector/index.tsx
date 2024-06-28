@@ -84,7 +84,9 @@ export const ChainSelectorModal: FunctionComponent<{
                   <VectorCharacter char={chainName} color="white" height={14} />
                 )}
               </View>
-              <Text style={style.flatten(["h5", "color-text-middle"])}>
+              <Text
+                style={style.flatten(["h5", "color-text-middle"]) as ViewStyle}
+              >
                 {chainName}
               </Text>
             </RectButton>

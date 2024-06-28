@@ -8,10 +8,9 @@ import {
   View,
   Text,
   ViewStyle,
-  ActivityIndicator,
   FlatList,
+  ActivityIndicator,
 } from "react-native";
-import { fetchTransactions } from "../../../graphQL/activity-api";
 import moment from "moment";
 import { useStore } from "stores/index";
 import { useStyle } from "styles/index";
@@ -21,6 +20,7 @@ import { activityFilterOptions, ActivityFilterView } from "./activity-filter";
 import { ActivityRow } from "./activity-row";
 import { observer } from "mobx-react-lite";
 import { NoActivityView } from "screens/activity/activity-transaction/no-activity-view";
+import { CHAIN_ID_FETCHHUB, CHAIN_ID_DORADO } from "../../../config";
 
 const processFilters = (filters: string[]) => {
   let result: any[] = [];
@@ -30,33 +30,20 @@ const processFilters = (filters: string[]) => {
   return result;
 };
 
-function debounce(func: any, timeout = 500) {
-  let timer: any;
-  return (...args: any) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => {
-      func(args);
-    }, timeout);
-  };
-}
 export const ActivityNativeTab: FunctionComponent<{
-  latestBlock: any;
   isOpenModal: boolean;
   setIsOpenModal: any;
-}> = observer(({ latestBlock, isOpenModal, setIsOpenModal }) => {
+}> = observer(({ isOpenModal, setIsOpenModal }) => {
   const style = useStyle();
-  const { chainStore, accountStore } = useStore();
+  const { chainStore, accountStore, activityStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
 
   const [_date, setDate] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
-  const [loadingRequest, setLoadingRequest] = useState(true);
-  const [fetchedData, setFetchedData] = useState<any>();
+  const [activities, setActivities] = useState<unknown[]>([]);
 
-  const [pageInfo, setPageInfo] = useState<any>();
-  const [nodes, setNodes] = useState({});
   const [filters, setFilters] = useState<FilterItem[]>(activityFilterOptions);
+  const [isLoading, setIsLoading] = useState(true);
 
   const filter = useCallback(
     () =>
@@ -66,92 +53,69 @@ export const ActivityNativeTab: FunctionComponent<{
     [filters]
   )();
 
-  const fetchNodes = debounce(async (cursor: any) => {
+  const accountOrChainChanged =
+    activityStore.getAddress !== accountInfo.bech32Address ||
+    activityStore.getChainId !== current.chainId;
+
+  useEffect(() => {
+    // this is required because accountInit sets the nodes on reload, so we wait for accountInit to set the node and then setActivities
+    // else activityStore.getNodes will be empty
     setIsLoading(true);
-    const data = await fetchTransactions(
-      current.chainId,
-      cursor,
-      accountInfo.bech32Address,
-      processFilters(filter)
-    );
-    setFetchedData(data?.nodes);
-    if (!pageInfo || cursor != "") setPageInfo(data?.pageInfo);
+    const timeout = setTimeout(() => {
+      setActivities(activityStore.sortedNodes);
+    }, 100);
     setIsLoading(false);
-  }, 1000);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [activityStore.sortedNodes]);
 
   useEffect(() => {
-    fetchNodes("");
-  }, []);
+    setFilters(activityFilterOptions);
+  }, [accountOrChainChanged]);
 
   useEffect(() => {
-    fetchNodes("");
-  }, [latestBlock, filters]);
-
-  useEffect(() => {
-    /// Execute bloc after 1.5 sec
-    setTimeout(() => {
-      setIsLoading(true);
-      setPageInfo(undefined);
-      setNodes({});
-      fetchNodes("");
-    }, 1500);
-  }, [chainStore.current.chainId]);
-
-  useEffect(() => {
-    if (fetchedData) {
-      const nodeMap: any = {};
-      fetchedData.map((node: any) => {
-        nodeMap[node.id] = node;
-      });
-      setNodes({ ...nodes, ...nodeMap });
+    setIsLoading(true);
+    if (activityStore.checkIsNodeUpdated) {
+      setActivities(activityStore.sortedNodes);
+      activityStore.setIsNodeUpdated(false);
       setIsLoading(false);
-      setLoadingRequest(false);
     }
-  }, [fetchedData]);
+  }, [activityStore, activityStore.checkIsNodeUpdated]);
+
+  useEffect(() => {
+    if (accountOrChainChanged) {
+      activityStore.setAddress(accountInfo.bech32Address);
+      activityStore.setChainId(current.chainId);
+    }
+    //accountInit is required because in case of a reload, this.nodes becomes empty and should be updated with KVstore's saved nodes
+    activityStore.accountInit();
+  }, [
+    accountInfo.bech32Address,
+    accountOrChainChanged,
+    activityStore,
+    current.chainId,
+  ]);
 
   const handleFilterChange = (selectedFilters: FilterItem[]) => {
-    setIsLoading(true);
-    setPageInfo(undefined);
-    setNodes({});
     setFilters(selectedFilters);
     setIsOpenModal(false);
   };
 
-  const handleLoadMore = () => {
-    if (!loadingRequest) {
-      setLoadingRequest(true);
-      fetchNodes(pageInfo?.endCursor);
-    }
-  };
-
-  const renderFooter = () => {
-    //it will show indicator at the bottom of the list when data is loading otherwise it returns null
-    if (!pageInfo?.hasNextPage) return null;
-    return (
-      <React.Fragment>
-        <ActivityIndicator
-          size="large"
-          color={style.get("color-white").color}
-        />
-        <View style={style.get("height-page-pad") as ViewStyle} />
-      </React.Fragment>
-    );
-  };
-
-  const renderList = (nodes: { [s: string]: unknown } | ArrayLike<unknown>) => {
+  const renderList = (nodes: [s: string] | unknown[]) => {
     return (
       <FlatList
-        data={Object.values(nodes)}
+        data={nodes}
         scrollEnabled={false}
         renderItem={({ item, index }: { item: any; index: number }) => {
-          const isLastPos = index == Object.values(nodes).length - 1;
-          const currentDate = moment(item.block.timestamp)
-            .utc()
-            .format("MMMM DD, YYYY");
-          const previousNode: any =
-            index > 0 ? Object.values(nodes)[index - 1] : null;
+          const isLastPos = index == nodes.length - 1;
+          const currentDate = moment(item.block.timestamp).format(
+            "MMMM DD, YYYY"
+          );
+          const previousNode: any = index > 0 ? nodes[index - 1] : null;
           const previousDate = previousNode
-            ? moment(previousNode.block.timestamp).utc().format("MMMM DD, YYYY")
+            ? moment(previousNode.block.timestamp).format("MMMM DD, YYYY")
             : null;
           const shouldDisplayDate = currentDate !== previousDate;
 
@@ -185,27 +149,28 @@ export const ActivityNativeTab: FunctionComponent<{
         ItemSeparatorComponent={() => (
           <CardDivider style={style.flatten(["margin-y-16"]) as ViewStyle} />
         )}
-        ListFooterComponent={() => renderFooter()}
-        onEndReachedThreshold={0.4}
-        onEndReached={() => handleLoadMore()}
       />
     );
   };
 
-  const data = Object.values(nodes).filter((node: any) =>
+  const data = activities.filter((node: any) =>
     processFilters(filter).includes(node.transaction.messages.nodes[0].typeUrl)
   );
 
   return (
     <React.Fragment>
-      {data.length > 0 && renderList(nodes)}
-      {data.length == 0 && isLoading ? (
+      {(current.chainId === CHAIN_ID_FETCHHUB ||
+        current.chainId === CHAIN_ID_DORADO) &&
+      data.length > 0 &&
+      activities.length > 0 ? (
+        renderList(data)
+      ) : activities.length == 0 && isLoading ? (
         <ActivityIndicator
           size="large"
           color={style.get("color-white").color}
         />
       ) : (
-        data.length == 0 && <NoActivityView />
+        <NoActivityView />
       )}
       <ActivityFilterView
         isOpen={isOpenModal}

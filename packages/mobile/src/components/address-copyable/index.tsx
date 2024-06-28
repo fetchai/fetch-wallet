@@ -44,11 +44,13 @@ export const AddressCopyable: FunctionComponent<{
       activeOpacity={0.2}
     >
       <Text
-        style={style.flatten([
-          "subtitle3",
-          "color-gray-300",
-          "dark:color-platinum-200",
-        ])}
+        style={
+          style.flatten([
+            "subtitle3",
+            "color-gray-300",
+            "dark:color-platinum-200",
+          ]) as ViewStyle
+        }
       >
         {Bech32Address.shortenAddress(address, maxCharacters)}
       </Text>

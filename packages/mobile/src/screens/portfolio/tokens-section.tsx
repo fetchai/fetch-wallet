@@ -17,7 +17,8 @@ import { separateNumericAndDenom } from "utils/format/format";
 
 export const TokensSection: FunctionComponent = observer(() => {
   const style = useStyle();
-  const { chainStore, queriesStore, accountStore, priceStore } = useStore();
+  const { chainStore, queriesStore, accountStore, priceStore, analyticsStore } =
+    useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
@@ -114,15 +115,18 @@ export const TokensSection: FunctionComponent = observer(() => {
             <TokenCardView
               containerStyle={style.flatten(["margin-y-4"]) as ViewStyle}
               key={token.currency.coinMinimalDenom}
-              onPress={() =>
+              onPress={() => {
+                analyticsStore.logEvent("token_click", {
+                  pageName: "Portfolio",
+                });
                 navigation.navigate("Others", {
                   screen: "NativeTokens",
                   params: {
                     tokenString: tokenString,
                     tokenBalanceString: tokenBalanceString,
                   },
-                })
-              }
+                });
+              }}
               leadingIcon={
                 <TokenSymbol
                   size={32}

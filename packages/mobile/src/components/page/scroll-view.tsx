@@ -18,7 +18,6 @@ const AnimatedKeyboardAwareScrollView = Animated.createAnimatedComponent(
   KeyboardAwareScrollView
 );
 
-// eslint-disable-next-line react/display-name
 export const PageWithScrollView = forwardRef<
   ScrollView,
   React.PropsWithChildren<
@@ -123,3 +122,4 @@ export const PageWithScrollView = forwardRef<
     </React.Fragment>
   );
 });
+PageWithScrollView.displayName = "PageWithScrollView";

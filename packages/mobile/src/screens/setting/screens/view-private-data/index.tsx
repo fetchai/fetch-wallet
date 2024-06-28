@@ -72,7 +72,9 @@ export const ViewPrivateDataScreen: FunctionComponent = () => {
           ]) as ViewStyle
         }
       >
-        <Text style={style.flatten(["text-caption2", "color-white"])}>
+        <Text
+          style={style.flatten(["text-caption2", "color-white"]) as ViewStyle}
+        >
           {item}
         </Text>
       </BlurBackground>
@@ -111,7 +113,7 @@ export const ViewPrivateDataScreen: FunctionComponent = () => {
                 style.flatten([
                   "h6",
                   "margin-bottom-30",
-                  "color-text-high",
+                  "color-white",
                 ]) as ViewStyle
               }
             >
@@ -128,10 +130,12 @@ export const ViewPrivateDataScreen: FunctionComponent = () => {
                 [isTimedOut && "border-color-green-400"]
               ) as ViewStyle
             }
-            textStyle={style.flatten(
-              ["text-button1", "color-white"],
-              [isTimedOut && "color-green-400"]
-            )}
+            textStyle={
+              style.flatten(
+                ["text-button1", "color-white"],
+                [isTimedOut && "color-green-400"]
+              ) as ViewStyle
+            }
             {...(isTimedOut && {
               rightIcon: (
                 <View style={style.flatten(["margin-left-8"]) as ViewStyle}>

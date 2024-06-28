@@ -1,6 +1,8 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import {
+  Platform,
   StyleSheet,
+  Switch,
   Text,
   TextStyle,
   View,
@@ -10,6 +12,7 @@ import {
 import { useStyle } from "styles/index";
 import { action, makeObservable, observable } from "mobx";
 import {
+  FeeType,
   IFeeConfig,
   IGasConfig,
   InsufficientFeeError,
@@ -21,19 +24,21 @@ import { CoinPretty, PricePretty } from "@keplr-wallet/unit";
 import { LoadingSpinner } from "components/spinner";
 import { RectButton } from "components/rect-button";
 import { observer } from "mobx-react-lite";
-import { BlurButton } from "../button/blur-button";
-
+import { BlurBackground } from "../blur-background/blur-background";
 export interface FeeButtonsProps {
   labelStyle?: TextStyle;
   containerStyle?: ViewProps;
   buttonsContainerStyle?: ViewProps;
   errorLabelStyle?: TextStyle;
+  setFeeButton?: any;
+  selectFeeButton?: FeeType;
 
   label: string;
   gasLabel: string;
 
   feeConfig: IFeeConfig;
   gasConfig: IGasConfig;
+  pageName?: string;
 }
 
 class FeeButtonState {
@@ -59,36 +64,53 @@ export const FeeButtons: FunctionComponent<FeeButtonsProps> = observer(
     // This may be not the good way to handle the states across the components.
     // But, rather than using the context API with boilerplate code, just use the mobx state to simplify the logic.
     const [feeButtonState] = useState(() => new FeeButtonState());
+    const { analyticsStore } = useStore();
     const style = useStyle();
 
     return (
       <React.Fragment>
         {props.feeConfig.feeCurrency ? <FeeButtonsInner {...props} /> : null}
-        <BlurButton
-          text="Advanced Settings"
-          blurIntensity={30}
-          borderRadius={32}
-          backgroundBlur={true}
-          containerStyle={
-            [
+        <View
+          style={
+            style.flatten([
+              "flex-row",
+              "justify-between",
+              "items-center",
+              "margin-top-12",
+              "padding-y-12",
+            ]) as ViewStyle
+          }
+        >
+          <Text style={style.flatten(["body3", "color-white"]) as ViewStyle}>
+            Advanced Settings
+          </Text>
+          <Switch
+            trackColor={{
+              false: "#767577",
+              true: Platform.OS === "ios" ? "#5F38FB" : "#767577",
+            }}
+            thumbColor={feeButtonState.isGasInputOpen ? "#FFFFFF" : "#D0BCFF66"}
+            style={[
+              {
+                borderRadius: 16,
+              },
               style.flatten(
-                ["justify-center"],
-                [
-                  feeButtonState.isGasInputOpen && "border-width-1",
-                  "border-radius-64",
-                  "border-color-indigo",
-                ]
+                ["border-color-pink-light@40%"],
+                [!feeButtonState.isGasInputOpen && "border-width-1"]
               ),
-              { width: 150 },
-            ] as ViewStyle
-          }
-          textStyle={style.flatten(["text-caption2"]) as ViewStyle}
-          onPress={() =>
-            feeButtonState.setIsGasInputOpen(!feeButtonState.isGasInputOpen)
-          }
-        />
+            ]}
+            onValueChange={() => {
+              feeButtonState.setIsGasInputOpen(!feeButtonState.isGasInputOpen);
+              if (props.pageName)
+                analyticsStore.logEvent("fee_advance_click", {
+                  pageName: props.pageName,
+                });
+            }}
+            value={feeButtonState.isGasInputOpen}
+          />
+        </View>
         {feeButtonState.isGasInputOpen || !props.feeConfig.feeCurrency ? (
-          <GasInput label={props.gasLabel} gasConfig={props.gasConfig} />
+          <GasInput gasConfig={props.gasConfig} />
         ) : null}
       </React.Fragment>
     );
@@ -107,13 +129,25 @@ export const getFeeErrorText = (error: Error): string | undefined => {
 };
 
 export const FeeButtonsInner: FunctionComponent<FeeButtonsProps> = observer(
-  ({ labelStyle, containerStyle, errorLabelStyle, label, feeConfig }) => {
-    const { priceStore, chainStore } = useStore();
+  ({
+    containerStyle,
+    errorLabelStyle,
+    feeConfig,
+    pageName,
+    setFeeButton,
+    selectFeeButton,
+  }) => {
+    const { priceStore, chainStore, analyticsStore } = useStore();
     const style = useStyle();
 
     useEffect(() => {
       if (feeConfig.feeCurrency && !feeConfig.fee) {
         feeConfig.setFeeType("average");
+        if (pageName)
+          analyticsStore.logEvent("fee_type_select", {
+            pageName,
+            feeType: "average",
+          });
       }
     }, [feeConfig]);
 
@@ -161,102 +195,113 @@ export const FeeButtonsInner: FunctionComponent<FeeButtonsProps> = observer(
       const isEvm = chainStore.current.features?.includes("evm") ?? false;
 
       return (
-        <RectButton
-          style={
-            style.flatten(
-              [
-                "flex-row",
-                "items-center",
-                "justify-between",
-                "padding-x-16",
-                "padding-y-18",
-              ],
-              [selected && "background-color-indigo", "border-radius-12"]
-            ) as ViewStyle
-          }
-          onPress={onPress}
-        >
-          <View style={style.flatten(["flex-row"])}>
-            <Text style={style.flatten(["body3", "color-white"])}>{label}</Text>
-            {price ? (
-              <Text
-                style={
-                  style.flatten(
-                    ["padding-top-2", "text-caption2", "margin-left-6"],
-                    [selected ? "color-white" : "color-white@60%"]
-                  ) as ViewStyle
-                }
-              >
-                {price.toString()}
-              </Text>
-            ) : null}
-          </View>
-          <Text
+        <BlurBackground borderRadius={12} blurIntensity={15}>
+          <RectButton
             style={
-              style.flatten([
-                "text-center",
-                "text-caption2",
-                "color-white@60%",
-              ]) as ViewStyle
+              style.flatten(
+                [
+                  "flex-row",
+                  "items-center",
+                  "justify-between",
+                  "padding-x-16",
+                  "padding-y-18",
+                ],
+                [selected && "background-color-indigo", "border-radius-12"]
+              ) as ViewStyle
             }
+            onPress={onPress}
           >
-            {amount.hideIBCMetadata(true).trim(true).toMetricPrefix(isEvm)}
-          </Text>
-        </RectButton>
+            <View style={style.flatten(["flex-row"])}>
+              <Text
+                style={style.flatten(["body3", "color-white"]) as ViewStyle}
+              >
+                {label}
+              </Text>
+              {price ? (
+                <Text
+                  style={
+                    style.flatten(
+                      ["padding-top-2", "text-caption2", "margin-left-6"],
+                      [selected ? "color-white" : "color-white@60%"]
+                    ) as ViewStyle
+                  }
+                >
+                  {price.toString()}
+                </Text>
+              ) : null}
+            </View>
+            <Text
+              style={
+                style.flatten([
+                  "text-center",
+                  "text-caption2",
+                  "color-white@60%",
+                ]) as ViewStyle
+              }
+            >
+              {amount.hideIBCMetadata(true).trim(true).toMetricPrefix(isEvm)}
+            </Text>
+          </RectButton>
+        </BlurBackground>
       );
     };
 
     return (
-      <View
-        style={StyleSheet.flatten([
-          style.flatten(["padding-y-12"]) as ViewStyle,
-          containerStyle,
-        ])}
-      >
-        <Text
+      <View style={StyleSheet.flatten([containerStyle])}>
+        {/* <Text
           style={StyleSheet.flatten([
-            labelStyle ??
-              (style.flatten([
-                "h6",
-                "color-platinum-100",
-                "margin-bottom-12",
-              ]) as ViewStyle),
-          ])}
+            style.flatten(["h6", "color-platinum-100", "margin-bottom-12"]),
+            labelStyle,
+          ] as ViewStyle)}
         >
           {label}
-        </Text>
+        </Text> */}
         <View>
           {renderButton(
             "Low",
             lowFeePrice,
             lowFee,
-            feeConfig.feeType === "low",
+            selectFeeButton === "low",
             () => {
-              feeConfig.setFeeType("low");
+              setFeeButton("low");
+              // feeConfig.setFeeType("low");
+              if (pageName)
+                analyticsStore.logEvent("fee_type_select", {
+                  pageName,
+                  feeType: "low",
+                });
             }
           )}
-          <View
-            style={style.flatten(["width-1", "margin-top-2"]) as ViewStyle}
-          />
+          <View style={style.flatten(["margin-top-6"]) as ViewStyle} />
           {renderButton(
             "Average",
             averageFeePrice,
             averageFee,
-            feeConfig.feeType === "average",
+            selectFeeButton === "average",
             () => {
-              feeConfig.setFeeType("average");
+              setFeeButton("average");
+              // feeConfig.setFeeType("average");
+              if (pageName)
+                analyticsStore.logEvent("fee_type_select", {
+                  pageName,
+                  feeType: "average",
+                });
             }
           )}
-          <View
-            style={style.flatten(["width-1", "margin-top-2"]) as ViewStyle}
-          />
+          <View style={style.flatten(["margin-top-6"]) as ViewStyle} />
           {renderButton(
             "High",
             highFeePrice,
             highFee,
-            feeConfig.feeType === "high",
+            selectFeeButton === "high",
             () => {
-              feeConfig.setFeeType("high");
+              setFeeButton("high");
+              // feeConfig.setFeeType("high");
+              if (pageName)
+                analyticsStore.logEvent("fee_type_select", {
+                  pageName,
+                  feeType: "high",
+                });
             }
           )}
         </View>
@@ -281,7 +326,7 @@ export const FeeButtonsInner: FunctionComponent<FeeButtonsProps> = observer(
           </View>
         ) : null}
         {!isFeeLoading && errorText ? (
-          <View>
+          <View style={style.flatten(["margin-bottom-12"]) as ViewStyle}>
             <Text
               style={StyleSheet.flatten([
                 style.flatten([

@@ -27,13 +27,10 @@ export interface State {
 const { SmartNavigatorProvider, useSmartNavigation } =
   createSmartNavigatorProvider(
     new SmartNavigator({
+      Unlock: {
+        upperScreenName: "Unlock",
+      },
       "Register.Intro": {
-        upperScreenName: "Register",
-      },
-      "Register.NewUser": {
-        upperScreenName: "Register",
-      },
-      "Register.NotNewUser": {
         upperScreenName: "Register",
       },
       "Register.NewMnemonic": {
@@ -51,7 +48,7 @@ const { SmartNavigatorProvider, useSmartNavigation } =
       "Register.CreateAccount": {
         upperScreenName: "Register",
       },
-      "Register.NewLedger": {
+      "Register.Ledger": {
         upperScreenName: "Register",
       },
       "Register.TorusSignIn": {
@@ -72,86 +69,65 @@ const { SmartNavigatorProvider, useSmartNavigation } =
       Home: {
         upperScreenName: "HomeTab",
       },
-      Send: {
-        upperScreenName: "Others",
-      },
-      Receive: {
-        upperScreenName: "Others",
-      },
-      SendNew: {
-        upperScreenName: "Others",
-      },
       Portfolio: {
         upperScreenName: "HomeTab",
       },
       NativeTokens: {
         upperScreenName: "HomeTab",
       },
-      Tokens: {
-        upperScreenName: "Others",
-      },
-      Camera: {
-        upperScreenName: "Others",
-      },
       Inbox: {
         upperScreenName: "HomeTab",
       },
-      ManageWalletConnect: {
-        upperScreenName: "Others",
-      },
       "Staking.Dashboard": {
-        upperScreenName: "Others",
+        upperScreenName: "Stake",
       },
       "Validator.Details": {
-        upperScreenName: "Others",
+        upperScreenName: "Stake",
+      },
+      "SelectorValidator.Details": {
+        upperScreenName: "Stake",
       },
       "Validator.List": {
-        upperScreenName: "Others",
+        upperScreenName: "Stake",
       },
       Delegate: {
-        upperScreenName: "Others",
+        upperScreenName: "Stake",
       },
       Undelegate: {
-        upperScreenName: "Others",
+        upperScreenName: "Stake",
       },
       Redelegate: {
-        upperScreenName: "Others",
+        upperScreenName: "Stake",
       },
       Governance: {
-        upperScreenName: "Others",
+        upperScreenName: "Setting",
       },
-      "Governance Details": {
-        upperScreenName: "Others",
-      },
-      Setting: {
-        upperScreenName: "Settings",
-      },
-      SettingSelectAccount: {
-        upperScreenName: "Settings",
+      "Governance.Details": {
+        upperScreenName: "Setting",
       },
       "Setting.ViewPrivateData": {
-        upperScreenName: "Others",
+        upperScreenName: "Setting",
       },
       "Setting.Currency": {
-        upperScreenName: "Others",
+        upperScreenName: "Setting",
       },
       "Setting.Version": {
-        upperScreenName: "Others",
+        upperScreenName: "Setting",
       },
       "Setting.ChainList": {
-        upperScreenName: "ChainList",
+        upperScreenName: "Setting",
       },
       "Setting.AddToken": {
-        upperScreenName: "Others",
+        upperScreenName: "Setting",
       },
       "Setting.ManageTokens": {
-        upperScreenName: "Others",
+        upperScreenName: "Setting",
+      },
+      "Setting.SecurityAndPrivacy": {
+        upperScreenName: "Setting",
       },
       AddressBook: {
         upperScreenName: "AddressBooks",
-      },
-      SecurityAndPrivacy: {
-        upperScreenName: "Others",
       },
       AddAddressBook: {
         upperScreenName: "AddressBooks",
@@ -159,35 +135,17 @@ const { SmartNavigatorProvider, useSmartNavigation } =
       EditAddressBook: {
         upperScreenName: "AddressBooks",
       },
-      Result: {
+      Tokens: {
         upperScreenName: "Others",
       },
-      TxPendingResult: {
+      Camera: {
         upperScreenName: "Others",
       },
-      TxSuccessResult: {
+      Receive: {
         upperScreenName: "Others",
       },
-      TxFailedResult: {
+      Send: {
         upperScreenName: "Others",
-      },
-      "Web.Intro": {
-        upperScreenName: "Web",
-      },
-      "Web.Osmosis": {
-        upperScreenName: "Web",
-      },
-      "Web.OsmosisFrontier": {
-        upperScreenName: "Web",
-      },
-      "Web.Stargaze": {
-        upperScreenName: "Web",
-      },
-      "Web.Umee": {
-        upperScreenName: "Web",
-      },
-      "Web.Junoswap": {
-        upperScreenName: "Web",
       },
       WebView: {
         upperScreenName: "Others",
@@ -199,9 +157,6 @@ const { SmartNavigatorProvider, useSmartNavigation } =
         upperScreenName: "Others",
       },
     }).withParams<{
-      WebView: {
-        url: string;
-      };
       "Register.Intro": {
         isBack: boolean;
       };
@@ -224,7 +179,7 @@ const { SmartNavigatorProvider, useSmartNavigation } =
         bip44HDPath?: BIP44HDPath;
         title?: string;
       };
-      "Register.NewLedger": {
+      "Register.Ledger": {
         registerConfig: RegisterConfig;
       };
       "Register.TorusSignIn": {
@@ -245,33 +200,20 @@ const { SmartNavigatorProvider, useSmartNavigation } =
       "Register.End": {
         password?: string;
       };
-      Send: {
-        chainId?: string;
-        currency?: string;
-        recipient?: string;
-      };
-      Receive: {
-        chainId?: string;
-      };
-      SendNew: {
-        chainId?: string;
-        currency?: string;
-        recipient?: string;
-        state?: State;
-      };
-      NativeTokens: {
-        tokenString: string;
-        tokenBalanceString: string;
-      };
-      Camera: {
-        showMyQRButton?: boolean;
-        recipientConfig?: IRecipientConfig | IRecipientConfigWithICNS;
+      "Staking.Dashboard": {
+        isTab?: boolean;
       };
       "Validator.Details": {
         validatorAddress: string;
+        prevSelectedValidator?: string;
+      };
+      "SelectorValidator.Details": {
+        prevSelectedValidator?: string;
+        validatorAddress: string;
       };
       "Validator.List": {
-        validatorSelector?: (validatorAddress: string) => void;
+        prevSelectedValidator?: string;
+        selectedValidator?: string;
       };
       Delegate: {
         validatorAddress: string;
@@ -280,10 +222,8 @@ const { SmartNavigatorProvider, useSmartNavigation } =
         validatorAddress: string;
       };
       Redelegate: {
+        selectedValidatorAddress?: string;
         validatorAddress: string;
-      };
-      "Governance Details": {
-        proposalId: string;
       };
       "Setting.ViewPrivateData": {
         privateData: string;
@@ -297,17 +237,28 @@ const { SmartNavigatorProvider, useSmartNavigation } =
         chainId: string;
         addressBookConfig: AddressBookConfig;
       };
-      TxPendingResult: {
-        chainId?: string;
-        txHash: string;
+      "Governance.Details": {
+        proposalId: string;
       };
-      TxSuccessResult: {
+      Send: {
         chainId?: string;
-        txHash: string;
+        currency?: string;
+        recipient?: string;
+        state?: State;
       };
-      TxFailedResult: {
+      Receive: {
         chainId?: string;
-        txHash: string;
+      };
+      NativeTokens: {
+        tokenString: string;
+        tokenBalanceString: string;
+      };
+      Camera: {
+        showMyQRButton?: boolean;
+        recipientConfig?: IRecipientConfig | IRecipientConfigWithICNS;
+      };
+      WebView: {
+        url: string;
       };
     }>()
   );

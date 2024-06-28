@@ -34,7 +34,9 @@ export const WCAppLogoAndName: FunctionComponent<{
           altLogoStyle,
         ])}
       />
-      <Text style={style.flatten(["h6", "color-text-middle"])}>{appName}</Text>
+      <Text style={style.flatten(["h6", "color-text-middle"]) as ViewStyle}>
+        {appName}
+      </Text>
     </View>
   );
 };

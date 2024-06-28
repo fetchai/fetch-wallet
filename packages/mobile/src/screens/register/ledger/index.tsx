@@ -49,7 +49,7 @@ enum BLEPermissionGrantStatus {
   Granted = "granted",
 }
 
-export const NewLedgerScreen: FunctionComponent = () => {
+export const LedgerScreen: FunctionComponent = () => {
   const route = useRoute<
     RouteProp<
       Record<
@@ -258,6 +258,7 @@ export const NewLedgerScreen: FunctionComponent = () => {
   };
 
   const submit = handleSubmit(async () => {
+    setShowPassword(false);
     if (Platform.OS === "android" && location == undefined) {
       setLocationError("Location services are disabled");
       return;
@@ -291,6 +292,7 @@ export const NewLedgerScreen: FunctionComponent = () => {
       ledgerInitStore.abortAll();
       // Definitely, the error can be thrown when the ledger connection failed
       console.log(e);
+    } finally {
       setIsCreating(false);
     }
   });
@@ -324,7 +326,7 @@ export const NewLedgerScreen: FunctionComponent = () => {
     <PageWithScrollView
       backgroundMode="image"
       contentContainerStyle={style.get("flex-grow-1")}
-      style={style.flatten(["padding-x-page"]) as ViewStyle}
+      style={style.flatten(["padding-x-page", "overflow-scroll"]) as ViewStyle}
     >
       <Text
         style={
@@ -346,7 +348,7 @@ export const NewLedgerScreen: FunctionComponent = () => {
         rules={{
           required: "Name is required",
           validate: (value: string) => {
-            if (value.length < 3) {
+            if (value.trim().length < 3) {
               return "Name at least 3 characters";
             }
           },
@@ -354,10 +356,8 @@ export const NewLedgerScreen: FunctionComponent = () => {
         render={({ field: { onChange, onBlur, value, ref } }) => {
           return (
             <InputCardView
-              label="Wallet nickname"
-              containerStyle={
-                style.flatten(["margin-bottom-4", "margin-top-18"]) as ViewStyle
-              }
+              label="Account name"
+              containerStyle={style.flatten(["margin-top-18"]) as ViewStyle}
               returnKeyType={mode === "add" ? "done" : "next"}
               onSubmitEditing={() => {
                 if (mode === "add") {
@@ -372,21 +372,27 @@ export const NewLedgerScreen: FunctionComponent = () => {
                 onBlur();
                 onChange(value.trim());
               }}
-              onChangeText={(text: string) =>
-                onChange(
-                  text.replace(/[`#$%^&*()+!\=\[\]{}'?*;:"\\|,.<>\/~]/, "")
-                )
-              }
+              onChangeText={(text: string) => {
+                text = text.replace(
+                  /[`#$%^&*()+!\=\[\]{}'?*;:"\\|,.<>\/~]/,
+                  ""
+                );
+                if (text[0] === " ") {
+                  text = text.replace(/\s+/g, "");
+                }
+                text = text.replace(/ {1,}/g, " ");
+                onChange(text);
+              }}
               value={value}
               maxLength={30}
-              refs={ref}
+              ref={ref}
             />
           );
         }}
         name="name"
         defaultValue=""
       />
-      {mode === "create" ? (
+      {mode === "create" && (
         <React.Fragment>
           <Controller
             control={control}
@@ -405,6 +411,7 @@ export const NewLedgerScreen: FunctionComponent = () => {
                 <InputCardView
                   label="Password"
                   keyboardType={"default"}
+                  containerStyle={style.flatten(["margin-top-8"]) as ViewStyle}
                   secureTextEntry={!showPassword}
                   returnKeyType="next"
                   onSubmitEditing={() => {
@@ -415,7 +422,7 @@ export const NewLedgerScreen: FunctionComponent = () => {
                   onBlur={onBlur}
                   onChangeText={(text: string) => onChange(text.trim())}
                   value={value}
-                  refs={ref}
+                  ref={ref}
                   rightIcon={
                     !showPassword ? (
                       <IconButton
@@ -543,15 +550,27 @@ export const NewLedgerScreen: FunctionComponent = () => {
             )}
           </View>
         </React.Fragment>
-      ) : null}
+      )}
       <View style={style.flatten(["flex-1"])} />
       <Button
+        containerStyle={
+          style.flatten([
+            "margin-y-18",
+            "background-color-white",
+            "border-radius-32",
+          ]) as ViewStyle
+        }
+        textStyle={{
+          color: "#0B1742",
+        }}
         text="Continue"
         size="large"
-        disabled={!isBLEAvailable}
         loading={isCreating}
-        onPress={submit}
-        containerStyle={style.flatten(["border-radius-32"]) as ViewStyle}
+        onPress={() => {
+          submit();
+          analyticsStore.logEvent("continue_click", { pageName: "Register" });
+        }}
+        disabled={!isBLEAvailable}
       />
       {
         <LedgerLocationErrorModel
@@ -565,8 +584,6 @@ export const NewLedgerScreen: FunctionComponent = () => {
           }}
         />
       }
-      {/* Mock element for bottom padding */}
-      <View style={style.flatten(["height-page-pad"]) as ViewStyle} />
     </PageWithScrollView>
   );
 };

@@ -10,6 +10,7 @@ prod
 .gitsecret/keys/random_seed
 !*.secret
 *.log
+.env
 
 yarn-error.log
 .yarn/*

@@ -68,6 +68,7 @@ export interface ChainInfo {
 
   readonly type?: "mainnet" | "testnet";
   readonly hideInUI?: boolean;
+  readonly isTestnet?: boolean;
   readonly status?: "alpha" | "beta" | "production";
   readonly txExplorer?: {
     readonly name: string;

@@ -41,11 +41,10 @@ export const AndroidLineChart: FunctionComponent<{
     </Defs>
   );
 
-  const Shadow = ({ line }: any) => (
+  const Shadow = () => (
     <ChartPath
       key={"shadow"}
       y={2}
-      d={line}
       fill={"none"}
       strokeWidth={4}
       stroke={"rgba(134, 65, 244, 0.2)"}
@@ -170,10 +169,8 @@ export const AndroidLineChart: FunctionComponent<{
         style={{ height: dynamicHeight }}
         data={valueList}
         contentInset={{ top: 20, bottom: 20 }}
-        animation={true}
+        animate={true}
         animationDuration={1200}
-        animateOnDataChange={true}
-        onDataChangeAnimationDuration={300}
         curve={shape.curveNatural}
         svg={{
           strokeWidth: 2,

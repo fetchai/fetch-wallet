@@ -22,7 +22,7 @@ export const WordChip: FunctionComponent<{
         ) as ViewStyle
       }
     >
-      <Text style={style.flatten(["body3", "color-white"])}>
+      <Text style={style.flatten(["body3", "color-white"]) as ViewStyle}>
         {empty ? `` : `${word}`}
       </Text>
     </BlurBackground>

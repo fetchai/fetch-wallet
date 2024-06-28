@@ -103,6 +103,8 @@ export const ImportFromExtensionSetPasswordScreen: FunctionComponent = observer(
       } catch (e) {
         console.log(e);
         smartNavigation.goBack();
+      } finally {
+        setIsCreating(false);
       }
     });
 
@@ -163,7 +165,7 @@ export const ImportFromExtensionSetPasswordScreen: FunctionComponent = observer(
                 onBlur={onBlur}
                 onChangeText={(text: string) => onChange(text.trim())}
                 value={value}
-                refs={ref}
+                ref={ref}
                 rightIcon={
                   !showPassword ? (
                     <IconButton

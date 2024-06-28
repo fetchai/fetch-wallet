@@ -9,7 +9,6 @@ import {
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { BackgroundMode } from "./background";
 
-// eslint-disable-next-line react/display-name
 export const PageWithScrollViewInBottomTabView = React.forwardRef<
   ScrollView,
   React.PropsWithChildren<
@@ -35,3 +34,5 @@ export const PageWithScrollViewInBottomTabView = React.forwardRef<
     />
   );
 });
+PageWithScrollViewInBottomTabView.displayName =
+  "PageWithScrollViewInBottomTabView";

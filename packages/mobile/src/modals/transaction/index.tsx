@@ -1,6 +1,6 @@
 import { CardModal } from "modals/card";
 import React, { FunctionComponent, useEffect, useState } from "react";
-import { NodeRequire, ViewStyle } from "react-native";
+import { ViewStyle } from "react-native";
 import { useStyle } from "styles/index";
 import { IconWithText } from "components/new/icon-with-text/icon-with-text";
 import { Button } from "components/button";
@@ -19,7 +19,7 @@ interface TransactionProcess {
   status: TransactionStatus;
   title: string;
   subTitle: string;
-  img: NodeRequire;
+  img: string;
 }
 export const TransactionModal: FunctionComponent<{
   isOpen: boolean;
@@ -28,7 +28,16 @@ export const TransactionModal: FunctionComponent<{
   onHomeClick: () => void;
   txnHash: string;
   chainId: string;
-}> = ({ txnHash, chainId, isOpen, close, onHomeClick, onTryAgainClick }) => {
+  buttonText?: string;
+}> = ({
+  txnHash,
+  chainId,
+  isOpen,
+  close,
+  onHomeClick,
+  onTryAgainClick,
+  buttonText = "Go to homescreen",
+}) => {
   const { chainStore } = useStore();
 
   const [transactionState, setTransactionState] = useState<TransactionProcess>({
@@ -43,9 +52,10 @@ export const TransactionModal: FunctionComponent<{
 
   useEffect(() => {
     const chainInfo = chainStore.getChain(chainId);
-    let txTracer: TendermintTxTracer | undefined;
-
-    txTracer = new TendermintTxTracer(chainInfo.rpc, "/websocket");
+    const txTracer: TendermintTxTracer = new TendermintTxTracer(
+      chainInfo.rpc,
+      "/websocket"
+    );
     txTracer
       .traceTx(Buffer.from(txnHash, "hex"))
       .then((tx) => {
@@ -82,64 +92,61 @@ export const TransactionModal: FunctionComponent<{
   }
 
   return (
-    <React.Fragment>
-      <CardModal
-        isOpen={isOpen}
-        disableGesture={true}
-        cardStyle={style.flatten(["padding-bottom-32"]) as ViewStyle}
+    <CardModal isOpen={isOpen} disableGesture={true}>
+      <IconWithText
+        icon={
+          <LottieView
+            source={transactionState.img}
+            autoPlay
+            loop
+            style={style.flatten(["width-90", "margin-bottom-16"]) as ViewStyle}
+          />
+        }
+        title={transactionState.title}
+        subtitle={transactionState.subTitle}
       >
-        <IconWithText
-          icon={
-            <LottieView
-              source={transactionState.img}
-              autoPlay
-              loop
-              style={
-                style.flatten(["width-90", "margin-bottom-16"]) as ViewStyle
-              }
-            />
-          }
-          title={transactionState.title}
-          subtitle={transactionState.subTitle}
-        >
-          {transactionState.status === TransactionStatus.Failed ? (
-            <Button
-              text="Try again"
-              size="large"
-              containerStyle={
-                style.flatten([
-                  "border-radius-64",
-                  "margin-top-16",
-                ]) as ViewStyle
-              }
-              rippleColor="black@50%"
-              onPress={() => {
-                close();
-                onTryAgainClick();
-              }}
-            />
-          ) : null}
+        {transactionState.status === TransactionStatus.Failed ? (
           <Button
-            text="Go to homescreen"
+            text="Try again"
+            mode="outline"
             size="large"
             containerStyle={
-              style.flatten(
-                ["border-radius-64"],
-                [
-                  transactionState.status === TransactionStatus.Failed
-                    ? "margin-top-8"
-                    : "margin-top-16",
-                ]
-              ) as ViewStyle
+              style.flatten([
+                "border-radius-64",
+                "border-color-white@40%",
+                "margin-top-18",
+              ]) as ViewStyle
             }
+            textStyle={style.flatten(["color-white", "body2"]) as ViewStyle}
             rippleColor="black@50%"
             onPress={() => {
               close();
-              onHomeClick();
+              onTryAgainClick();
             }}
           />
-        </IconWithText>
-      </CardModal>
-    </React.Fragment>
+        ) : null}
+        <Button
+          text={buttonText}
+          mode="outline"
+          size="large"
+          containerStyle={
+            style.flatten(
+              ["border-radius-64", "border-color-white@40%"],
+              [
+                transactionState.status === TransactionStatus.Failed
+                  ? "margin-top-12"
+                  : "margin-top-18",
+              ]
+            ) as ViewStyle
+          }
+          textStyle={style.flatten(["color-white", "body2"]) as ViewStyle}
+          rippleColor="black@50%"
+          onPress={() => {
+            close();
+            onHomeClick();
+          }}
+        />
+      </IconWithText>
+    </CardModal>
   );
 };

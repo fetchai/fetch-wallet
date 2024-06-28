@@ -7,11 +7,11 @@ import { WalletConnectApprovalModal } from "modals/wallet-connect-approval";
 import { WCMessageRequester } from "stores/wallet-connect/msg-requester";
 import { WCGoBackToBrowserModal } from "modals/wc-go-back-to-browser";
 import { BackHandler, Platform } from "react-native";
-import { LoadingScreenModal } from "../loading-screen/modal";
 import { KeyRingStatus } from "@keplr-wallet/background";
 import { NetworkErrorModal } from "modals/network";
 import { useNetInfo } from "@react-native-community/netinfo";
 import { LedgerTransectionGuideModel } from "modals/ledger/ledger-transection";
+import { LoadingScreenModal } from "providers/loading-screen/modal";
 
 export const InteractionModalsProivder: FunctionComponent = observer(
   ({ children }) => {
@@ -65,15 +65,11 @@ export const InteractionModalsProivder: FunctionComponent = observer(
          The user should be able to type password to unlock or create the account if there is no account.
          So, we shouldn't show the loading indicator if the keyring is not unlocked.
          */}
-        {keyRingStore.status === KeyRingStatus.UNLOCKED &&
-        walletConnectStore.isPendingClientFromDeepLink ? (
+        {keyRingStore.status === KeyRingStatus.UNLOCKED && (
           <LoadingScreenModal
-            isOpen={true}
-            close={() => {
-              // noop
-            }}
+            isOpen={walletConnectStore.isPendingClientFromDeepLink}
           />
-        ) : null}
+        )}
         {walletConnectStore.needGoBackToBrowser && Platform.OS === "ios" ? (
           <WCGoBackToBrowserModal
             isOpen={walletConnectStore.needGoBackToBrowser}

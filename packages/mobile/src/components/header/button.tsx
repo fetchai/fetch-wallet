@@ -1,14 +1,15 @@
 import React, { FunctionComponent } from "react";
-import { StackHeaderLeftButtonProps } from "@react-navigation/stack";
 import { StyleSheet, View, ViewStyle } from "react-native";
 import { useStyle } from "styles/index";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { HeaderBackButtonIcon } from "./icon";
 import { IconButton } from "components/new/button/icon";
+import { HeaderBackButtonProps } from "@react-navigation/elements";
 
-export const HeaderLeftButton: FunctionComponent<
-  StackHeaderLeftButtonProps
-> = ({ children, onPress }) => {
+export const HeaderLeftButton: FunctionComponent<HeaderBackButtonProps> = ({
+  children,
+  onPress,
+}) => {
   const style = useStyle();
 
   return (
@@ -42,9 +43,9 @@ export const HeaderRightButton: FunctionComponent<{
     </View>
   );
 };
-export const HeaderLeftBackButton: FunctionComponent<
-  StackHeaderLeftButtonProps
-> = (props) => {
+export const HeaderLeftBackButton: FunctionComponent<HeaderBackButtonProps> = (
+  props
+) => {
   return (
     <React.Fragment>
       {props.canGoBack ? (
@@ -57,7 +58,7 @@ export const HeaderLeftBackButton: FunctionComponent<
 };
 
 export const HeaderLeftBackBlurButton: FunctionComponent<
-  StackHeaderLeftButtonProps
+  HeaderBackButtonProps
 > = (props) => {
   const style = useStyle();
   return (

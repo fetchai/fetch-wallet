@@ -7,6 +7,7 @@ import { EditIcon } from "../icon/edit";
 import { DeleteIcon } from "../icon/color-delete";
 import { RectButton } from "components/rect-button";
 import { BlurBackground } from "components/new/blur-background/blur-background";
+import { useStore } from "stores/index";
 
 export enum ManageAddressOption {
   renameAddress,
@@ -20,6 +21,7 @@ export const ManageAddressCardModel: FunctionComponent<{
   onSelectWallet: (option: ManageAddressOption) => void;
 }> = ({ close, title, isOpen, onSelectWallet }) => {
   const style = useStyle();
+  const { analyticsStore } = useStore();
 
   if (!isOpen) {
     return null;
@@ -29,15 +31,14 @@ export const ManageAddressCardModel: FunctionComponent<{
     <CardModal
       isOpen={isOpen}
       title={title}
-      cardStyle={style.flatten(["padding-bottom-12"]) as ViewStyle}
       disableGesture={true}
       close={() => close()}
     >
-      <View style={style.flatten(["margin-y-12"]) as ViewStyle}>
+      <View style={style.flatten([]) as ViewStyle}>
         <BlurBackground
           borderRadius={12}
           blurIntensity={15}
-          containerStyle={style.flatten(["margin-bottom-8"]) as ViewStyle}
+          containerStyle={style.flatten(["margin-bottom-6"]) as ViewStyle}
         >
           <RectButton
             onPress={() => {
@@ -78,7 +79,7 @@ export const ManageAddressCardModel: FunctionComponent<{
         <BlurBackground
           borderRadius={12}
           blurIntensity={15}
-          containerStyle={style.flatten(["margin-bottom-8"]) as ViewStyle}
+          containerStyle={style.flatten([]) as ViewStyle}
         >
           <RectButton
             onPress={() => {
@@ -101,6 +102,9 @@ export const ManageAddressCardModel: FunctionComponent<{
                 backgroundBlur={false}
                 icon={<DeleteIcon size={17} />}
                 iconStyle={style.flatten(["padding-0"]) as ViewStyle}
+                onPress={() =>
+                  analyticsStore.logEvent("delete_address_icon_click")
+                }
               />
               <Text
                 style={

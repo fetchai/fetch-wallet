@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react";
 import { TransitionPresets } from "@react-navigation/stack";
 import { TransparentHeaderOptionsPreset } from "components/header";
-import { NewHomeScreen } from "screens/home/new";
+import { NewHomeScreen } from "screens/home";
 import { PortfolioScreen } from "screens/portfolio";
 import { Stack } from "./navigation";
 import { InboxScreen } from "screens/inbox";

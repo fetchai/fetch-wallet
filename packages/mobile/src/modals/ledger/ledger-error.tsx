@@ -13,6 +13,10 @@ export const LedgerLocationErrorModel: FunctionComponent<{
 }> = observer(({ isOpen, error, close, retry }) => {
   const style = useStyle();
 
+  if (!isOpen) {
+    return null;
+  }
+
   return (
     <CardModal
       isOpen={isOpen}

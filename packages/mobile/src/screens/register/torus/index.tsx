@@ -28,6 +28,7 @@ import { HideEyeIcon } from "components/new/icon/hide-eye-icon";
 import { PasswordValidateView } from "components/new/password-validate/password-validate";
 import { XmarkIcon } from "components/new/icon/xmark";
 import { CheckIcon } from "components/new/icon/check"; // for using ethers.js
+import DeviceInfo from "react-native-device-info";
 
 const isEnvDevelopment = process.env["NODE_ENV"] !== "production";
 const scheme = "fetchwallet";
@@ -47,7 +48,6 @@ const web3auth = new Web3Auth(WebBrowser, SecureStore, {
 interface FormData {
   name: string;
   password: string;
-  confirmPassword: string;
 }
 
 // CONTRACT: Only supported on IOS
@@ -77,6 +77,7 @@ const useWeb3AuthSignIn = (
         mfaLevel: "default",
         curve: "secp256k1",
       });
+
       console.log(`Logged in ${web3auth.privKey}`);
       if (web3auth.privKey) {
         setEmail(web3auth.userInfo()?.email);
@@ -93,9 +94,17 @@ const useWeb3AuthSignIn = (
   useEffect(() => {
     const init = async () => {
       await web3auth.init();
+
       if (web3auth?.privKey) {
-        setEmail(web3auth.userInfo()?.email);
-        setPrivateKey(Buffer.from(web3auth.privKey, "hex"));
+        const userInfo = web3auth?.userInfo();
+        const typeOfLogin = userInfo?.typeOfLogin;
+
+        if (type == typeOfLogin) {
+          setEmail(userInfo?.email);
+          setPrivateKey(Buffer.from(web3auth.privKey, "hex"));
+        } else {
+          await login();
+        }
       } else {
         await login();
       }
@@ -139,21 +148,20 @@ export const TorusSignInScreen: FunctionComponent = observer(() => {
 
   const smartNavigation = useSmartNavigation();
 
+  const isPad = DeviceInfo.getSystemName() === "iPadOS";
+
   const title =
     route.params.type === "apple"
-      ? "Sign in with Apple"
-      : "Sign in with Google";
+      ? `Sign in with ${isPad ? "\n" : ""}Apple`
+      : `Sign in with ${isPad ? "\n" : ""}Google`;
 
   const registerConfig: RegisterConfig = route.params.registerConfig;
-  const [mode] = useState(registerConfig.mode);
+
   const [showPassword, setShowPassword] = useState(false);
+  const [mode] = useState(registerConfig.mode);
+  const [isCreating, setIsCreating] = useState(false);
   const [password, setPassword] = useState("");
 
-  // Below uses the hook conditionally.
-  // This is a silly way, but `route.params.type` never changed in the logic.
-  const { privateKey, email } = useWeb3AuthSignIn(
-    route.params.type === "apple" ? LOGIN_PROVIDER.APPLE : LOGIN_PROVIDER.GOOGLE
-  );
   const {
     control,
     handleSubmit,
@@ -162,9 +170,14 @@ export const TorusSignInScreen: FunctionComponent = observer(() => {
     formState: { errors },
   } = useForm<FormData>();
 
-  const [isCreating, setIsCreating] = useState(false);
+  // Below uses the hook conditionally.
+  // This is a silly way, but `route.params.type` never changed in the logic.
+  const { privateKey, email } = useWeb3AuthSignIn(
+    route.params.type === "apple" ? LOGIN_PROVIDER.APPLE : LOGIN_PROVIDER.GOOGLE
+  );
 
   const submit = handleSubmit(async () => {
+    setShowPassword(false);
     if (!privateKey || !email) {
       return;
     }
@@ -196,8 +209,8 @@ export const TorusSignInScreen: FunctionComponent = observer(() => {
       });
     } catch (e) {
       console.log(e);
-      setIsCreating(false);
     } finally {
+      setIsCreating(false);
       await logoutWeb3Auth();
     }
   });
@@ -231,7 +244,7 @@ export const TorusSignInScreen: FunctionComponent = observer(() => {
     <PageWithScrollView
       backgroundMode="image"
       contentContainerStyle={style.get("flex-grow-1")}
-      style={style.flatten(["padding-x-page"]) as ViewStyle}
+      style={style.flatten(["padding-x-page", "overflow-scroll"]) as ViewStyle}
     >
       <Text
         style={
@@ -253,7 +266,7 @@ export const TorusSignInScreen: FunctionComponent = observer(() => {
         rules={{
           required: "Name is required",
           validate: (value: string) => {
-            if (value.length < 3) {
+            if (value.trim().length < 3) {
               return "Name at least 3 characters";
             }
           },
@@ -261,10 +274,8 @@ export const TorusSignInScreen: FunctionComponent = observer(() => {
         render={({ field: { onChange, onBlur, value, ref } }) => {
           return (
             <InputCardView
-              label="Wallet nickname"
-              containerStyle={
-                style.flatten(["margin-bottom-4", "margin-top-18"]) as ViewStyle
-              }
+              label="Account name"
+              containerStyle={style.flatten(["margin-top-18"]) as ViewStyle}
               returnKeyType={mode === "add" ? "done" : "next"}
               onSubmitEditing={() => {
                 if (mode === "add") {
@@ -275,26 +286,31 @@ export const TorusSignInScreen: FunctionComponent = observer(() => {
                 }
               }}
               error={errors.name?.message}
-              errorMassageShow={false}
               onBlur={() => {
                 onBlur();
                 onChange(value.trim());
               }}
-              onChangeText={(text: string) =>
-                onChange(
-                  text.replace(/[`#$%^&*()+!\=\[\]{}'?*;:"\\|,.<>\/~]/, "")
-                )
-              }
+              onChangeText={(text: string) => {
+                text = text.replace(
+                  /[`#$%^&*()+!\=\[\]{}'?*;:"\\|,.<>\/~]/,
+                  ""
+                );
+                if (text[0] === " ") {
+                  text = text.replace(/\s+/g, "");
+                }
+                text = text.replace(/ {1,}/g, " ");
+                onChange(text);
+              }}
               value={value}
               maxLength={30}
-              refs={ref}
+              ref={ref}
             />
           );
         }}
         name="name"
         defaultValue=""
       />
-      {mode === "create" ? (
+      {mode === "create" && (
         <React.Fragment>
           <Controller
             control={control}
@@ -311,19 +327,18 @@ export const TorusSignInScreen: FunctionComponent = observer(() => {
 
               return (
                 <InputCardView
-                  label="Password"
+                  label="Create wallet password"
+                  containerStyle={style.flatten(["margin-top-8"]) as ViewStyle}
                   keyboardType={"default"}
                   secureTextEntry={!showPassword}
                   returnKeyType="next"
-                  onSubmitEditing={() => {
-                    submit();
-                  }}
+                  onSubmitEditing={submit}
                   error={errors.password?.message}
                   errorMassageShow={false}
                   onBlur={onBlur}
                   onChangeText={(text: string) => onChange(text.trim())}
                   value={value}
-                  refs={ref}
+                  ref={ref}
                   rightIcon={
                     !showPassword ? (
                       <IconButton
@@ -451,17 +466,28 @@ export const TorusSignInScreen: FunctionComponent = observer(() => {
             )}
           </View>
         </React.Fragment>
-      ) : null}
+      )}
       <View style={style.flatten(["flex-1"])} />
       <Button
-        text="Next"
+        containerStyle={
+          style.flatten([
+            "margin-y-18",
+            "background-color-white",
+            "border-radius-32",
+          ]) as ViewStyle
+        }
+        textStyle={{
+          color: "#0B1742",
+        }}
+        text="Continue"
         size="large"
         loading={isCreating}
-        onPress={submit}
+        onPress={() => {
+          submit();
+          analyticsStore.logEvent("next_click", { pageName: title });
+        }}
         disabled={!privateKey || !email}
       />
-      {/* Mock element for bottom padding */}
-      <View style={style.flatten(["height-page-pad"]) as ViewStyle} />
     </PageWithScrollView>
   );
 });

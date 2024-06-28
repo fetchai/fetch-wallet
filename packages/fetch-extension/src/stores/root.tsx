@@ -44,6 +44,7 @@ import {
   EthereumAccount,
   ChatStore,
   ProposalStore,
+  ActivityStore,
 } from "@keplr-wallet/stores";
 import {
   KeplrETCQueries,
@@ -74,6 +75,7 @@ export class RootStore {
   public readonly ibcChannelStore: IBCChannelStore;
   public readonly chatStore: ChatStore;
   public readonly proposalStore: ProposalStore;
+  public readonly activityStore: ActivityStore;
 
   protected readonly interactionStore: InteractionStore;
   public readonly permissionStore: PermissionStore;
@@ -235,9 +237,15 @@ export class RootStore {
       EvmQueries.use()
     );
 
+    this.activityStore = new ActivityStore(
+      new ExtensionKVStore("store_activity_config"),
+      this.chainStore
+    );
+
     this.accountStore = new AccountStore(
       window,
       this.chainStore,
+      this.activityStore,
       () => {
         return {
           suggestChain: false,

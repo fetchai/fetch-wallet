@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { PageWithScrollView } from "components/page";
-import { Text, View, ViewStyle } from "react-native";
+import { FlatList, Text, View, ViewStyle } from "react-native";
 import { useStyle } from "styles/index";
 import { WordChip } from "components/mnemonic";
 import { Button } from "components/button";
@@ -10,8 +10,9 @@ import { NewMnemonicConfig } from "./hook";
 import { RegisterConfig } from "@keplr-wallet/hooks";
 import { observer } from "mobx-react-lite";
 import { RectButton } from "components/rect-button";
-import { BIP44HDPath } from "@keplr-wallet/background";
+import { BIP44AdvancedButton, useBIP44Option } from "screens/register/bip44";
 import { useStore } from "stores/index";
+import { BipButtons } from "screens/register/bip-button";
 
 export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
   const route = useRoute<
@@ -21,7 +22,6 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
         {
           registerConfig: RegisterConfig;
           newMnemonicConfig: NewMnemonicConfig;
-          bip44HDPath: BIP44HDPath;
         }
       >,
       string
@@ -30,12 +30,12 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
 
   const style = useStyle();
 
-  const { analyticsStore } = useStore();
-
   const smartNavigation = useSmartNavigation();
-
+  const { analyticsStore } = useStore();
   const registerConfig = route.params.registerConfig;
   const newMnemonicConfig = route.params.newMnemonicConfig;
+
+  const bip44Option = useBIP44Option();
 
   const [candidateWords, setCandidateWords] = useState<
     {
@@ -44,6 +44,7 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
     }[]
   >([]);
   const [wordSet, setWordSet] = useState<(string | undefined)[]>([]);
+  const [selectedDerivationPath, setIsSelectedDerivationPath] = useState(false);
 
   useEffect(() => {
     const words = newMnemonicConfig.mnemonic.split(" ");
@@ -51,7 +52,7 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
       return Math.random() > 0.5 ? 1 : -1;
     });
 
-    const candidateWords = randomSortedWords.slice(0, 5);
+    const candidateWords = randomSortedWords.slice();
     setCandidateWords(
       candidateWords.map((word) => {
         return {
@@ -61,16 +62,9 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
       })
     );
 
-    const candidateWordsCopy = candidateWords.slice();
     setWordSet(
-      newMnemonicConfig.mnemonic.split(" ").map((word) => {
-        const i = candidateWordsCopy.indexOf(word);
-        if (i >= 0) {
-          // Mnemonic words can have the same word. Therefore, used words should be deleted.
-          candidateWordsCopy.splice(i, 1);
-          return undefined;
-        }
-        return word;
+      newMnemonicConfig.mnemonic.split(" ").map((_) => {
+        return undefined;
       })
     );
   }, [newMnemonicConfig.mnemonic]);
@@ -81,100 +75,133 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
 
   const [isCreating, setIsCreating] = useState(false);
 
+  const renderButtonItem = ({ item, index }: any) => {
+    return (
+      <WordButton
+        key={index}
+        word={item.word}
+        used={item.usedIndex >= 0}
+        onPress={() => {
+          const newWordSet = wordSet.slice();
+          const newCandiateWords = candidateWords.slice();
+          if (item.usedIndex < 0) {
+            if (firstEmptyWordSetIndex < 0) {
+              return;
+            }
+
+            newWordSet[firstEmptyWordSetIndex] = item.word;
+            setWordSet(newWordSet);
+
+            newCandiateWords[index].usedIndex = firstEmptyWordSetIndex;
+            setCandidateWords(newCandiateWords);
+          } else {
+            newWordSet[item.usedIndex] = undefined;
+            setWordSet(newWordSet);
+
+            newCandiateWords[index].usedIndex = -1;
+            setCandidateWords(newCandiateWords);
+          }
+        }}
+      />
+    );
+  };
+
+  const undefinedFilterList = wordSet.filter((v) => v !== undefined);
+
   return (
     <PageWithScrollView
-      backgroundMode="tertiary"
+      backgroundMode="image"
       contentContainerStyle={style.get("flex-grow-1")}
-      style={style.flatten(["padding-x-page"]) as ViewStyle}
+      style={style.flatten(["padding-x-page", "overflow-scroll"]) as ViewStyle}
     >
       <Text
         style={
           style.flatten([
-            "h5",
-            "color-text-middle",
-            "margin-top-32",
-            "margin-bottom-4",
-            "text-center",
+            "h1",
+            "color-white",
+            "margin-y-18",
+            "font-normal",
           ]) as ViewStyle
         }
       >
-        Backup your mnemonic seed securely.
+        Verify your recovery phrase
       </Text>
-      <WordsCard
-        wordSet={wordSet.map((word, i) => {
-          return {
-            word: word ?? "",
-            empty: word === undefined,
-            dashed: i === firstEmptyWordSetIndex,
-          };
-        })}
-      />
-      <View style={style.flatten(["flex-row", "flex-wrap"])}>
-        {candidateWords.map(({ word, usedIndex }, i) => {
-          return (
-            <WordButton
-              key={i.toString()}
-              word={word}
-              used={usedIndex >= 0}
-              onPress={() => {
-                const newWordSet = wordSet.slice();
-                const newCandiateWords = candidateWords.slice();
-                if (usedIndex < 0) {
-                  if (firstEmptyWordSetIndex < 0) {
-                    return;
-                  }
+      <View>
+        <WordsCard
+          wordSet={wordSet.map((word, i) => {
+            return {
+              word: word ?? "",
+              empty: word === undefined,
+              dashed: i === firstEmptyWordSetIndex,
+            };
+          })}
+        />
+        <BipButtons
+          selected={selectedDerivationPath}
+          setIsSelected={setIsSelectedDerivationPath}
+          clearButtonDisable={undefinedFilterList.length === 0}
+          onPressClearButton={() => {
+            const words = newMnemonicConfig.mnemonic.split(" ");
+            const randomSortedWords = words.slice().sort(() => {
+              return Math.random() > 0.5 ? 1 : -1;
+            });
 
-                  newWordSet[firstEmptyWordSetIndex] = word;
-                  setWordSet(newWordSet);
-
-                  newCandiateWords[i].usedIndex = firstEmptyWordSetIndex;
-                  setCandidateWords(newCandiateWords);
-                } else {
-                  newWordSet[usedIndex] = undefined;
-                  setWordSet(newWordSet);
-
-                  newCandiateWords[i].usedIndex = -1;
-                  setCandidateWords(newCandiateWords);
-                }
-              }}
-            />
-          );
-        })}
+            const candidateWords = randomSortedWords.slice();
+            setCandidateWords(
+              candidateWords.map((word) => {
+                return {
+                  word,
+                  usedIndex: -1,
+                };
+              })
+            );
+            setWordSet(
+              words.map((_) => {
+                return undefined;
+              })
+            );
+          }}
+        />
+        <BIP44AdvancedButton
+          bip44Option={bip44Option}
+          selected={selectedDerivationPath}
+        />
       </View>
       <View style={style.flatten(["flex-1"])} />
-      <Button
-        text="Next"
-        size="large"
-        loading={isCreating}
-        disabled={wordSet.join(" ") !== newMnemonicConfig.mnemonic}
-        onPress={async () => {
-          setIsCreating(true);
-          await registerConfig.createMnemonic(
-            newMnemonicConfig.name,
-            newMnemonicConfig.mnemonic,
-            newMnemonicConfig.password,
-            route.params.bip44HDPath
-          );
-          analyticsStore.setUserProperties({
-            registerType: "seed",
-            accountType: "mnemonic",
-          });
-
-          smartNavigation.reset({
-            index: 0,
-            routes: [
-              {
-                name: "Register.End",
-                params: {
-                  password: newMnemonicConfig.password,
-                },
-              },
-            ],
-          });
-        }}
-      />
+      <View>
+        <FlatList
+          data={candidateWords}
+          keyExtractor={(_, index) => index.toString()}
+          renderItem={renderButtonItem}
+          numColumns={4}
+          scrollEnabled={false}
+        />
+        <Button
+          containerStyle={
+            style.flatten(["border-radius-32", "margin-top-24"]) as ViewStyle
+          }
+          text="Continue"
+          size="large"
+          loading={isCreating}
+          disabled={wordSet.join(" ") !== newMnemonicConfig.mnemonic}
+          textStyle={style.flatten(["body2"]) as ViewStyle}
+          onPress={async () => {
+            setIsCreating(true);
+            analyticsStore.logEvent("continue_click", { pageName: "More" });
+            smartNavigation.navigateSmart("Register.CreateAccount", {
+              registerConfig: registerConfig,
+              mnemonic: encodeURIComponent(
+                JSON.stringify(newMnemonicConfig.mnemonic.trim())
+              ),
+              bip44HDPath: bip44Option.bip44HDPath,
+            });
+            setIsCreating(false);
+          }}
+        />
+        {/*naive supreme token farm hand panic ketchup wisdom little choice valid home*/}
+        <View style={style.flatten(["height-page-pad"]) as ViewStyle} />
+      </View>
       {/* Mock element for bottom padding */}
-      <View style={style.flatten(["height-page-pad"]) as ViewStyle} />
     </PageWithScrollView>
   );
 });
@@ -191,22 +218,29 @@ const WordButton: FunctionComponent<{
       style={
         style.flatten(
           [
-            "background-color-blue-400",
-            "padding-x-12",
-            "padding-y-4",
-            "margin-right-12",
-            "margin-bottom-12",
-            "border-radius-8",
+            "padding-y-6",
+            "margin-4",
+            "flex-1",
+            "border-radius-32",
+            "border-width-1",
+            "border-color-white@40%",
           ],
-          [
-            used && "background-color-blue-100",
-            used && "dark:background-color-platinum-300",
-          ]
+          [used && "border-color-white@20%"]
         ) as ViewStyle
       }
       onPress={onPress}
+      rippleColor={"black@50%"}
     >
-      <Text style={style.flatten(["subtitle2", "color-white"])}>{word}</Text>
+      <Text
+        style={
+          style.flatten(
+            ["text-caption2", "color-white", "text-center"],
+            [used && "color-white@20%"]
+          ) as ViewStyle
+        }
+      >
+        {word}
+      </Text>
     </RectButton>
   );
 };
@@ -218,35 +252,24 @@ const WordsCard: FunctionComponent<{
     dashed: boolean;
   }[];
 }> = ({ wordSet }) => {
-  const style = useStyle();
+  const renderItem = ({ item, index }: any) => {
+    return (
+      <WordChip
+        key={index.toString()}
+        word={item.word}
+        empty={item.empty}
+        dashedBorder={item.dashed}
+      />
+    );
+  };
 
   return (
-    <View
-      style={
-        style.flatten([
-          "margin-top-14",
-          "margin-bottom-20",
-          "padding-y-24",
-          "padding-x-28",
-          "background-color-white",
-          "dark:background-color-platinum-700",
-          "border-radius-8",
-          "flex-row",
-          "flex-wrap",
-        ]) as ViewStyle
-      }
-    >
-      {wordSet.map((word, i) => {
-        return (
-          <WordChip
-            key={i.toString()}
-            index={i + 1}
-            word={word.word}
-            empty={word.empty}
-            dashedBorder={word.dashed}
-          />
-        );
-      })}
-    </View>
+    <FlatList
+      data={wordSet}
+      keyExtractor={(_, index) => index.toString()}
+      renderItem={renderItem}
+      numColumns={3}
+      scrollEnabled={false}
+    />
   );
 };

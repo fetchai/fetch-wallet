@@ -23,7 +23,6 @@ export const CardModal: FunctionComponent<{
   showCloseButton = true,
   children,
   childrenContainerStyle,
-  disableGesture = false,
   cardStyle,
   titleStyle,
 }) => {
@@ -40,7 +39,8 @@ export const CardModal: FunctionComponent<{
       }}
       onBackButtonPress={close}
       onBackdropPress={close}
-      animationType="slide"
+      animationIn={"slideInUp"}
+      animationOut={"slideOutDown"}
       animationInTiming={500}
       animationOutTiming={500}
       backdropColor={style.get("color-indigo-backdrop").color}
@@ -56,32 +56,21 @@ export const CardModal: FunctionComponent<{
                 "overflow-hidden",
               ]),
             ]) as ViewStyle,
-            cardStyle,
             {
               maxHeight: windowHeight - 24,
             },
+            cardStyle,
           ]}
         >
-          <View
-            style={style.flatten(["padding-x-10", "margin-y-12"]) as ViewStyle}
-          >
-            <View
-              style={
-                style.flatten(["items-center", "margin-bottom-16"]) as ViewStyle
-              }
-            >
-              {!disableGesture ? (
-                <View style={style.flatten(["margin-top-10"]) as ViewStyle} />
-              ) : null}
-            </View>
-
+          {title || showCloseButton ? (
             <View
               style={
                 style.flatten([
                   "flex-row",
                   "items-center",
                   "justify-between",
-                  "margin-x-10",
+                  "margin-x-28",
+                  "margin-top-24",
                 ]) as ViewStyle
               }
             >
@@ -124,15 +113,17 @@ export const CardModal: FunctionComponent<{
                 </View>
               ) : null}
             </View>
-          </View>
+          ) : null}
           <KeyboardAwareScrollView
             style={StyleSheet.flatten([
-              style.flatten(["padding-x-20", "padding-top-12"]) as ViewStyle,
+              style.flatten(["padding-x-20", "margin-top-24"]) as ViewStyle,
               childrenContainerStyle,
             ])}
           >
             {children}
-            <View style={style.flatten(["height-page-pad"]) as ViewStyle} />
+            <View
+              style={style.flatten(["height-page-double-pad"]) as ViewStyle}
+            />
           </KeyboardAwareScrollView>
         </View>
       </GestureHandlerRootView>

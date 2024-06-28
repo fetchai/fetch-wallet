@@ -11,6 +11,7 @@ import { RouteProp, useRoute } from "@react-navigation/native";
 import { useSmartNavigation } from "navigation/smart-navigation";
 import { parseEthPrivateKey } from "@fetchai/eth-migration";
 import { isPrivateKey } from "utils/format/format";
+import { useStore } from "stores/index";
 
 interface FormData {
   ethAddress: string;
@@ -35,6 +36,7 @@ export const MigrateETHScreen: FunctionComponent = observer(() => {
   const style = useStyle();
 
   const smartNavigation = useSmartNavigation();
+  const { analyticsStore } = useStore();
 
   const {
     control,
@@ -44,7 +46,6 @@ export const MigrateETHScreen: FunctionComponent = observer(() => {
   } = useForm<FormData>();
 
   const submit = handleSubmit(() => {
-    console.log(getValues("ethAddress"));
     smartNavigation.navigateSmart("Register.CreateAccount", {
       registerConfig: registerConfig,
       mnemonic: encodeURIComponent(
@@ -89,7 +90,7 @@ export const MigrateETHScreen: FunctionComponent = observer(() => {
     <PageWithScrollView
       backgroundMode="image"
       contentContainerStyle={style.get("flex-grow-1")}
-      style={style.flatten(["padding-x-page"]) as ViewStyle}
+      style={style.flatten(["padding-x-page", "overflow-scroll"]) as ViewStyle}
     >
       <Text style={style.flatten(["color-white", "h2"]) as ViewStyle}>
         Migrate from ETH
@@ -103,9 +104,7 @@ export const MigrateETHScreen: FunctionComponent = observer(() => {
           return (
             <InputCardView
               label="Ethereum Address"
-              containerStyle={
-                style.flatten(["margin-bottom-4", "margin-top-18"]) as ViewStyle
-              }
+              containerStyle={style.flatten(["margin-top-18"]) as ViewStyle}
               error={errors.ethAddress?.message}
               onBlur={onBlur}
               onChangeText={onChange}
@@ -132,9 +131,7 @@ export const MigrateETHScreen: FunctionComponent = observer(() => {
           return (
             <InputCardView
               label="Private Key"
-              containerStyle={
-                style.flatten(["margin-bottom-4", "margin-top-18"]) as ViewStyle
-              }
+              containerStyle={style.flatten(["margin-top-18"]) as ViewStyle}
               error={errors.ethPrivateKey?.message}
               onBlur={onBlur}
               onChangeText={onChange}
@@ -169,6 +166,7 @@ export const MigrateETHScreen: FunctionComponent = observer(() => {
         rippleColor="black@10%"
         onPress={() => {
           submit();
+          analyticsStore.logEvent("next_click", { pageName: "Register" });
         }}
       />
     </PageWithScrollView>

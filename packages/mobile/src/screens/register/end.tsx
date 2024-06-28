@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { PageWithView } from "components/page";
 import { useStyle } from "styles/index";
-import { View, Text, ViewStyle, Image } from "react-native";
+import { Text, View, ViewStyle } from "react-native";
 import { Button } from "components/button";
 import { useSmartNavigation } from "navigation/smart-navigation";
 import { RouteProp, useRoute } from "@react-navigation/native";
@@ -9,9 +9,11 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "stores/index";
 import { Toggle } from "components/toggle";
 import delay from "delay";
+import { LinearGradientText } from "components/svg/linear-gradient-text";
+import { RocketIcon } from "components/new/icon/rocket";
 
 export const RegisterEndScreen: FunctionComponent = observer(() => {
-  const { keychainStore, keyRingStore } = useStore();
+  const { keychainStore, keyRingStore, analyticsStore } = useStore();
 
   const style = useStyle();
 
@@ -43,30 +45,20 @@ export const RegisterEndScreen: FunctionComponent = observer(() => {
 
   return (
     <PageWithView
-      backgroundMode="gradient"
+      backgroundMode="image"
+      isTransparentHeader={true}
+      backgroundBlur={true}
       style={style.flatten(["padding-x-20"]) as ViewStyle}
     >
       <View style={style.get("flex-8")} />
       <View style={style.flatten(["items-center"])}>
-        {style.theme === "dark" ? (
-          <Image
-            style={{ width: 400, height: 260, marginRight: -80 }}
-            source={require("assets/image/wallet.png")}
-            fadeDuration={0}
-            resizeMode="stretch"
-          />
-        ) : (
-          <Image
-            style={{ width: 400, height: 260, marginRight: -80 }}
-            source={require("assets/image/all-set.png")}
-            fadeDuration={0}
-            resizeMode="contain"
-          />
-        )}
+        <RocketIcon />
 
-        <Text style={style.flatten(["h2", "color-text-middle"]) as ViewStyle}>
-          You’re all set!
-        </Text>
+        <LinearGradientText
+          text="You’re all set!"
+          color1="#CF447B"
+          color2="#F9774B"
+        />
         <Text
           style={
             style.flatten([
@@ -90,7 +82,9 @@ export const RegisterEndScreen: FunctionComponent = observer(() => {
             ]) as ViewStyle
           }
         >
-          <Text style={style.flatten(["subtitle1", "color-text-middle"])}>
+          <Text
+            style={style.flatten(["subtitle1", "color-text-low"]) as ViewStyle}
+          >
             Enable Biometric
           </Text>
           <View style={style.get("flex-1")} />
@@ -103,29 +97,39 @@ export const RegisterEndScreen: FunctionComponent = observer(() => {
       <View style={style.get("flex-8")} />
       <Button
         containerStyle={
-          style.flatten(["margin-top-44", "margin-bottom-20"]) as ViewStyle
+          style.flatten([
+            "margin-top-44",
+            "margin-bottom-20",
+            "background-color-white",
+            "border-radius-32",
+          ]) as ViewStyle
         }
+        textStyle={{
+          color: "#0B1742",
+        }}
         size="large"
-        text="Continue"
+        text="Start using your wallet"
         loading={isLoading}
         onPress={async () => {
           setIsLoading(true);
           try {
-            // Because javascript is synchronous language, the loading state change would not be delivered to the UI thread
+            // Because javascript is synchronous language, the loadnig state change would not delivered to the UI thread
             // So to make sure that the loading state changes, just wait very short time.
             await delay(10);
 
             if (password && isBiometricOn) {
-              keychainStore.turnOnBiometry(password);
+              await keychainStore.turnOnBiometry(password);
             }
 
-            // Definitely, the last key is the newest keyring.
+            // Definetly, the last key is newest keyring.
             if (keyRingStore.multiKeyStoreInfo.length > 0) {
-              keyRingStore.changeKeyRing(
+              await keyRingStore.changeKeyRing(
                 keyRingStore.multiKeyStoreInfo.length - 1
               );
             }
-
+            analyticsStore.logEvent("start_using_your_wallet_click", {
+              pageName: "Register",
+            });
             smartNavigation.reset({
               index: 0,
               routes: [

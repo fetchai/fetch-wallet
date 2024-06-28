@@ -2,7 +2,6 @@ import React, { FunctionComponent } from "react";
 import { StoreProvider } from "./stores";
 import { StyleProvider } from "./styles";
 import { IntlProvider } from "react-intl";
-import { ModalsProvider } from "modals/base";
 import { Platform, StatusBar, View } from "react-native";
 
 import codePush from "react-native-code-push";
@@ -10,7 +9,6 @@ import { InteractionModalsProivder } from "providers/interaction-modals-provider
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { LoadingScreenProvider } from "providers/loading-screen";
 import * as SplashScreen from "expo-splash-screen";
-import { ConfirmModalProvider } from "providers/confirm-modal";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Toast, { BaseToast, ErrorToast } from "react-native-toast-message";
 import { BaseToastProps } from "react-native-toast-message/lib/src/types";
@@ -87,6 +85,7 @@ const toastConfig = {
       {...props}
       text1NumberOfLines={2}
       text2NumberOfLines={2}
+      style={{ borderLeftColor: "#69C779" }}
       renderTrailingIcon={() => (
         <View
           style={{
@@ -152,15 +151,11 @@ const AppBody: FunctionComponent = () => {
           >
             <ThemeStatusBar />
             <SafeAreaProvider>
-              <ModalsProvider>
-                <LoadingScreenProvider>
-                  <ConfirmModalProvider>
-                    <InteractionModalsProivder>
-                      <AppNavigation />
-                    </InteractionModalsProivder>
-                  </ConfirmModalProvider>
-                </LoadingScreenProvider>
-              </ModalsProvider>
+              <LoadingScreenProvider>
+                <InteractionModalsProivder>
+                  <AppNavigation />
+                </InteractionModalsProivder>
+              </LoadingScreenProvider>
             </SafeAreaProvider>
           </IntlProvider>
         </StoreProvider>

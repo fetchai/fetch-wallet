@@ -14,13 +14,7 @@ export const EmptyView: FunctionComponent<{
     <View
       style={
         [
-          style.flatten([
-            "items-center",
-            "absolute",
-            "height-full",
-            "width-full",
-            "justify-center",
-          ]),
+          style.flatten(["items-center", "justify-center"]),
           containerStyle,
         ] as ViewStyle
       }

@@ -13,7 +13,6 @@ import {
   useDrawerStatus,
 } from "@react-navigation/drawer";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { HomeSelectIcon } from "components/new/icon/file-icon";
 import { UpDownArrowIcon } from "components/new/icon/up-down-arrow";
 import { ClockIcon } from "components/new/icon/clock-icon";
 import { MoreIcon } from "components/new/icon/more-icon";
@@ -28,18 +27,18 @@ import {
   QuickTabOptionModel,
   QuickTabOptions,
 } from "components/new/quick-tab-card/quick-tab-card";
-import { MoreNavigation } from "./more-navigation";
 import Toast from "react-native-toast-message";
 import { StakeIcon } from "components/new/icon/stake-icon";
-import { HomeUnselectIcon } from "components/new/icon/home-unselect";
+import { StakingDashboardScreen } from "screens/stake";
+import { HomeIcon } from "components/new/icon/home-icon";
 import { ActivityScreen } from "screens/activity";
-import { StakeSection } from "screens/stake/stake-coming-soon-section";
+import { SettingScreen } from "screens/setting";
 
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
 export const MainTabNavigation: FunctionComponent = () => {
   const style = useStyle();
-  const { chainStore } = useStore();
+  const { chainStore, analyticsStore } = useStore();
   const chainId = chainStore.current.chainId;
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
 
@@ -55,6 +54,25 @@ export const MainTabNavigation: FunctionComponent = () => {
     if (focusedScreen.name !== "Home" && isDrawerOpen) {
       navigation.dispatch(DrawerActions.toggleDrawer());
     }
+
+    switch (focusedScreen.name) {
+      case "Home":
+        analyticsStore.logEvent("home_tab_click");
+        break;
+
+      case "StakeTab":
+        analyticsStore.logEvent("stake_tab_click");
+        break;
+
+      case "ActivityTab":
+        analyticsStore.logEvent("activity_tab_click");
+        break;
+
+      case "MoreTab":
+        analyticsStore.logEvent("more_tab_click");
+        break;
+    }
+
     BackHandler.addEventListener("hardwareBackPress", handleBackButton);
     return () => {
       BackHandler.removeEventListener("hardwareBackPress", handleBackButton);
@@ -64,9 +82,9 @@ export const MainTabNavigation: FunctionComponent = () => {
   const handleBackButton = () => {
     if (
       focusedScreen.name === "Home" ||
-      focusedScreen.name === "Stake" ||
+      focusedScreen.name === "StakeTab" ||
       focusedScreen.name === "ActivityTab" ||
-      focusedScreen.name === "Setting"
+      focusedScreen.name === "MoreTab"
     ) {
       if (backClickCountRef.current == 1) {
         BackHandler.exitApp();
@@ -106,7 +124,7 @@ export const MainTabNavigation: FunctionComponent = () => {
               case "HomeTab":
                 return (
                   <IconButton
-                    icon={focused ? <HomeSelectIcon /> : <HomeUnselectIcon />}
+                    icon={<HomeIcon isSelected={focused} />}
                     bottomText={screenNames.Home}
                     backgroundBlur={focused}
                     borderRadius={32}
@@ -125,10 +143,16 @@ export const MainTabNavigation: FunctionComponent = () => {
                     containerStyle={style.flatten(["items-center"])}
                   />
                 );
-              case "Stake":
+              case "StakeTab":
                 return (
                   <IconButton
-                    icon={<StakeIcon color={focused ? "white" : "#FFFFFF90"} />}
+                    icon={
+                      focused ? (
+                        <StakeIcon isSelected={true} />
+                      ) : (
+                        <StakeIcon color={"#FFFFFF90"} />
+                      )
+                    }
                     bottomText={screenNames.Stake}
                     borderRadius={32}
                     backgroundBlur={focused}
@@ -153,7 +177,10 @@ export const MainTabNavigation: FunctionComponent = () => {
                     icon={<UpDownArrowIcon />}
                     borderRadius={64}
                     backgroundBlur={false}
-                    onPress={() => setQuickOptionEnable(true)}
+                    onPress={() => {
+                      setQuickOptionEnable(true);
+                      analyticsStore.logEvent("fund_transfer_tab_click");
+                    }}
                     iconStyle={
                       style.flatten([
                         "padding-16",
@@ -170,7 +197,13 @@ export const MainTabNavigation: FunctionComponent = () => {
               case "ActivityTab":
                 return (
                   <IconButton
-                    icon={<ClockIcon color={focused ? "white" : "#FFFFFF90"} />}
+                    icon={
+                      focused ? (
+                        <ClockIcon isSelected={true} />
+                      ) : (
+                        <ClockIcon color={"#FFFFFF90"} />
+                      )
+                    }
                     bottomText={screenNames.Activity}
                     borderRadius={32}
                     backgroundBlur={focused}
@@ -227,9 +260,7 @@ export const MainTabNavigation: FunctionComponent = () => {
               <BorderlessButton
                 {...props}
                 activeOpacity={1}
-                rippleColor={
-                  style.get("color-rect-button-default-ripple").color
-                }
+                rippleColor={style.get("color-transparent").color}
                 style={{
                   height: "100%",
                   aspectRatio: 1.9,
@@ -256,10 +287,10 @@ export const MainTabNavigation: FunctionComponent = () => {
         )}
       >
         <Tab.Screen name="HomeTab" component={HomeNavigation} />
-        <Tab.Screen name="Stake" component={StakeSection} />
+        <Tab.Screen name="StakeTab" component={StakingDashboardScreen} />
         <Tab.Screen name="InboxTab" component={HomeNavigation} />
         <Tab.Screen name="ActivityTab" component={ActivityScreen} />
-        <Tab.Screen name="MoreTab" component={MoreNavigation} />
+        <Tab.Screen name="MoreTab" component={SettingScreen} />
       </Tab.Navigator>
       <QuickTabOptionModel
         isOpen={isQuickOptionEnable}
@@ -276,17 +307,14 @@ export const MainTabNavigation: FunctionComponent = () => {
 
             case QuickTabOptions.send:
               return navigation.navigate("Others", {
-                screen: "SendNew",
+                screen: "Send",
                 params: {
                   currency: chainStore.current.stakeCurrency.coinMinimalDenom,
                 },
               });
 
-            // case QuickTabOptions.earn:
-            //   return;
-
             case QuickTabOptions.bridge:
-              return;
+              break;
           }
         }}
       />

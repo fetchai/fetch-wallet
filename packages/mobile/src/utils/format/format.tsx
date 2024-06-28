@@ -2,7 +2,9 @@ import { Buffer } from "buffer/";
 import { AGENT_ADDRESS } from "../../config";
 
 export const separateNumericAndDenom = (value: any) => {
-  const [numericPart, denomPart] = value ? value.split(" ") : ["", ""];
+  const data = value ? value.split(" ") : ["", ""];
+  const numericPart = data[0].replace(/,/g, "");
+  const denomPart = data[1];
   return { numericPart, denomPart };
 };
 
@@ -92,4 +94,10 @@ export const shortenNumber = (value: string, decimal = 18) => {
     result = number.toFixed(2) + " ";
   }
   return result;
+};
+
+export const FormatNumberWithCommas = (value: number) => {
+  return Intl.NumberFormat("en-US", {
+    maximumSignificantDigits: value.toString().length,
+  }).format(value);
 };

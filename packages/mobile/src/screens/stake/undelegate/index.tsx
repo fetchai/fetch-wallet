@@ -1,18 +1,29 @@
-import React, { FunctionComponent, useEffect } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { RouteProp, useRoute } from "@react-navigation/native";
+import {
+  NavigationProp,
+  ParamListBase,
+  RouteProp,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
 import { useStore } from "stores/index";
 import { useStyle } from "styles/index";
 import { useUndelegateTxConfig } from "@keplr-wallet/hooks";
 import { PageWithScrollView } from "components/page";
-import { AmountInput, FeeButtons, MemoInput } from "components/input";
 import { Text, View, ViewStyle } from "react-native";
 import { Button } from "components/button";
-import { Card, CardBody, CardDivider } from "components/card";
 import { Staking } from "@keplr-wallet/stores";
-import { ValidatorThumbnail } from "components/thumbnail";
 import { Buffer } from "buffer/";
 import { useSmartNavigation } from "navigation/smart-navigation";
+import { StakeAmountInput } from "components/new/input/stake-amount";
+import { UseMaxButton } from "components/new/button/use-max-button";
+import { MemoInputView } from "components/new/card-view/memo-input";
+import { CircleExclamationIcon } from "components/new/icon/circle-exclamation";
+import { TransactionModal } from "modals/transaction";
+import { IconButton } from "components/new/button/icon";
+import { GearIcon } from "components/new/icon/gear-icon";
+import { TransectionFreeModel } from "components/new/fee-modal/transection-fee-modal";
 
 export const UndelegateScreen: FunctionComponent = observer(() => {
   const route = useRoute<
@@ -29,13 +40,22 @@ export const UndelegateScreen: FunctionComponent = observer(() => {
 
   const validatorAddress = route.params.validatorAddress;
 
-  const { chainStore, accountStore, queriesStore, analyticsStore } = useStore();
+  const { chainStore, accountStore, queriesStore, analyticsStore, priceStore } =
+    useStore();
 
   const style = useStyle();
   const smartNavigation = useSmartNavigation();
+  const navigation = useNavigation<NavigationProp<ParamListBase>>();
 
   const account = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
+
+  const [isToggleClicked, setIsToggleClicked] = useState<boolean>(false);
+
+  const [inputInUsd, setInputInUsd] = useState<string | undefined>("");
+  const [showTransectionModal, setTransectionModal] = useState(false);
+  const [txnHash, setTxnHash] = useState<string>("");
+  const [showFeeModal, setFeeModal] = useState(false);
 
   const validator =
     queries.cosmos.queryValidators
@@ -47,18 +67,6 @@ export const UndelegateScreen: FunctionComponent = observer(() => {
     queries.cosmos.queryValidators
       .getQueryStatus(Staking.BondStatus.Unbonded)
       .getValidator(validatorAddress);
-
-  const validatorThumbnail = validator
-    ? queries.cosmos.queryValidators
-        .getQueryStatus(Staking.BondStatus.Bonded)
-        .getValidatorThumbnail(validatorAddress) ||
-      queries.cosmos.queryValidators
-        .getQueryStatus(Staking.BondStatus.Unbonding)
-        .getValidatorThumbnail(validatorAddress) ||
-      queries.cosmos.queryValidators
-        .getQueryStatus(Staking.BondStatus.Unbonded)
-        .getValidatorThumbnail(validatorAddress)
-    : undefined;
 
   const staked = queries.cosmos.queryDelegations
     .getQueryBech32Address(account.bech32Address)
@@ -85,119 +93,239 @@ export const UndelegateScreen: FunctionComponent = observer(() => {
     sendConfigs.feeConfig.error;
   const txStateIsValid = sendConfigError == null;
 
+  const convertToUsd = (currency: any) => {
+    const value = priceStore.calculatePrice(currency);
+    return value && value.shrink(true).maxDecimals(6).toString();
+  };
+  useEffect(() => {
+    const inputValueInUsd = convertToUsd(staked);
+    setInputInUsd(inputValueInUsd);
+  }, [sendConfigs.amountConfig.amount]);
+
+  const Usd = inputInUsd
+    ? ` (${inputInUsd} ${priceStore.defaultVsCurrency.toUpperCase()})`
+    : "";
+
+  const availableBalance = `${staked
+    .trim(true)
+    .shrink(true)
+    .maxDecimals(6)
+    .toString()}${Usd}`;
+
+  const isEvm = chainStore.current.features?.includes("evm") ?? false;
+  const feePrice = sendConfigs.feeConfig.getFeeTypePretty(
+    sendConfigs.feeConfig.feeType ? sendConfigs.feeConfig.feeType : "average"
+  );
+
+  const unstakeBalance = async () => {
+    if (account.isReadyToSendTx && txStateIsValid) {
+      try {
+        analyticsStore.logEvent("unstake_txn_click", {
+          pageName: "Stake Validator",
+        });
+        await account.cosmos.sendUndelegateMsg(
+          sendConfigs.amountConfig.amount,
+          sendConfigs.recipientConfig.recipient,
+          sendConfigs.memoConfig.memo,
+          sendConfigs.feeConfig.toStdFee(),
+          {
+            preferNoSetMemo: true,
+            preferNoSetFee: true,
+          },
+          {
+            onBroadcasted: (txHash) => {
+              analyticsStore.logEvent("unstake_txn_broadcasted", {
+                chainId: chainStore.current.chainId,
+                chainName: chainStore.current.chainName,
+                validatorName: validator?.description.moniker,
+                feeType: sendConfigs.feeConfig.feeType,
+              });
+              setTxnHash(Buffer.from(txHash).toString("hex"));
+              setTransectionModal(true);
+            },
+          }
+        );
+      } catch (e) {
+        if (e?.message === "Request rejected") {
+          return;
+        }
+        console.log(e);
+        analyticsStore.logEvent("unstake_txn_broadcasted_fail", {
+          chainId: chainStore.current.chainId,
+          chainName: chainStore.current.chainName,
+          feeType: sendConfigs.feeConfig.feeType,
+          message: e?.message ?? "",
+        });
+        smartNavigation.navigateSmart("Home", {});
+      }
+    }
+  };
+
   return (
     <PageWithScrollView
-      backgroundMode="tertiary"
-      style={style.flatten(["padding-x-page"]) as ViewStyle}
+      backgroundMode="image"
+      style={style.flatten(["padding-x-page", "overflow-scroll"]) as ViewStyle}
       contentContainerStyle={style.get("flex-grow-1")}
     >
-      <View style={style.flatten(["height-page-pad"]) as ViewStyle} />
-      <Card
+      <View
+        style={
+          [
+            style.flatten([
+              "flex-row",
+              "items-center",
+              "border-width-1",
+              "border-color-white@20%",
+              "border-radius-12",
+              "padding-12",
+              "justify-between",
+              "margin-y-16",
+            ]),
+          ] as ViewStyle
+        }
+      >
+        <Text style={style.flatten(["body3", "color-white@60%"]) as ViewStyle}>
+          Current staked amount
+        </Text>
+        <Text style={style.flatten(["subtitle3", "color-white"]) as ViewStyle}>
+          {staked.trim(true).shrink(true).maxDecimals(6).toString()}
+        </Text>
+      </View>
+      <StakeAmountInput
+        label="Amount"
+        labelStyle={
+          style.flatten([
+            "body3",
+            "color-white@60%",
+            "padding-y-0",
+            "margin-y-0",
+            "margin-bottom-8",
+          ]) as ViewStyle
+        }
+        amountConfig={sendConfigs.amountConfig}
+        isToggleClicked={isToggleClicked}
+      />
+      <Text
         style={
           style.flatten([
-            "margin-bottom-12",
-            "border-radius-8",
-            "dark:background-color-platinum-500",
+            "color-white@60%",
+            "text-caption2",
+            "margin-top-8",
+          ]) as ViewStyle
+        }
+      >{`Available: ${availableBalance}`}</Text>
+      <UseMaxButton
+        amountConfig={sendConfigs.amountConfig}
+        isToggleClicked={isToggleClicked}
+        setIsToggleClicked={setIsToggleClicked}
+      />
+      <MemoInputView
+        label="Memo"
+        labelStyle={
+          style.flatten([
+            "body3",
+            "color-white@60%",
+            "padding-y-0",
+            "margin-y-0",
+            "margin-bottom-8",
+          ]) as ViewStyle
+        }
+        memoConfig={sendConfigs.memoConfig}
+      />
+      <View
+        style={
+          style.flatten([
+            "margin-y-16",
+            "padding-12",
+            "background-color-cardColor@25%",
+            "flex-row",
+            "border-radius-12",
           ]) as ViewStyle
         }
       >
-        <CardBody>
-          <View style={style.flatten(["flex-row", "items-center"])}>
-            <ValidatorThumbnail
-              style={style.flatten(["margin-right-12"]) as ViewStyle}
-              size={36}
-              url={validatorThumbnail}
-            />
-            <Text style={style.flatten(["h6", "color-text-high"])}>
-              {validator ? validator.description.moniker : "..."}
-            </Text>
-          </View>
-          <CardDivider
+        <View
+          style={
+            [style.flatten(["margin-top-4", "margin-right-10"])] as ViewStyle
+          }
+        >
+          <CircleExclamationIcon />
+        </View>
+        <Text
+          style={style.flatten(["body3", "color-white", "flex-1"]) as ViewStyle}
+        >
+          Your tokens will go through a 21-day unstaking process
+        </Text>
+      </View>
+      <View style={style.flatten(["flex-1"])} />
+      <View
+        style={
+          style.flatten([
+            "flex-row",
+            "justify-between",
+            "items-center",
+            "margin-y-12",
+          ]) as ViewStyle
+        }
+      >
+        <Text style={style.flatten(["body3", "color-white@60%"]) as ViewStyle}>
+          Transaction fee:
+        </Text>
+        <View style={style.flatten(["flex-row", "items-center"]) as ViewStyle}>
+          <Text
             style={
               style.flatten([
-                "margin-x-0",
-                "margin-top-8",
-                "margin-bottom-15",
+                "body3",
+                "color-white",
+                "margin-right-6",
               ]) as ViewStyle
             }
+          >
+            {feePrice.hideIBCMetadata(true).trim(true).toMetricPrefix(isEvm)}
+          </Text>
+          <IconButton
+            backgroundBlur={false}
+            icon={<GearIcon />}
+            iconStyle={
+              style.flatten([
+                "width-32",
+                "height-32",
+                "items-center",
+                "justify-center",
+                "border-width-1",
+                "border-color-white@40%",
+              ]) as ViewStyle
+            }
+            onPress={() => setFeeModal(true)}
           />
-          <View style={style.flatten(["flex-row", "items-center"])}>
-            <Text style={style.flatten(["subtitle2", "color-text-middle"])}>
-              Staked
-            </Text>
-            <View style={style.get("flex-1")} />
-            <Text style={style.flatten(["body2", "color-text-middle"])}>
-              {staked.trim(true).shrink(true).maxDecimals(6).toString()}
-            </Text>
-          </View>
-        </CardBody>
-      </Card>
-      {/*
-        // The recipient validator is selected by the route params, so no need to show the address input.
-        <AddressInput
-          label="Recipient"
-          recipientConfig={sendConfigs.recipientConfig}
-        />
-      */}
-      {/*
-      Undelegate tx only can be sent with just stake currency. So, it is not needed to show the currency selector because the stake currency is one.
-      <CurrencySelector
-        label="Token"
-        placeHolder="Select Token"
-        amountConfig={sendConfigs.amountConfig}
+        </View>
+      </View>
+      <Button
+        text="Confirm"
+        disabled={!account.isReadyToSendTx || !txStateIsValid}
+        loading={account.txTypeInProgress === "undelegate"}
+        containerStyle={
+          style.flatten(["margin-top-16", "border-radius-32"]) as ViewStyle
+        }
+        onPress={unstakeBalance}
       />
-      */}
-      <AmountInput label="Amount" amountConfig={sendConfigs.amountConfig} />
-      <MemoInput label="Memo (Optional)" memoConfig={sendConfigs.memoConfig} />
-      <FeeButtons
-        label="Fee"
-        gasLabel="gas"
+      <View style={style.flatten(["height-page-pad"]) as ViewStyle} />
+      <TransactionModal
+        isOpen={showTransectionModal}
+        close={() => {
+          setTransectionModal(false);
+        }}
+        txnHash={txnHash}
+        chainId={chainStore.current.chainId}
+        buttonText="Go to stakescreen"
+        onHomeClick={() => navigation.navigate("StakeTab", {})}
+        onTryAgainClick={unstakeBalance}
+      />
+      <TransectionFreeModel
+        isOpen={showFeeModal}
+        close={() => setFeeModal(false)}
+        title={"Transaction fee"}
         feeConfig={sendConfigs.feeConfig}
         gasConfig={sendConfigs.gasConfig}
       />
-      <View style={style.flatten(["flex-1"])} />
-      <Button
-        text="Unstake"
-        size="large"
-        disabled={!account.isReadyToSendTx || !txStateIsValid}
-        loading={account.txTypeInProgress === "undelegate"}
-        onPress={async () => {
-          if (account.isReadyToSendTx && txStateIsValid) {
-            try {
-              await account.cosmos.sendUndelegateMsg(
-                sendConfigs.amountConfig.amount,
-                sendConfigs.recipientConfig.recipient,
-                sendConfigs.memoConfig.memo,
-                sendConfigs.feeConfig.toStdFee(),
-                {
-                  preferNoSetMemo: true,
-                  preferNoSetFee: true,
-                },
-                {
-                  onBroadcasted: (txHash) => {
-                    analyticsStore.logEvent("Undelegate tx broadcasted", {
-                      chainId: chainStore.current.chainId,
-                      chainName: chainStore.current.chainName,
-                      validatorName: validator?.description.moniker,
-                      feeType: sendConfigs.feeConfig.feeType,
-                    });
-                    smartNavigation.pushSmart("TxPendingResult", {
-                      txHash: Buffer.from(txHash).toString("hex"),
-                    });
-                  },
-                }
-              );
-            } catch (e) {
-              if (e?.message === "Request rejected") {
-                return;
-              }
-              console.log(e);
-              smartNavigation.navigateSmart("Home", {});
-            }
-          }
-        }}
-      />
-      <View style={style.flatten(["height-page-pad"]) as ViewStyle} />
     </PageWithScrollView>
   );
 });

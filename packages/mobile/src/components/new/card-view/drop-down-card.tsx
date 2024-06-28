@@ -2,13 +2,14 @@ import React, { FunctionComponent } from "react";
 import { Text, TouchableOpacity, View, ViewStyle } from "react-native";
 import { useStyle } from "styles/index";
 import { BlurBackground } from "components/new/blur-background/blur-background";
-import { IconButton } from "components/new/button/icon";
 
 export const DropDownCardView: FunctionComponent<{
   trailingIcon?: any;
   mainHeading?: string;
   heading?: string;
   subHeading?: string;
+  headingrStyle?: ViewStyle;
+  mainHeadingrStyle?: ViewStyle;
   containerStyle?: ViewStyle;
   onPress?: () => void;
 }> = ({
@@ -17,6 +18,8 @@ export const DropDownCardView: FunctionComponent<{
   heading,
   subHeading,
   containerStyle,
+  headingrStyle,
+  mainHeadingrStyle,
   onPress,
 }) => {
   const style = useStyle();
@@ -26,12 +29,10 @@ export const DropDownCardView: FunctionComponent<{
       {mainHeading ? (
         <Text
           style={
-            style.flatten([
-              "text-button3",
-              "padding-4",
-              "margin-y-8",
-              "color-gray-200",
-            ]) as ViewStyle
+            [
+              style.flatten(["text-button3", "margin-y-8", "color-white@60%"]),
+              mainHeadingrStyle,
+            ] as ViewStyle
           }
         >
           {mainHeading}
@@ -42,12 +43,14 @@ export const DropDownCardView: FunctionComponent<{
         blurIntensity={16}
         containerStyle={
           [
-            style.flatten([
-              "flex-row",
-              "padding-x-18",
-              "padding-y-12",
-              "items-center",
-            ]),
+            [
+              style.flatten([
+                "flex-row",
+                "padding-x-18",
+                "padding-y-12",
+                "items-center",
+              ]),
+            ],
             containerStyle,
           ] as ViewStyle
         }
@@ -55,13 +58,14 @@ export const DropDownCardView: FunctionComponent<{
         <View style={style.flatten(["flex-3"]) as ViewStyle}>
           {heading ? (
             <Text
-              style={
+              style={[
                 style.flatten([
                   "body2",
                   "padding-bottom-2",
                   "color-white",
-                ]) as ViewStyle
-              }
+                ]) as ViewStyle,
+                headingrStyle,
+              ]}
             >
               {heading}
             </Text>
@@ -80,7 +84,7 @@ export const DropDownCardView: FunctionComponent<{
             </Text>
           ) : null}
         </View>
-        <IconButton backgroundBlur={false} icon={trailingIcon} />
+        {trailingIcon}
       </BlurBackground>
     </TouchableOpacity>
   );

@@ -182,6 +182,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://lcd-secret.keplr.app",
     chainId: "secret-4",
     chainName: "Secret Network",
+    hideInUI: true,
     stakeCurrency: {
       coinDenom: "SCRT",
       coinMinimalDenom: "uscrt",
@@ -238,6 +239,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://lcd-akash.keplr.app",
     chainId: "akashnet-2",
     chainName: "Akash",
+    hideInUI: true,
     stakeCurrency: {
       coinDenom: "AKT",
       coinMinimalDenom: "uakt",
@@ -283,6 +285,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://lcd-mars.keplr.app",
     chainId: "mars-1",
     chainName: "Mars Hub",
+    hideInUI: true,
     stakeCurrency: {
       coinDenom: "MARS",
       coinMinimalDenom: "umars",
@@ -331,6 +334,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://lcd-crypto-org.keplr.app",
     chainId: "crypto-org-chain-mainnet-1",
     chainName: "Crypto.org",
+    hideInUI: true,
     stakeCurrency: {
       coinDenom: "CRO",
       coinMinimalDenom: "basecro",
@@ -391,6 +395,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://lcd-iov.keplr.app",
     chainId: "iov-mainnet-ibc",
     chainName: "Starname",
+    hideInUI: true,
     stakeCurrency: {
       coinDenom: "IOV",
       coinMinimalDenom: "uiov",
@@ -442,6 +447,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://lcd-sifchain.keplr.app",
     chainId: "sifchain-1",
     chainName: "Sifchain",
+    hideInUI: true,
     stakeCurrency: {
       coinDenom: "ROWAN",
       coinMinimalDenom: "rowan",
@@ -913,6 +919,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://lcd-certik.keplr.app",
     chainId: "shentu-2.2",
     chainName: "Shentu",
+    hideInUI: true,
     stakeCurrency: {
       coinDenom: "CTK",
       coinMinimalDenom: "uctk",
@@ -954,6 +961,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://lcd-iris.keplr.app",
     chainId: "irishub-1",
     chainName: "IRISnet",
+    hideInUI: true,
     stakeCurrency: {
       coinDenom: "IRIS",
       coinMinimalDenom: "uiris",
@@ -1016,6 +1024,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://lcd-regen.keplr.app",
     chainId: "regen-1",
     chainName: "Regen",
+    hideInUI: true,
     stakeCurrency: {
       coinDenom: "REGEN",
       coinMinimalDenom: "uregen",
@@ -1061,6 +1070,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://lcd-persistence.keplr.app",
     chainId: "core-1",
     chainName: "Persistence",
+    hideInUI: true,
     stakeCurrency: {
       coinDenom: "XPRT",
       coinMinimalDenom: "uxprt",
@@ -1119,6 +1129,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://lcd-sentinel.keplr.app",
     chainId: "sentinelhub-2",
     chainName: "Sentinel",
+    hideInUI: true,
     stakeCurrency: {
       coinDenom: "DVPN",
       coinMinimalDenom: "udvpn",
@@ -1170,6 +1181,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://lcd-ixo.keplr.app",
     chainId: "ixo-4",
     chainName: "ixo",
+    hideInUI: true,
     stakeCurrency: {
       coinDenom: "IXO",
       coinMinimalDenom: "uixo",
@@ -1204,135 +1216,12 @@ export const EmbedChainInfos: ChainInfo[] = [
     chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ixo.png",
     features: ["ibc-transfer"],
   },
-  // {
-  //   rpc: "https://rpc-emoney.keplr.app",
-  //   rest: "https://lcd-emoney.keplr.app",
-  //   chainId: "emoney-3",
-  //   chainName: "e-Money",
-  //   stakeCurrency: {
-  //     coinDenom: "NGM",
-  //     coinMinimalDenom: "ungm",
-  //     coinDecimals: 6,
-  //     coinGeckoId: "e-money",
-  //   },
-  //   walletUrl:
-  //     process.env["NODE_ENV"] === "production"
-  //       ? "https://wallet.keplr.app/chains/e-money"
-  //       : "http://localhost:8080/chains/e-money",
-  //   walletUrlForStaking:
-  //     process.env["NODE_ENV"] === "production"
-  //       ? "https://wallet.keplr.app/chains/e-money"
-  //       : "http://localhost:8080/chains/e-money",
-  //   bip44: {
-  //     coinType: 118,
-  //   },
-  //   bech32Config: Bech32Address.defaultBech32Config("emoney"),
-  //   currencies: [
-  //     {
-  //       coinDenom: "NGM",
-  //       coinMinimalDenom: "ungm",
-  //       coinDecimals: 6,
-  //       coinGeckoId: "e-money",
-  //     },
-  //     {
-  //       coinDenom: "EEUR",
-  //       coinMinimalDenom: "eeur",
-  //       coinDecimals: 6,
-  //       coinGeckoId: "e-money-eur",
-  //     },
-  //     {
-  //       coinDenom: "EDKK",
-  //       coinMinimalDenom: "edkk",
-  //       coinDecimals: 6,
-  //     },
-  //     {
-  //       coinDenom: "ESEK",
-  //       coinMinimalDenom: "esek",
-  //       coinDecimals: 6,
-  //     },
-  //     {
-  //       coinDenom: "ENOK",
-  //       coinMinimalDenom: "enok",
-  //       coinDecimals: 6,
-  //     },
-  //     {
-  //       coinDenom: "ECHF",
-  //       coinMinimalDenom: "echf",
-  //       coinDecimals: 6,
-  //     },
-  //   ],
-  //   feeCurrencies: [
-  //     {
-  //       coinDenom: "NGM",
-  //       coinMinimalDenom: "ungm",
-  //       coinDecimals: 6,
-  //       coinGeckoId: "e-money",
-  //       gasPriceStep: {
-  //         low: 1,
-  //         average: 1,
-  //         high: 1,
-  //       },
-  //     },
-  //     {
-  //       coinDenom: "EEUR",
-  //       coinMinimalDenom: "eeur",
-  //       coinDecimals: 6,
-  //       coinGeckoId: "e-money-eur",
-  //       gasPriceStep: {
-  //         low: 1,
-  //         average: 1,
-  //         high: 1,
-  //       },
-  //     },
-  //     {
-  //       coinDenom: "ECHF",
-  //       coinMinimalDenom: "echf",
-  //       coinDecimals: 6,
-  //       gasPriceStep: {
-  //         low: 1,
-  //         average: 1,
-  //         high: 1,
-  //       },
-  //     },
-  //     {
-  //       coinDenom: "ESEK",
-  //       coinMinimalDenom: "esek",
-  //       coinDecimals: 6,
-  //       gasPriceStep: {
-  //         low: 1,
-  //         average: 1,
-  //         high: 1,
-  //       },
-  //     },
-  //     {
-  //       coinDenom: "ENOK",
-  //       coinMinimalDenom: "enok",
-  //       coinDecimals: 6,
-  //       gasPriceStep: {
-  //         low: 1,
-  //         average: 1,
-  //         high: 1,
-  //       },
-  //     },
-  //     {
-  //       coinDenom: "EDKK",
-  //       coinMinimalDenom: "edkk",
-  //       coinDecimals: 6,
-  //       gasPriceStep: {
-  //         low: 1,
-  //         average: 1,
-  //         high: 1,
-  //       },
-  //     },
-  //   ],
-  //   chainSymbolImageUrl: "https://dhj8dql1kzq2v.cloudfront.net/white/ngm.png",
-  //   features: ["ibc-transfer"],
-  // },
   {
     rpc: "https://rpc-agoric.keplr.app",
     rest: "https://lcd-agoric.keplr.app",
     chainId: "agoric-3",
     chainName: "Agoric",
+    hideInUI: true,
     stakeCurrency: {
       coinDenom: "BLD",
       coinMinimalDenom: "ubld",
@@ -1396,6 +1285,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://lcd-cyber.keplr.app",
     chainId: "bostrom",
     chainName: "Bostrom",
+    hideInUI: true,
     stakeCurrency: {
       coinDenom: "BOOT",
       coinMinimalDenom: "boot",
@@ -1459,6 +1349,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://lcd-juno.keplr.app",
     chainId: "juno-1",
     chainName: "Juno",
+    hideInUI: true,
     stakeCurrency: {
       coinDenom: "JUNO",
       coinMinimalDenom: "ujuno",
@@ -1524,6 +1415,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://lcd-stargaze.keplr.app",
     chainId: "stargaze-1",
     chainName: "Stargaze",
+    hideInUI: true,
     stakeCurrency: {
       coinDenom: "STARS",
       coinMinimalDenom: "ustars",
@@ -1574,6 +1466,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://lcd-axelar.keplr.app",
     chainId: "axelar-dojo-1",
     chainName: "Axelar",
+    hideInUI: true,
     stakeCurrency: {
       coinDenom: "AXL",
       coinMinimalDenom: "uaxl",
@@ -1733,6 +1626,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://lcd-sommelier.keplr.app",
     chainId: "sommelier-3",
     chainName: "Sommelier",
+    hideInUI: true,
     stakeCurrency: {
       coinDenom: "SOMM",
       coinMinimalDenom: "usomm",
@@ -1778,6 +1672,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://lcd-umee.keplr.app",
     chainId: "umee-1",
     chainName: "Umee",
+    hideInUI: true,
     stakeCurrency: {
       coinDenom: "UMEE",
       coinMinimalDenom: "uumee",
@@ -1825,6 +1720,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://lcd-gravity-bridge.keplr.app",
     chainId: "gravity-bridge-3",
     chainName: "Gravity Bridge",
+    hideInUI: true,
     stakeCurrency: {
       coinDenom: "GRAV",
       coinMinimalDenom: "ugraviton",
@@ -1887,6 +1783,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://lcd-tgrade.keplr.app",
     chainId: "tgrade-mainnet-1",
     chainName: "Tgrade",
+    hideInUI: true,
     stakeCurrency: {
       coinDenom: "TGD",
       coinMinimalDenom: "utgd",
@@ -1922,6 +1819,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://lcd-stride.keplr.app",
     chainId: "stride-1",
     chainName: "Stride",
+    hideInUI: true,
     stakeCurrency: {
       coinDenom: "STRD",
       coinMinimalDenom: "ustrd",
@@ -2080,6 +1978,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://lcd-kava.keplr.app",
     chainId: "kava_2222-10",
     chainName: "Kava",
+    hideInUI: true,
     stakeCurrency: {
       coinDenom: "KAVA",
       coinMinimalDenom: "ukava",
@@ -2161,6 +2060,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://lcd-quicksilver.keplr.app",
     chainId: "quicksilver-1",
     chainName: "Quicksilver",
+    hideInUI: true,
     stakeCurrency: {
       coinDenom: "QCK",
       coinMinimalDenom: "uqck",
@@ -2207,6 +2107,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://lcd-phoenix.keplr.app",
     chainId: "phoenix-1",
     chainName: "Terra",
+    hideInUI: true,
     stakeCurrency: {
       coinDenom: "LUNA",
       coinMinimalDenom: "uluna",
@@ -2256,6 +2157,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://lcd-columbus.keplr.app",
     chainId: "columbus-5",
     chainName: "Terra Classic",
+    hideInUI: true,
     stakeCurrency: {
       coinDenom: "LUNC",
       coinMinimalDenom: "uluna",
@@ -2318,6 +2220,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://lcd-quasar.keplr.app",
     chainId: "quasar-1",
     chainName: "Quasar",
+    hideInUI: true,
     stakeCurrency: {
       coinDenom: "QSR",
       coinMinimalDenom: "uqsr",
@@ -2383,6 +2286,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://lcd-noble.keplr.app",
     chainId: "noble-1",
     chainName: "Noble",
+    hideInUI: true,
     stakeCurrency: {
       coinDenom: "STAKE",
       coinMinimalDenom: "ustake",
@@ -2436,6 +2340,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://lcd-omniflixhub.keplr.app",
     chainId: "omniflixhub-1",
     chainName: "OmniFlix",
+    hideInUI: true,
     stakeCurrency: {
       coinDenom: "FLIX",
       coinMinimalDenom: "uflix",
@@ -2478,6 +2383,7 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://lcd-kyve.keplr.app",
     chainId: "kyve-1",
     chainName: "KYVE",
+    hideInUI: true,
     stakeCurrency: {
       coinDenom: "KYVE",
       coinMinimalDenom: "ukyve",
@@ -2520,6 +2426,8 @@ export const EmbedChainInfos: ChainInfo[] = [
     rest: "https://axelartest-lcd.quickapi.com:443",
     chainId: "axelar-testnet-lisbon-3",
     chainName: "Axelar Testnet",
+    hideInUI: true,
+    isTestnet: true,
     stakeCurrency: {
       coinDenom: "AXL",
       coinMinimalDenom: "uaxl",
@@ -2551,7 +2459,9 @@ export const EmbedChainInfos: ChainInfo[] = [
     rpc: "https://rpc-dorado.fetch.ai",
     rest: "https://rest-dorado.fetch.ai",
     chainId: "dorado-1",
-    chainName: "Dorado",
+    chainName: "Dorado Testnet",
+    hideInUI: true,
+    isTestnet: true,
     stakeCurrency: {
       coinDenom: "TESTFET",
       coinMinimalDenom: "atestfet",
@@ -2588,6 +2498,50 @@ export const EmbedChainInfos: ChainInfo[] = [
     features: ["cosmwasm"],
     walletUrlForStaking: "https://browse-dorado.fetch.ai/validators",
     govUrl: "https://fetchstation.azoyalabs.com/dorado/governance/",
+  },
+  {
+    rpc: "https://rpc-eridanus-1.fetch.ai",
+    rest: "https://rest-eridanus-1.fetch.ai",
+    chainId: "eridanus-1",
+    chainName: "Eridanus Testnet",
+    hideInUI: true,
+    isTestnet: true,
+    stakeCurrency: {
+      coinDenom: "TESTASI",
+      coinMinimalDenom: "atestasi",
+      coinDecimals: 18,
+    },
+    bip44: {
+      coinType: 118,
+    },
+    bech32Config: Bech32Address.defaultBech32Config("asi"),
+    currencies: [
+      {
+        coinDenom: "TESTASI",
+        coinMinimalDenom: "atestasi",
+        coinDecimals: 18,
+      },
+      {
+        coinDenom: "MOBX",
+        coinMinimalDenom: "nanomobx",
+        coinDecimals: 9,
+      },
+    ],
+    feeCurrencies: [
+      {
+        coinDenom: "TESTASI",
+        coinMinimalDenom: "atestasi",
+        coinDecimals: 18,
+        gasPriceStep: {
+          low: 0,
+          average: 5000000000,
+          high: 6250000000,
+        },
+      },
+    ],
+    features: ["cosmwasm"],
+    walletUrlForStaking: "https://explore-eridanus-1.fetch.ai/validators",
+    govUrl: "https://explore-eridanus-1.fetch.ai/proposals",
   },
 ];
 
@@ -2657,4 +2611,9 @@ if (process.env["NODE_ENV"] === "production") {
 export const AGENT_ADDRESS: { [key: string]: string } = {
   [CHAIN_ID_FETCHHUB]: FETCHHUB_AGENT,
   [CHAIN_ID_DORADO]: DORADO_AGENT,
+};
+
+export const STAKE_VALIDATOR_URL: { [key in string]: string } = {
+  [CHAIN_ID_DORADO]: "https://explore-dorado.fetch.ai/validators",
+  [CHAIN_ID_FETCHHUB]: "https://www.mintscan.io/fetchai/validators",
 };

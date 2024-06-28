@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-export const usePrevious = <T extends any>(
+export const usePrevious = <T = any,>(
   state: T,
   initialValue?: T
 ): T | undefined => {

@@ -9,10 +9,10 @@ import { useSmartNavigation } from "navigation/smart-navigation";
 import { RightArrowIcon } from "components/icon";
 import { Card } from "components/card";
 import { RectButton } from "components/rect-button";
-import { Currency } from "@keplr-wallet/types";
 import { HeaderRightButton } from "components/header";
 import { HeaderAddIcon } from "components/header/icon";
 import { TokenSymbolUsingChainInfo } from "components/token-symbol/token-symbol-chain";
+import { Currency } from "@keplr-wallet/types";
 
 export const TokensScreen: FunctionComponent = observer(() => {
   const { chainStore, queriesStore, accountStore } = useStore();
@@ -56,7 +56,6 @@ export const TokensScreen: FunctionComponent = observer(() => {
   useEffect(() => {
     if (showAddTokenButton) {
       smartNavigation.setOptions({
-        // eslint-disable-next-line react/display-name
         headerRight: () => (
           <HeaderRightButton
             onPress={() => {
@@ -97,6 +96,8 @@ export const TokenItem: FunctionComponent<{
   containerStyle?: ViewStyle;
 
   chainInfo: {
+    [x: string]: any;
+    chainName: string;
     stakeCurrency: Currency;
   };
   balance: CoinPretty;

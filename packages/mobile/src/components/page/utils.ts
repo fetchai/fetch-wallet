@@ -17,7 +17,6 @@ export const usePageRegisterScrollYValue = () => {
     return () => {
       pageScrollPosition.releaseScrollYValueOf(key);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [route.key]);
   return (
     pageScrollPosition.getScrollYValueOf(route.key) ?? new Animated.Value(0)
@@ -37,6 +36,5 @@ export const useSetFocusedScreen = () => {
         key: route.key,
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isFocused, route.key, route.name]);
 };

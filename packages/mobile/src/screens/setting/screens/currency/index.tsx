@@ -7,17 +7,14 @@ import { useStore } from "stores/index";
 import { Text, View, ViewStyle } from "react-native";
 import { RectButton } from "components/rect-button";
 import { CheckIcon } from "components/new/icon/check";
-import {
-  NavigationProp,
-  ParamListBase,
-  useNavigation,
-} from "@react-navigation/native";
+
+import { useSmartNavigation } from "navigation/smart-navigation";
 
 export const CurrencyScreen: FunctionComponent = observer(() => {
-  const { priceStore } = useStore();
+  const { priceStore, analyticsStore } = useStore();
 
   const style = useStyle();
-  const navigation = useNavigation<NavigationProp<ParamListBase>>();
+  const smartNavigation = useSmartNavigation();
 
   const currencyItems = useMemo(() => {
     return Object.keys(priceStore.supportedVsCurrencies).map((key) => {
@@ -50,10 +47,13 @@ export const CurrencyScreen: FunctionComponent = observer(() => {
             }
             onPress={() => {
               priceStore.setDefaultVsCurrency(item.key);
-              navigation.goBack();
+              analyticsStore.logEvent("currency_change_click", {
+                pageName: "More",
+              });
+              smartNavigation.goBack();
             }}
           >
-            <Text style={style.flatten(["body3", "color-white"])}>
+            <Text style={style.flatten(["body3", "color-white"]) as ViewStyle}>
               {item.label} ({item.symbol})
             </Text>
             {item.key === priceStore.defaultVsCurrency ? <CheckIcon /> : null}

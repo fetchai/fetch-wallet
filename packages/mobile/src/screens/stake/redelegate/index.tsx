@@ -1,22 +1,29 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { RouteProp, useRoute } from "@react-navigation/native";
+import {
+  NavigationProp,
+  ParamListBase,
+  RouteProp,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
 import { useStore } from "stores/index";
 import { useStyle } from "styles/index";
 import { Staking } from "@keplr-wallet/stores";
 import { useRedelegateTxConfig } from "@keplr-wallet/hooks";
 import { PageWithScrollView } from "components/page";
-import { Card, CardBody, CardDivider } from "components/card";
 import { Text, View, ViewStyle } from "react-native";
-import { ValidatorThumbnail } from "components/thumbnail";
-import {
-  AmountInput,
-  FeeButtons,
-  MemoInput,
-  SelectorButtonWithoutModal,
-} from "components/input";
 import { Button } from "components/button";
 import { useSmartNavigation } from "navigation/smart-navigation";
+import { DropDownCardView } from "components/new/card-view/drop-down-card";
+import { ChevronRightIcon } from "components/new/icon/chevron-right";
+import { StakeAmountInput } from "components/new/input/stake-amount";
+import { UseMaxButton } from "components/new/button/use-max-button";
+import { MemoInputView } from "components/new/card-view/memo-input";
+import { TransactionModal } from "modals/transaction";
+import { IconButton } from "components/new/button/icon";
+import { GearIcon } from "components/new/icon/gear-icon";
+import { TransectionFreeModel } from "components/new/fee-modal/transection-fee-modal";
 
 export const RedelegateScreen: FunctionComponent = observer(() => {
   const route = useRoute<
@@ -25,6 +32,7 @@ export const RedelegateScreen: FunctionComponent = observer(() => {
         string,
         {
           validatorAddress: string;
+          selectedValidatorAddress: string;
         }
       >,
       string
@@ -32,15 +40,27 @@ export const RedelegateScreen: FunctionComponent = observer(() => {
   >();
 
   const validatorAddress = route.params.validatorAddress;
+  const selectedValidatorAddress = route.params.selectedValidatorAddress
+    ? route.params.selectedValidatorAddress
+    : "";
 
   const smartNavigation = useSmartNavigation();
+  const navigation = useNavigation<NavigationProp<ParamListBase>>();
 
-  const { chainStore, accountStore, queriesStore, analyticsStore } = useStore();
+  const { chainStore, accountStore, queriesStore, analyticsStore, priceStore } =
+    useStore();
 
   const style = useStyle();
 
   const account = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
+
+  const [isToggleClicked, setIsToggleClicked] = useState<boolean>(false);
+
+  const [inputInUsd, setInputInUsd] = useState<string | undefined>("");
+  const [showTransectionModal, setTransectionModal] = useState(false);
+  const [txnHash, setTxnHash] = useState<string>("");
+  const [showFeeModal, setFeeModal] = useState(false);
 
   const srcValidator =
     queries.cosmos.queryValidators
@@ -52,18 +72,6 @@ export const RedelegateScreen: FunctionComponent = observer(() => {
     queries.cosmos.queryValidators
       .getQueryStatus(Staking.BondStatus.Unbonded)
       .getValidator(validatorAddress);
-
-  const srcValidatorThumbnail = srcValidator
-    ? queries.cosmos.queryValidators
-        .getQueryStatus(Staking.BondStatus.Bonded)
-        .getValidatorThumbnail(validatorAddress) ||
-      queries.cosmos.queryValidators
-        .getQueryStatus(Staking.BondStatus.Unbonding)
-        .getValidatorThumbnail(validatorAddress) ||
-      queries.cosmos.queryValidators
-        .getQueryStatus(Staking.BondStatus.Unbonded)
-        .getValidatorThumbnail(validatorAddress)
-    : undefined;
 
   const staked = queries.cosmos.queryDelegations
     .getQueryBech32Address(account.bech32Address)
@@ -78,22 +86,20 @@ export const RedelegateScreen: FunctionComponent = observer(() => {
     validatorAddress
   );
 
-  const [dstValidatorAddress, setDstValidatorAddress] = useState("");
-
   const dstValidator =
     queries.cosmos.queryValidators
       .getQueryStatus(Staking.BondStatus.Bonded)
-      .getValidator(dstValidatorAddress) ||
+      .getValidator(selectedValidatorAddress) ||
     queries.cosmos.queryValidators
       .getQueryStatus(Staking.BondStatus.Unbonding)
-      .getValidator(dstValidatorAddress) ||
+      .getValidator(selectedValidatorAddress) ||
     queries.cosmos.queryValidators
       .getQueryStatus(Staking.BondStatus.Unbonded)
-      .getValidator(dstValidatorAddress);
+      .getValidator(selectedValidatorAddress);
 
   useEffect(() => {
-    sendConfigs.recipientConfig.setRawRecipient(dstValidatorAddress);
-  }, [dstValidatorAddress, sendConfigs.recipientConfig]);
+    sendConfigs.recipientConfig.setRawRecipient(selectedValidatorAddress);
+  }, [selectedValidatorAddress, sendConfigs.recipientConfig]);
 
   const sendConfigError =
     sendConfigs.recipientConfig.error ??
@@ -103,140 +109,260 @@ export const RedelegateScreen: FunctionComponent = observer(() => {
     sendConfigs.feeConfig.error;
   const txStateIsValid = sendConfigError == null;
 
+  const convertToUsd = (currency: any) => {
+    const value = priceStore.calculatePrice(currency);
+    return value && value.shrink(true).maxDecimals(6).toString();
+  };
+  useEffect(() => {
+    const inputValueInUsd = convertToUsd(staked);
+    setInputInUsd(inputValueInUsd);
+  }, [sendConfigs.amountConfig.amount]);
+
+  const Usd = inputInUsd
+    ? ` (${inputInUsd} ${priceStore.defaultVsCurrency.toUpperCase()})`
+    : "";
+
+  const availableBalance = `${staked
+    .trim(true)
+    .shrink(true)
+    .maxDecimals(6)
+    .toString()}${Usd}`;
+
+  const isEvm = chainStore.current.features?.includes("evm") ?? false;
+  const feePrice = sendConfigs.feeConfig.getFeeTypePretty(
+    sendConfigs.feeConfig.feeType ? sendConfigs.feeConfig.feeType : "average"
+  );
+
+  const redelegateAmount = async () => {
+    if (account.isReadyToSendTx && txStateIsValid) {
+      try {
+        analyticsStore.logEvent("redelegate_txn_click", {
+          pageName: "Stake Validator",
+        });
+        await account.cosmos.sendBeginRedelegateMsg(
+          sendConfigs.amountConfig.amount,
+          sendConfigs.srcValidatorAddress,
+          sendConfigs.dstValidatorAddress,
+          sendConfigs.memoConfig.memo,
+          sendConfigs.feeConfig.toStdFee(),
+          {
+            preferNoSetMemo: true,
+            preferNoSetFee: true,
+          },
+          {
+            onBroadcasted: (txHash) => {
+              analyticsStore.logEvent("redelegate_txn_broadcasted", {
+                chainId: chainStore.current.chainId,
+                chainName: chainStore.current.chainName,
+                validatorName: srcValidator?.description.moniker,
+                toValidatorName: dstValidator?.description.moniker,
+                feeType: sendConfigs.feeConfig.feeType,
+              });
+              setTxnHash(Buffer.from(txHash).toString("hex"));
+              setTransectionModal(true);
+            },
+          }
+        );
+      } catch (e) {
+        if (e?.message === "Request rejected") {
+          return;
+        }
+        console.log(e);
+        analyticsStore.logEvent("redelegate_txn_broadcasted_fail", {
+          chainId: chainStore.current.chainId,
+          chainName: chainStore.current.chainName,
+          feeType: sendConfigs.feeConfig.feeType,
+          message: e?.message ?? "",
+        });
+        smartNavigation.navigateSmart("Home", {});
+      }
+    }
+  };
+
   return (
     <PageWithScrollView
-      backgroundMode="tertiary"
-      style={style.flatten(["padding-x-page"]) as ViewStyle}
+      backgroundMode="image"
+      style={style.flatten(["padding-x-page", "overflow-scroll"]) as ViewStyle}
       contentContainerStyle={style.get("flex-grow-1")}
     >
-      <View style={style.flatten(["height-page-pad"]) as ViewStyle} />
-      <Card
+      <View
         style={
           style.flatten([
-            "margin-bottom-12",
-            "border-radius-8",
-            "dark:background-color-platinum-500",
+            "flex-row",
+            "items-center",
+            "border-width-1",
+            "border-color-white@20%",
+            "border-radius-12",
+            "padding-12",
+            "justify-between",
+            "margin-y-16",
           ]) as ViewStyle
         }
       >
-        <CardBody>
-          <View style={style.flatten(["flex-row", "items-center"])}>
-            <ValidatorThumbnail
-              style={style.flatten(["margin-right-12"]) as ViewStyle}
-              size={36}
-              url={srcValidatorThumbnail}
-            />
-            <Text style={style.flatten(["h6", "color-text-high"])}>
-              {srcValidator ? srcValidator.description.moniker : "..."}
-            </Text>
-          </View>
-          <CardDivider
-            style={
-              style.flatten([
-                "margin-x-0",
-                "margin-top-8",
-                "margin-bottom-15",
-              ]) as ViewStyle
-            }
-          />
-          <View style={style.flatten(["flex-row", "items-center"])}>
-            <Text style={style.flatten(["subtitle2", "color-text-middle"])}>
-              Staked
-            </Text>
-            <View style={style.get("flex-1")} />
-            <Text style={style.flatten(["body2", "color-text-middle"])}>
-              {staked.trim(true).shrink(true).maxDecimals(6).toString()}
-            </Text>
-          </View>
-        </CardBody>
-      </Card>
-      {/*
-        // The recipient validator is selected by the route params, so no need to show the address input.
-        <AddressInput
-          label="Recipient"
-          recipientConfig={sendConfigs.recipientConfig}
-        />
-      */}
-      {/*
-      Undelegate tx only can be sent with just stake currency. So, it is not needed to show the currency selector because the stake currency is one.
-      <CurrencySelector
-        label="Token"
-        placeHolder="Select Token"
-        amountConfig={sendConfigs.amountConfig}
-      />
-      */}
-      <SelectorButtonWithoutModal
-        label="Redelegate to"
-        placeHolder="Select Validator"
-        selected={
-          dstValidator
-            ? {
-                key: dstValidatorAddress,
-                label: dstValidator.description.moniker || dstValidatorAddress,
-              }
-            : undefined
+        <Text style={style.flatten(["body3", "color-white@60%"]) as ViewStyle}>
+          Current staked amount
+        </Text>
+        <Text style={style.flatten(["subtitle3", "color-white"]) as ViewStyle}>
+          {staked.trim(true).shrink(true).maxDecimals(6).toString()}
+        </Text>
+      </View>
+      <Text
+        style={
+          style.flatten([
+            "body3",
+            "color-white@60%",
+            "margin-bottom-8",
+          ]) as ViewStyle
         }
+      >
+        From
+      </Text>
+      <View
+        style={
+          style.flatten([
+            "border-width-1",
+            "border-color-white@20%",
+            "border-radius-12",
+            "padding-x-18",
+            "padding-y-12",
+            "margin-bottom-8",
+          ]) as ViewStyle
+        }
+      >
+        <Text style={style.flatten(["body3", "color-white@60%"]) as ViewStyle}>
+          {srcValidator ? srcValidator.description.moniker : "..."}
+        </Text>
+      </View>
+
+      <DropDownCardView
+        containerStyle={style.flatten(["margin-bottom-16"]) as ViewStyle}
+        mainHeadingrStyle={style.flatten(["body3"]) as ViewStyle}
+        headingrStyle={style.flatten(["body3", "color-white@60%"]) as ViewStyle}
+        mainHeading="To"
+        heading={
+          dstValidator ? dstValidator.description.moniker : "Choose validator"
+        }
+        trailingIcon={<ChevronRightIcon color="white" />}
         onPress={() => {
-          smartNavigation.pushSmart("Validator.List", {
-            validatorSelector: (validatorAddress: string) => {
-              setDstValidatorAddress(validatorAddress);
-            },
+          smartNavigation.navigateSmart("Validator.List", {
+            prevSelectedValidator: srcValidator?.operator_address,
+            selectedValidator: dstValidator?.operator_address,
           });
         }}
       />
-      <AmountInput label="Amount" amountConfig={sendConfigs.amountConfig} />
-      <MemoInput label="Memo (Optional)" memoConfig={sendConfigs.memoConfig} />
-      <FeeButtons
-        label="Fee"
-        gasLabel="gas"
+      <StakeAmountInput
+        label="Amount"
+        labelStyle={
+          style.flatten([
+            "body3",
+            "color-white@60%",
+            "margin-y-0",
+            "margin-bottom-8",
+          ]) as ViewStyle
+        }
+        amountConfig={sendConfigs.amountConfig}
+        isToggleClicked={isToggleClicked}
+      />
+      <Text
+        style={
+          style.flatten([
+            "color-white@60%",
+            "text-caption2",
+            "margin-top-8",
+          ]) as ViewStyle
+        }
+      >{`Available: ${availableBalance}`}</Text>
+      <UseMaxButton
+        amountConfig={sendConfigs.amountConfig}
+        isToggleClicked={isToggleClicked}
+        setIsToggleClicked={setIsToggleClicked}
+      />
+      <MemoInputView
+        label="Memo"
+        labelStyle={
+          style.flatten([
+            "body3",
+            "color-white@60%",
+            "padding-y-0",
+            "margin-y-0",
+            "margin-bottom-8",
+          ]) as ViewStyle
+        }
+        memoConfig={sendConfigs.memoConfig}
+        containerStyle={style.flatten(["margin-bottom-16"]) as ViewStyle}
+      />
+      <View style={style.flatten(["flex-1"])} />
+      <View
+        style={
+          style.flatten([
+            "flex-row",
+            "justify-between",
+            "items-center",
+            "margin-y-12",
+          ]) as ViewStyle
+        }
+      >
+        <Text style={style.flatten(["body3", "color-white@60%"]) as ViewStyle}>
+          Transaction fee:
+        </Text>
+        <View style={style.flatten(["flex-row", "items-center"]) as ViewStyle}>
+          <Text
+            style={
+              style.flatten([
+                "body3",
+                "color-white",
+                "margin-right-6",
+              ]) as ViewStyle
+            }
+          >
+            {feePrice.hideIBCMetadata(true).trim(true).toMetricPrefix(isEvm)}
+          </Text>
+          <IconButton
+            backgroundBlur={false}
+            icon={<GearIcon />}
+            iconStyle={
+              style.flatten([
+                "width-32",
+                "height-32",
+                "items-center",
+                "justify-center",
+                "border-width-1",
+                "border-color-white@40%",
+              ]) as ViewStyle
+            }
+            onPress={() => setFeeModal(true)}
+          />
+        </View>
+      </View>
+      <Button
+        text="Confirm"
+        disabled={!account.isReadyToSendTx || !txStateIsValid}
+        loading={account.txTypeInProgress === "redelegate"}
+        containerStyle={
+          style.flatten(["margin-top-16", "border-radius-32"]) as ViewStyle
+        }
+        textStyle={style.flatten(["body2"]) as ViewStyle}
+        onPress={redelegateAmount}
+      />
+      <View style={style.flatten(["height-page-pad"]) as ViewStyle} />
+      <TransactionModal
+        isOpen={showTransectionModal}
+        close={() => {
+          setTransectionModal(false);
+        }}
+        txnHash={txnHash}
+        chainId={chainStore.current.chainId}
+        buttonText="Go to stakescreen"
+        onHomeClick={() => navigation.navigate("StakeTab", {})}
+        onTryAgainClick={redelegateAmount}
+      />
+      <TransectionFreeModel
+        isOpen={showFeeModal}
+        close={() => setFeeModal(false)}
+        title={"Transaction fee"}
         feeConfig={sendConfigs.feeConfig}
         gasConfig={sendConfigs.gasConfig}
       />
-      <View style={style.flatten(["flex-1"])} />
-      <Button
-        text="Switch Validator"
-        size="large"
-        disabled={!account.isReadyToSendTx || !txStateIsValid}
-        loading={account.txTypeInProgress === "redelegate"}
-        onPress={async () => {
-          if (account.isReadyToSendTx && txStateIsValid) {
-            try {
-              await account.cosmos.sendBeginRedelegateMsg(
-                sendConfigs.amountConfig.amount,
-                sendConfigs.srcValidatorAddress,
-                sendConfigs.dstValidatorAddress,
-                sendConfigs.memoConfig.memo,
-                sendConfigs.feeConfig.toStdFee(),
-                {
-                  preferNoSetMemo: true,
-                  preferNoSetFee: true,
-                },
-                {
-                  onBroadcasted: (txHash) => {
-                    analyticsStore.logEvent("Redelgate tx broadcasted", {
-                      chainId: chainStore.current.chainId,
-                      chainName: chainStore.current.chainName,
-                      validatorName: srcValidator?.description.moniker,
-                      toValidatorName: dstValidator?.description.moniker,
-                      feeType: sendConfigs.feeConfig.feeType,
-                    });
-                    smartNavigation.pushSmart("TxPendingResult", {
-                      txHash: Buffer.from(txHash).toString("hex"),
-                    });
-                  },
-                }
-              );
-            } catch (e) {
-              if (e?.message === "Request rejected") {
-                return;
-              }
-              console.log(e);
-              smartNavigation.navigateSmart("Home", {});
-            }
-          }
-        }}
-      />
-      <View style={style.flatten(["height-page-pad"]) as ViewStyle} />
     </PageWithScrollView>
   );
 });

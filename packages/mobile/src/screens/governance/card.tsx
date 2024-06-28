@@ -152,7 +152,7 @@ export const GovernanceCardBody: FunctionComponent<{
             ]) as ViewStyle
           }
           onPress={() => {
-            navigation.navigateSmart("Governance Details", {
+            navigation.navigateSmart("Governance.Details", {
               proposalId: proposal.id,
             });
           }}
@@ -167,24 +167,35 @@ export const GovernanceCardBody: FunctionComponent<{
             }
           >
             <Text
-              style={style.flatten(["h5", "color-text-high"])}
+              style={style.flatten(["h5", "color-text-high"]) as ViewStyle}
             >{`#${proposal.id}`}</Text>
             <View style={style.flatten(["flex-1"])} />
             <GovernanceProposalStatusChip status={proposal.proposalStatus} />
           </View>
           <View style={style.flatten(["margin-bottom-8"]) as ViewStyle}>
-            <Text style={style.flatten(["h6", "color-text-high"])}>
+            <Text style={style.flatten(["h6", "color-text-high"]) as ViewStyle}>
               {proposal.title}
             </Text>
           </View>
-          <View style={style.flatten(["flex-row", "items-center"])}>
-            <Text style={style.flatten(["text-caption1", "color-text-low"])}>
+          <View
+            style={style.flatten(["flex-row", "items-center"]) as ViewStyle}
+          >
+            <Text
+              style={
+                style.flatten(["text-caption1", "color-text-low"]) as ViewStyle
+              }
+            >
               {renderProposalDateString(proposal)}
             </Text>
             <View style={style.flatten(["flex-1"])} />
             {proposalRelativeEndTimeString ? (
               <Text
-                style={style.flatten(["text-caption1", "color-text-middle"])}
+                style={
+                  style.flatten([
+                    "text-caption1",
+                    "color-text-middle",
+                  ]) as ViewStyle
+                }
               >
                 {proposalRelativeEndTimeString}
               </Text>

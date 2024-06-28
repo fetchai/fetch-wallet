@@ -11,7 +11,9 @@ export const SettingSectionTitle: FunctionComponent<{
 
   return (
     <View style={style.flatten(["padding-y-12"]) as ViewStyle}>
-      <Text style={style.flatten(["body3", "color-text-low"])}>{title}</Text>
+      <Text style={style.flatten(["body3", "color-text-low"]) as ViewStyle}>
+        {title}
+      </Text>
     </View>
   );
 };
@@ -65,19 +67,23 @@ export const SettingItem: FunctionComponent<{
         ) : null}
         <View>
           <Text
-            style={StyleSheet.flatten([
-              style.flatten(["body3", "color-white"]),
-              labelStyle,
-            ])}
+            style={
+              StyleSheet.flatten([
+                style.flatten(["body3", "color-white"]),
+                labelStyle,
+              ]) as ViewStyle
+            }
           >
             {label}
           </Text>
           {paragraph ? (
             <Text
-              style={StyleSheet.flatten([
-                style.flatten(["subtitle3", "color-text-low"]),
-                paragraphStyle,
-              ])}
+              style={
+                StyleSheet.flatten([
+                  style.flatten(["subtitle3", "color-text-low"]),
+                  paragraphStyle,
+                ]) as ViewStyle
+              }
             >
               {paragraph}
             </Text>

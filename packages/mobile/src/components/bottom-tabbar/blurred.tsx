@@ -13,17 +13,14 @@ interface BlurredBottomTabBarProps extends BottomTabBarProps {
 export const BlurredBottomTabBar: FunctionComponent<
   BlurredBottomTabBarProps
 > = (props) => {
+  const { style: propStyle, enabledScreens = [], ...rest } = props;
+
+  const style = useStyle();
+  const focusedScreen = useFocusedScreen();
+
   if (Platform.OS === "android") {
     return <AndroidAlternativeBlurredBottomTabBar {...props} />;
   }
-
-  const { style: propStyle, enabledScreens = [], ...rest } = props;
-
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const style = useStyle();
-
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const focusedScreen = useFocusedScreen();
 
   const containerOpacity = (() => {
     if (enabledScreens.length === 0) {
@@ -62,9 +59,6 @@ export const BlurredBottomTabBar: FunctionComponent<
         }}
       />
       <BottomTabBar
-        // Why type error??
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         style={StyleSheet.flatten([
           propStyle,
           {

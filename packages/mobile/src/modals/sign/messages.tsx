@@ -1,5 +1,3 @@
-/* eslint-disable react/display-name */
-
 import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { CoinUtils, Coin } from "@keplr-wallet/unit";
 import { AppCurrency, Currency } from "@keplr-wallet/types";
@@ -8,11 +6,7 @@ import { CoinPrimitive } from "@keplr-wallet/stores";
 import { Text, ViewStyle } from "react-native";
 import { useStyle } from "styles/index";
 import { Bech32Address } from "@keplr-wallet/cosmos";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import Hypher from "hypher";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import english from "hyphenation.en-us";
 import { useStore } from "stores/index";
 import { Buffer } from "buffer/";
@@ -117,7 +111,6 @@ export interface MsgInstantiateContract {
     sender: string;
     code_id: string;
     label: string;
-    // eslint-disable-next-line @typescript-eslint/ban-types
     init_msg: object;
     init_funds: [
       {
@@ -133,7 +126,6 @@ export interface MsgExecuteContract {
   value: {
     contract: string;
     // If message is for secret-wasm, msg will be the base64 encoded and encrypted string.
-    // eslint-disable-next-line @typescript-eslint/ban-types
     msg: object | string;
     sender: string;
     // The field is for wasm message.
@@ -167,7 +159,6 @@ export interface MsgLink {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-types
 export function renderUnknownMessage(msg: object) {
   return {
     icon: undefined,
@@ -339,8 +330,6 @@ export function renderMsgDelegate(
     denom: parsed.denom,
   };
 
-  // Delegate <b>{amount}</b> to <b>{validator}</b>
-
   return {
     title: "Stake",
     content: (
@@ -414,7 +403,6 @@ export function renderMsgExecuteContract(
   sentFunds: CoinPrimitive[],
   _callbackCodeHash: string | undefined,
   contract: string,
-  // eslint-disable-next-line @typescript-eslint/ban-types
   msg: object | string
 ) {
   const sent: { amount: string; denom: string }[] = [];
@@ -475,7 +463,6 @@ export function renderMsgExecuteContract(
 }
 
 export const WasmExecutionMsgView: FunctionComponent<{
-  // eslint-disable-next-line @typescript-eslint/ban-types
   msg: object | string;
 }> = observer(({ msg }) => {
   const { chainStore, accountStore } = useStore();
@@ -535,7 +522,9 @@ export const WasmExecutionMsgView: FunctionComponent<{
     <Text style={style.flatten(["margin-top-8"]) as ViewStyle}>
       <Text>{`\n${detailsMsg}`}</Text>
       {warningMsg ? (
-        <Text style={style.flatten(["color-red-200"])}>{warningMsg}</Text>
+        <Text style={style.flatten(["color-red-200"]) as ViewStyle}>
+          {warningMsg}
+        </Text>
       ) : null}
     </Text>
   );
@@ -685,7 +674,6 @@ export const WasmExecutionMsgView: FunctionComponent<{
 });
  */
 
-// eslint-disable-next-line @typescript-eslint/ban-types
 export const UnknownMsgView: FunctionComponent<{ msg: object }> = ({ msg }) => {
   const style = useStyle();
 
@@ -699,7 +687,9 @@ export const UnknownMsgView: FunctionComponent<{ msg: object }> = ({ msg }) => {
   }, [msg]);
 
   return (
-    <Text style={style.flatten(["body3", "color-text-low"])}>{prettyMsg}</Text>
+    <Text style={style.flatten(["body3", "color-text-low"]) as ViewStyle}>
+      {prettyMsg}
+    </Text>
   );
 };
 

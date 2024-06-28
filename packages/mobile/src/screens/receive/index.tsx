@@ -116,12 +116,13 @@ export const ReceiveScreen: FunctionComponent = observer(() => {
       >
         <SimpleCardView
           heading={account.bech32Address}
+          headingStyle={style.flatten(["body3"]) as ViewStyle}
           cardStyle={style.flatten(["margin-y-12"]) as ViewStyle}
           trailingIconComponent={
             isTimedOut ? (
               <View style={style.flatten(["margin-left-2"]) as ViewStyle}>
                 <View
-                  style={style.flatten(["width-20", "height-20"]) as ViewStyle}
+                  style={style.flatten(["width-16", "height-16"]) as ViewStyle}
                 >
                   <View
                     style={StyleSheet.flatten([
@@ -132,7 +133,7 @@ export const ReceiveScreen: FunctionComponent = observer(() => {
                       ]),
                       {
                         left: 0,
-                        right: 4,
+                        right: 0,
                         top: 0,
                         bottom: 0,
                       },
@@ -165,27 +166,30 @@ export const ReceiveScreen: FunctionComponent = observer(() => {
                       speed={2}
                       loop={false}
                       style={
-                        style.flatten(["width-80", "height-80"]) as ViewStyle
+                        style.flatten(["width-72", "height-72"]) as ViewStyle
                       }
                     />
                   </View>
                 </View>
               </View>
             ) : (
-              <CopyIcon size={18} />
+              <CopyIcon size={16} iconOpacity={1} />
             )
           }
         />
       </TouchableOpacity>
       <SimpleCardView
+        backgroundBlur={false}
         heading={`Deposits must be using the ${titleCase(
           chainStore.current.chainName
         )} Network. Do not send token from other networks to this address or they may be lost.`}
+        headingStyle={style.flatten(["body3"]) as ViewStyle}
         cardStyle={
           style.flatten([
             "background-color-coral-red@25%",
             "margin-top-12",
             "margin-bottom-48",
+            "padding-12",
           ]) as ViewStyle
         }
       />

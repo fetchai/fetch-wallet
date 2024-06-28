@@ -14,6 +14,7 @@ import { CameraPermissionModal } from "components/new/camera-permission-model/ca
 import { observer } from "mobx-react-lite";
 import { CameraPermissionOffIcon } from "components/new/icon/camerapermission-off";
 import { CameraPermissionOnIcon } from "components/new/icon/camerapermission-on";
+import { useStore } from "stores/index";
 
 export enum ModelStatus {
   First = "first",
@@ -41,7 +42,7 @@ export const ImportFromExtensionIntroScreen: FunctionComponent = observer(
         string
       >
     >();
-
+    const { analyticsStore } = useStore();
     const smartNavigation = useSmartNavigation();
     const style = useStyle();
     const [permission, requestPermission] = Camera.useCameraPermissions();
@@ -107,6 +108,10 @@ export const ImportFromExtensionIntroScreen: FunctionComponent = observer(
                   setModelStatus(ModelStatus.Second);
                   setIsOpenCameraModel(true);
                 } else {
+                  analyticsStore.logEvent("continue_click", {
+                    pageName: "Register",
+                    registerType: "qr",
+                  });
                   smartNavigation.navigateSmart(
                     "Register.ImportFromExtension",
                     {
@@ -155,6 +160,10 @@ export const ImportFromExtensionIntroScreen: FunctionComponent = observer(
               if (permissionStatus.status === PermissionStatus.GRANTED) {
                 smartNavigation.navigateSmart("Register.ImportFromExtension", {
                   registerConfig: route.params.registerConfig,
+                });
+                analyticsStore.logEvent("allow_fetch_to_use_camera_click", {
+                  registerType: "qr",
+                  pageName: "Register",
                 });
               }
             }

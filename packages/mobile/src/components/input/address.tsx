@@ -12,9 +12,6 @@ import {
 import { TextStyle, View, ViewStyle } from "react-native";
 import { LoadingSpinner } from "components/spinner";
 import { useStyle } from "styles/index";
-import { AddressBookIcon } from "components/icon";
-import { TouchableOpacity } from "react-native-gesture-handler";
-import { useSmartNavigation } from "navigation/smart-navigation";
 import { InputCardView } from "components/new/card-view/input-card";
 
 function numOfCharacter(str: string, c: string): number {
@@ -31,16 +28,10 @@ export const AddressInput: FunctionComponent<
     label: string;
 
     recipientConfig: IRecipientConfig | IRecipientConfigWithICNS;
-  } & (
-    | {
-        memoConfig?: IMemoConfig;
-        disableAddressBook: true;
-      }
-    | {
-        memoConfig: IMemoConfig;
-        disableAddressBook?: false;
-      }
-  )
+  } & {
+    memoConfig?: IMemoConfig;
+    disableAddressBook: true;
+  }
 > = observer(
   ({
     labelStyle,
@@ -49,11 +40,7 @@ export const AddressInput: FunctionComponent<
     errorLabelStyle,
     label,
     recipientConfig,
-    memoConfig,
-    disableAddressBook,
   }) => {
-    const smartNavigation = useSmartNavigation();
-
     const style = useStyle();
 
     const error = recipientConfig.error;
@@ -140,37 +127,6 @@ export const AddressInput: FunctionComponent<
               recipientConfig.recipient
             )
           ) : undefined
-        }
-        inputRight={
-          disableAddressBook ? null : (
-            <View
-              style={
-                style.flatten([
-                  "height-1",
-                  "overflow-visible",
-                  "justify-center",
-                ]) as ViewStyle
-              }
-            >
-              <TouchableOpacity
-                style={style.flatten(["padding-4"]) as ViewStyle}
-                onPress={() => {
-                  smartNavigation.navigateSmart("AddressBook", {
-                    recipientConfig,
-                    memoConfig,
-                  });
-                }}
-              >
-                <AddressBookIcon
-                  color={
-                    style.flatten(["color-blue-400", "dark:color-blue-100"])
-                      .color
-                  }
-                  height={18}
-                />
-              </TouchableOpacity>
-            </View>
-          )
         }
         autoCorrect={false}
         autoCapitalize="none"

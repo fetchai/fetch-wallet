@@ -31,7 +31,7 @@ export const AddAddressBookScreen: FunctionComponent = observer(() => {
     >
   >();
 
-  const { chainStore } = useStore();
+  const { chainStore, analyticsStore } = useStore();
 
   const smartNavigation = useSmartNavigation();
   const addressBookConfig = route.params.addressBookConfig;
@@ -102,6 +102,9 @@ export const AddAddressBookScreen: FunctionComponent = observer(() => {
                 name: name.trim(),
                 address: recipientConfig.recipient,
                 memo: memoConfig.memo,
+              });
+              analyticsStore.logEvent("save_new_address_click", {
+                pageName: "Add an address",
               });
               smartNavigation.goBack();
             } else {

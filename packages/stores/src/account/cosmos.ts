@@ -47,14 +47,45 @@ import { Buffer } from "buffer/";
 import { MakeTxResponse, ProtoMsgsOrWithAminoMsgs } from "./types";
 import {
   getEip712TypedDataBasedOnChainId,
+  getNodes,
   txEventsWithPreOnFulfill,
+  updateNodeOnTxnCompleted,
 } from "./utils";
 import { ExtensionOptionsWeb3Tx } from "@keplr-wallet/proto-types/ethermint/types/v1/web3";
 import { MsgRevoke } from "@keplr-wallet/proto-types/cosmos/authz/v1beta1/tx";
 import { simpleFetch } from "@keplr-wallet/simple-fetch";
-
+import { ActivityStore } from "src/activity";
 export interface CosmosAccount {
   cosmos: CosmosAccountImpl;
+}
+
+export interface Node {
+  balanceOffset: string;
+  block: {
+    timestamp: string;
+    __typename: string;
+  };
+  type: string;
+  id: string;
+  transaction: {
+    fees: string;
+    gasUsed: string;
+    chainId: string;
+    id: string;
+    memo: string;
+    messages: {
+      nodes: [
+        {
+          json: string;
+          typeUrl: string;
+          __typename: string;
+        }
+      ];
+    };
+    signerAddress: string;
+    status: string;
+    timeoutHeight: "0";
+  };
 }
 
 export const CosmosAccount = {
@@ -72,9 +103,10 @@ export const CosmosAccount = {
   }): (
     base: AccountSetBaseSuper,
     chainGetter: ChainGetter,
-    chainId: string
+    chainId: string,
+    activityStore: ActivityStore
   ) => CosmosAccount {
-    return (base, chainGetter, chainId) => {
+    return (base, chainGetter, chainId, activityStore) => {
       const msgOptsFromCreator = options.msgOptsCreator
         ? options.msgOptsCreator(chainId)
         : undefined;
@@ -85,6 +117,7 @@ export const CosmosAccount = {
           chainGetter,
           chainId,
           options.queriesStore,
+          activityStore,
           deepmerge<CosmosMsgOpts, DeepPartial<CosmosMsgOpts>>(
             defaultCosmosMsgOpts,
             msgOptsFromCreator ? msgOptsFromCreator : {}
@@ -157,6 +190,7 @@ export class CosmosAccountImpl {
     protected readonly chainGetter: ChainGetter,
     protected readonly chainId: string,
     protected readonly queriesStore: IQueriesStore<CosmosQueries>,
+    protected readonly activityStore: ActivityStore,
     protected readonly _msgOpts: CosmosMsgOpts,
     protected readonly txOpts: {
       wsObject?: new (url: string, protocols?: string | string[]) => WebSocket;
@@ -364,6 +398,8 @@ export class CosmosAccountImpl {
 
     let txHash: Uint8Array;
     let signDoc: StdSignDoc;
+    let txId: string;
+
     try {
       if (typeof msgs === "function") {
         msgs = await msgs();
@@ -378,6 +414,35 @@ export class CosmosAccountImpl {
       );
       txHash = result.txHash;
       signDoc = result.signDoc;
+
+      txId = Buffer.from(txHash).toString("hex").toLocaleUpperCase();
+
+      const { nodes, balanceOffset, signerAddress } = getNodes(msgs, type);
+
+      const newNode: Node = {
+        balanceOffset,
+        type,
+        block: {
+          timestamp: new Date().toJSON(),
+          __typename: "Block",
+        },
+        id: txId,
+        transaction: {
+          fees: JSON.stringify(signDoc.fee.amount),
+          chainId: signDoc.chain_id,
+          gasUsed: fee.gas,
+          id: txId,
+          memo: memo,
+          signerAddress,
+          status: "Pending",
+          timeoutHeight: "0",
+          messages: {
+            nodes,
+          },
+        },
+      };
+
+      this.activityStore.addNode(newNode);
     } catch (e: any) {
       this.base.setTxTypeInProgress("");
 
@@ -424,6 +489,9 @@ export class CosmosAccountImpl {
     );
     txTracer.traceTx(txHash).then((tx) => {
       txTracer.close();
+
+      //update node's gas, amount and status on completed
+      updateNodeOnTxnCompleted(type, tx, txId, this.activityStore);
 
       this.base.setTxTypeInProgress("");
 
