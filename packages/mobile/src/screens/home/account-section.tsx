@@ -313,7 +313,7 @@ export const AccountSection: FunctionComponent<{
               "padding-x-16",
               "padding-y-12",
               "border-width-1",
-              "border-color-indigo-200",
+              "border-color-indigo-20",
             ]),
             containerStyle,
           ] as ViewStyle

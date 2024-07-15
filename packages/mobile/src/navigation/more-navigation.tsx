@@ -5,8 +5,8 @@ import { Stack } from "./navigation";
 import { ViewStyle } from "react-native";
 import {
   BlurHeaderOptionsPreset,
-  HeaderOnGradientScreenOptionsPreset,
   HeaderRightButton,
+  TransparentHeaderOptionsPreset,
 } from "components/header";
 import { useStore } from "stores/index";
 import {
@@ -115,16 +115,16 @@ export const MoreNavigation: FunctionComponent = () => {
       />
       <Stack.Screen
         options={{
-          ...HeaderOnGradientScreenOptionsPreset,
-          title: "Governance",
+          ...TransparentHeaderOptionsPreset,
+          title: "Proposals",
         }}
         name="Governance"
         component={GovernanceScreen}
       />
       <Stack.Screen
         options={{
-          ...HeaderOnGradientScreenOptionsPreset,
-          title: "Proposal",
+          ...TransparentHeaderOptionsPreset,
+          title: "",
         }}
         name="Governance.Details"
         component={GovernanceDetailsScreen}

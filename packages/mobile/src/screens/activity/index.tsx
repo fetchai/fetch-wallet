@@ -52,7 +52,6 @@ export const ActivityScreen = observer(() => {
               style.flatten([
                 "border-width-1",
                 "border-color-gray-300",
-                "width-90",
               ]) as ViewStyle
             }
             backgroundBlur={false}
