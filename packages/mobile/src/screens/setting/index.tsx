@@ -21,9 +21,9 @@ import {
 } from "@react-navigation/native";
 import { ProposalIcon } from "components/new/icon/proposal-icon";
 import { ConfirmCardModel } from "components/new/confirm-modal";
-import { GuideIcon } from "components/new/icon/guide-icon";
 import { useNetInfo } from "@react-native-community/netinfo";
 import Toast from "react-native-toast-message";
+import { GuideIcon } from "components/new/icon/guide-icon";
 
 export const SettingScreen: FunctionComponent = observer(() => {
   const {
@@ -147,17 +147,15 @@ export const SettingScreen: FunctionComponent = observer(() => {
         />
       ) : null}
       <SettingSectionTitle title="Others" />
-      {chainStore.current.govUrl && (
-        <SettingItem
-          label="Proposals  "
-          left={<ProposalIcon />}
-          onPress={() => {
-            navigation.navigate("Setting", {
-              screen: "Governance",
-            });
-          }}
-        />
-      )}
+      <SettingItem
+        label="Proposals  "
+        left={<ProposalIcon />}
+        onPress={() => {
+          navigation.navigate("Setting", {
+            screen: "Governance",
+          });
+        }}
+      />
       <SettingItem
         label="Guide"
         left={<GuideIcon />}

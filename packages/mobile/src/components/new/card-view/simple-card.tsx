@@ -19,6 +19,7 @@ export const SimpleCardView: FunctionComponent<{
   trailingIconStyle?: ViewStyle;
   text?: string;
   backgroundBlur?: boolean;
+  onPress?: () => void;
 }> = ({
   trailingIconComponent,
   leadingIconComponent,
@@ -31,6 +32,7 @@ export const SimpleCardView: FunctionComponent<{
   cardStyle,
   leadingIconStyle,
   trailingIconStyle,
+  onPress,
 }) => {
   const style = useStyle();
 
@@ -54,6 +56,7 @@ export const SimpleCardView: FunctionComponent<{
         borderRadius={12}
         blurIntensity={16}
         backgroundBlur={backgroundBlur}
+        onPress={onPress}
         containerStyle={
           [
             style.flatten([

@@ -1,14 +1,7 @@
 import React, { FunctionComponent, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { PageWithScrollView } from "components/page";
-import {
-  Platform,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  ViewStyle,
-} from "react-native";
+import { Platform, StyleSheet, Text, View, ViewStyle } from "react-native";
 import { useStyle } from "styles/index";
 import { Button } from "components/button";
 import { useStore } from "stores/index";
@@ -161,26 +154,21 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
       return undefined;
     }
 
-    // Can fetch the vote only if the proposal is in voting period.
-    if (proposal.proposalStatus !== Governance.ProposalStatus.VOTING_PERIOD) {
-      return undefined;
-    }
-
     return queries.cosmos.queryProposalVote.getVote(
       proposal.id,
       account.bech32Address
     ).vote;
   })();
 
-  const urlRegex =
-    /(https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z]{2,}(\.[a-zA-Z]{2,})(\.[a-zA-Z]{2,})?\/[a-zA-Z0-9]{2,}|((https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z]{2,}(\.[a-zA-Z]{2,})(\.[a-zA-Z]{2,})?)|(https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z0-9]{2,}\.[a-zA-Z0-9]{2,}\.[a-zA-Z0-9]{2,}(\.[a-zA-Z0-9]{2,})?/g;
-  const urlProposal = proposal?.description;
-  let url = "";
-  if (urlProposal) {
-    if (urlRegex.test(urlProposal)) {
-      url = urlProposal.match(urlRegex)[0];
-    }
-  }
+  // const urlRegex =
+  //   /(https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z]{2,}(\.[a-zA-Z]{2,})(\.[a-zA-Z]{2,})?\/[a-zA-Z0-9]{2,}|((https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z]{2,}(\.[a-zA-Z]{2,})(\.[a-zA-Z]{2,})?)|(https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z0-9]{2,}\.[a-zA-Z0-9]{2,}\.[a-zA-Z0-9]{2,}(\.[a-zA-Z0-9]{2,})?/g;
+  // const urlProposal = proposal?.description;
+  // let url = "";
+  // if (urlProposal) {
+  //   if (urlRegex.test(urlProposal)) {
+  //     url = urlProposal.match(urlRegex)[0];
+  //   }
+  // }
 
   return (
     <React.Fragment>
@@ -202,7 +190,7 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
             {proposal.title}
           </Text>
           <Text
-            numberOfLines={url.length !== 0 ? 4 : undefined}
+            numberOfLines={4}
             ellipsizeMode="head"
             style={style.flatten(["body2", "color-white"]) as ViewStyle}
           >
@@ -275,7 +263,7 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
             </View>
             <GovernanceProposalStatusChip status={proposal.proposalStatus} />
           </View>
-          {url.length !== 0 ? (
+          {chainStore.current.govUrl && (
             <SimpleCardView
               heading="View full text of the proposal"
               leadingIconComponent={
@@ -293,25 +281,20 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
                   }
                 />
               }
-              trailingIconComponent={
-                <TouchableOpacity
-                  onPress={() =>
-                    navigation.navigate("Others", {
-                      screen: "WebView",
-                      params: {
-                        url: url,
-                      },
-                    })
-                  }
-                >
-                  <ExternalLinkIcon />
-                </TouchableOpacity>
-              }
+              trailingIconComponent={<ExternalLinkIcon />}
               cardStyle={
                 style.flatten(["padding-y-18", "margin-bottom-16"]) as ViewStyle
               }
+              onPress={() =>
+                navigation.navigate("Others", {
+                  screen: "WebView",
+                  params: {
+                    url: `${chainStore.current.govUrl}${proposalId}`,
+                  },
+                })
+              }
             />
-          ) : null}
+          )}
           <View style={style.flatten(["margin-bottom-16"]) as ViewStyle}>
             <Text
               style={
@@ -424,11 +407,6 @@ export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
 
   const voted = (() => {
     if (!proposal) {
-      return undefined;
-    }
-
-    // Can fetch the vote only if the proposal is in voting period.
-    if (proposal.proposalStatus !== Governance.ProposalStatus.VOTING_PERIOD) {
       return undefined;
     }
 

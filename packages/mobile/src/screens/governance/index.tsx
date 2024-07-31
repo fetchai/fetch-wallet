@@ -10,36 +10,26 @@ import { HeaderRightButton } from "components/header";
 import { ChipButton } from "components/new/chip";
 import { FilterIcon } from "components/new/icon/filter-icon";
 import { ProposalFilterModal } from "./filter-modal";
-import { fetchProposals, fetchVote } from "utils/proposals/fetch-proposals";
-import { ProposalType } from "src/@types/proposals-type";
 import { PageWithScrollView } from "components/page";
 import { InputCardView } from "components/new/card-view/input-card";
 import { SearchIcon } from "components/new/icon/search-icon";
+import { Governance } from "@keplr-wallet/stores";
 import { EmptyView } from "components/new/empty";
 
-export const proposalOptions = {
-  ProposalActive: "PROPOSAL_STATUS_VOTING_PERIOD",
-  ProposalPassed: "PROPOSAL_STATUS_PASSED",
-  ProposalRejected: "PROPOSAL_STATUS_REJECTED",
-  ProposalFailed: "PROPOSAL_STATUS_FAILED",
-};
-
 export const GovernanceScreen: FunctionComponent = observer(() => {
-  const { accountStore, chainStore, queriesStore, proposalStore } = useStore();
+  const { accountStore, chainStore, queriesStore } = useStore();
 
   const smartNavigation = useSmartNavigation();
 
   const style = useStyle();
 
-  const accountInfo = accountStore.getAccount(chainStore.current.chainId);
+  const account = accountStore.getAccount(chainStore.current.chainId);
 
   const [search, setSearch] = useState("");
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [proposals, setProposals] = useState<ProposalType[]>([]);
 
   const queries = queriesStore.get(chainStore.current.chainId);
-  const storedProposals = proposalStore.proposals;
 
   useEffect(() => {
     smartNavigation.setOptions({
@@ -66,98 +56,44 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
     });
   }, [queries, chainStore, smartNavigation]);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const response = await fetchProposals(chainStore.current.chainId);
-
-        const votedProposals: ProposalType[] = [];
-        const allProposals = response.proposals.reverse();
-        let activeProposals = allProposals.filter((proposal: ProposalType) => {
-          return proposal.status === proposalOptions.ProposalActive;
-        });
-
-        const promises = activeProposals.map(async (proposal: ProposalType) => {
-          try {
-            const vote = await fetchVote(
-              proposal.proposal_id,
-              accountInfo.bech32Address,
-              chainStore.current.rest
-            );
-            if (vote.vote.option && vote.vote.option != "Unspecified")
-              return proposal.proposal_id;
-          } catch (e) {}
-        });
-
-        const voteArray = await Promise.all(promises);
-
-        activeProposals = activeProposals.filter((proposal: ProposalType) => {
-          if (voteArray.indexOf(proposal.proposal_id) != -1) {
-            votedProposals.push(proposal);
-            return false;
-          }
-          return true;
-        });
-        const closedProposals = allProposals.filter(
-          (proposal: ProposalType) => {
-            return (
-              proposal.status === proposalOptions.ProposalPassed ||
-              proposal.status === proposalOptions.ProposalRejected ||
-              proposal.status === proposalOptions.ProposalFailed
-            );
-          }
-        );
-        proposalStore.setProposalsInStore({
-          activeProposals,
-          closedProposals,
-          votedProposals,
-          allProposals,
-        });
-
-        if (selectedIndex === 1) {
-          setProposals(activeProposals);
-          return;
-        }
-        if (selectedIndex === 2) {
-          setProposals(closedProposals);
-          return;
-        }
-
-        if (selectedIndex === 3) {
-          setProposals(votedProposals);
-          return;
-        }
-
-        setProposals(allProposals);
-      } catch (e) {}
-    })();
-  }, []);
-
-  useEffect(() => {
-    let newProposal: ProposalType[];
+  const sections = (() => {
+    let proposals = queries.cosmos.queryGovernance.proposals;
 
     if (selectedIndex === 1) {
-      newProposal = storedProposals.activeProposals;
-    } else if (selectedIndex === 3) {
-      newProposal = storedProposals.closedProposals;
+      proposals = proposals.filter(
+        (proposal) =>
+          proposal.proposalStatus == Governance.ProposalStatus.VOTING_PERIOD
+      );
     } else if (selectedIndex === 2) {
-      newProposal = storedProposals.votedProposals;
-    } else {
-      newProposal = storedProposals.allProposals;
+      proposals = proposals.filter((proposal) => {
+        if (!proposal) {
+          return false;
+        }
+
+        return (
+          queries.cosmos.queryProposalVote.getVote(
+            proposal.id,
+            account.bech32Address
+          ).vote !== "Unspecified"
+        );
+      });
+    } else if (selectedIndex === 3) {
+      proposals = proposals.filter(
+        (proposal) =>
+          proposal.proposalStatus == Governance.ProposalStatus.PASSED ||
+          proposal.proposalStatus == Governance.ProposalStatus.REJECTED ||
+          proposal.proposalStatus == Governance.ProposalStatus.FAILED
+      );
     }
 
-    newProposal = newProposal.filter((proposal: ProposalType) => {
-      if (
-        proposal.content.title
-          .toLowerCase()
-          .includes(search.trim().toLowerCase()) ||
-        proposal.proposal_id.includes(search)
-      )
-        return true;
-    });
+    proposals = proposals.filter(
+      (proposal) =>
+        proposal.title.toLowerCase().includes(search.trim().toLowerCase()) ||
+        proposal.id.includes(search)
+    );
 
-    setProposals(newProposal);
-  }, [selectedIndex, search]);
+    return { data: proposals };
+  })();
 
   return (
     <PageWithScrollView
@@ -179,21 +115,26 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
           rightIcon={<SearchIcon size={12} />}
         />
       </View>
-      {proposals.length !== 0 ? (
-        proposals.map((item: ProposalType) => {
+      {sections.data.length !== 0 ? (
+        sections.data.map((proposal) => {
           return (
             <BlurBackground
-              key={item.proposal_id}
+              key={proposal.id}
               borderRadius={12}
               blurIntensity={16}
               containerStyle={style.flatten(["margin-y-6"]) as ViewStyle}
             >
-              <GovernanceCardBody proposalId={item.proposal_id} />
+              <GovernanceCardBody proposalId={proposal.id} />
             </BlurBackground>
           );
         })
       ) : (
-        <EmptyView containerStyle={style.flatten(["flex-1"])} />
+        <EmptyView
+          containerStyle={style.flatten(["flex-1"])}
+          text={
+            search.trim().length == 0 ? "Empty proposals" : "No search data"
+          }
+        />
       )}
       <ProposalFilterModal
         isOpen={isOpenModal}

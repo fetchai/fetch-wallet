@@ -3,21 +3,36 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "stores/index";
 import { useStyle } from "styles/index";
 import { Governance } from "@keplr-wallet/stores";
-import { Chip } from "components/chip";
 import { Text, View, ViewStyle } from "react-native";
-import { LoadingSpinner } from "components/spinner";
 import { useSmartNavigation } from "navigation/smart-navigation";
 import { RectButton } from "components/rect-button";
 import { BlurButton } from "components/new/button/blur-button";
 import moment from "moment";
+import Skeleton from "react-native-reanimated-skeleton";
 
 export const GovernanceProposalStatusChip: FunctionComponent<{
-  status: Governance.ProposalStatus;
+  status: Governance.ProposalStatus | undefined;
 }> = ({ status }) => {
   const style = useStyle();
   switch (status) {
     case Governance.ProposalStatus.DEPOSIT_PERIOD:
-      return <Chip text="Deposit period" color="primary" mode="outline" />;
+      return (
+        <BlurButton
+          text={"Deposit period"}
+          backgroundBlur={false}
+          borderRadius={4}
+          textStyle={
+            style.flatten([
+              "text-caption2",
+              "font-medium",
+              "color-indigo-900",
+              "margin-y-4",
+              "margin-x-8",
+            ]) as ViewStyle
+          }
+          containerStyle={style.flatten(["background-color-white"])}
+        />
+      );
     case Governance.ProposalStatus.VOTING_PERIOD:
       return (
         <BlurButton
@@ -125,110 +140,125 @@ export const GovernanceCardBody: FunctionComponent<{
   const queries = queriesStore.get(chainStore.current.chainId);
   const queryGovernance = queries.cosmos.queryGovernance;
   const proposal = queryGovernance.getProposal(proposalId);
-
-  return proposal ? (
-    <RectButton
-      style={style.flatten(["padding-18"]) as ViewStyle}
-      onPress={() => {
-        navigation.navigateSmart("Governance.Details", {
-          proposalId: proposal.id,
-        });
-      }}
+  return (
+    <Skeleton
+      isLoading={proposal == undefined}
+      containerStyle={
+        style.flatten(
+          ["width-full"],
+          [proposal == undefined && "padding-18"]
+        ) as ViewStyle
+      }
+      layout={[
+        {
+          key: "proposalId",
+          width: "35%",
+          height: 12,
+          marginBottom: 6,
+        },
+        {
+          key: "proposalTitle",
+          width: "50%",
+          height: 20,
+        },
+        {
+          key: "proposalStatus",
+          width: "100%",
+          height: 35,
+          marginTop: 16,
+        },
+      ]}
+      boneColor={style.get("color-white@20%").color}
+      highlightColor={style.get("color-white@60%").color}
     >
-      <Text
-        style={
-          style.flatten([
-            "text-caption2",
-            "color-white@60%",
-            "margin-bottom-6",
-          ]) as ViewStyle
-        }
-      >{`PROPOSAL #${proposal.id}`}</Text>
-      {/* <View style={style.flatten(["flex-1"])} />
-        <GovernanceProposalStatusChip status={proposal.proposalStatus} /> */}
-      <Text style={style.flatten(["body3", "color-white"]) as ViewStyle}>
-        {proposal.title}
-      </Text>
-      <View
-        style={
-          style.flatten([
-            "flex-row",
-            "items-center",
-            "margin-top-16",
-            "justify-between",
-            "flex-wrap",
-          ]) as ViewStyle
-        }
+      <RectButton
+        style={style.flatten(["padding-18"]) as ViewStyle}
+        onPress={() => {
+          navigation.navigateSmart("Governance.Details", {
+            proposalId: proposal?.id,
+          });
+        }}
       >
+        <Text
+          style={
+            style.flatten([
+              "text-caption2",
+              "color-white@60%",
+              "margin-bottom-6",
+            ]) as ViewStyle
+          }
+        >{`PROPOSAL #${proposal?.id}`}</Text>
+        <Text style={style.flatten(["body3", "color-white"]) as ViewStyle}>
+          {proposal?.title}
+        </Text>
         <View
           style={
             style.flatten([
               "flex-row",
               "items-center",
-              "margin-right-16",
+              "margin-top-16",
+              "justify-between",
+              "flex-wrap",
             ]) as ViewStyle
           }
         >
-          <View style={style.flatten(["margin-right-16"]) as ViewStyle}>
-            <Text
-              style={
-                style.flatten([
-                  "text-caption2",
-                  "color-white@60%",
-                  "margin-bottom-6",
-                ]) as ViewStyle
-              }
-            >
-              Voting start time
-            </Text>
-            <Text
-              style={
-                style.flatten(["text-caption2", "color-white"]) as ViewStyle
-              }
-            >
-              {moment(proposal.raw.voting_start_time)
-                .utc()
-                .format("ddd, DD MMM")}
-            </Text>
+          <View
+            style={
+              style.flatten([
+                "flex-row",
+                "items-center",
+                "margin-right-16",
+              ]) as ViewStyle
+            }
+          >
+            <View style={style.flatten(["margin-right-16"]) as ViewStyle}>
+              <Text
+                style={
+                  style.flatten([
+                    "text-caption2",
+                    "color-white@60%",
+                    "margin-bottom-6",
+                  ]) as ViewStyle
+                }
+              >
+                Voting start time
+              </Text>
+              <Text
+                style={
+                  style.flatten(["text-caption2", "color-white"]) as ViewStyle
+                }
+              >
+                {moment(proposal?.raw.voting_start_time)
+                  .utc()
+                  .format("ddd, DD MMM")}
+              </Text>
+            </View>
+            <View>
+              <Text
+                style={
+                  style.flatten([
+                    "text-caption2",
+                    "color-white@60%",
+                    "margin-bottom-6",
+                  ]) as ViewStyle
+                }
+              >
+                Voting end time
+              </Text>
+              <Text
+                style={
+                  style.flatten(["text-caption2", "color-white"]) as ViewStyle
+                }
+              >
+                {moment(proposal?.raw.voting_end_time)
+                  .utc()
+                  .format("ddd, DD MMM")}
+              </Text>
+            </View>
           </View>
-          <View>
-            <Text
-              style={
-                style.flatten([
-                  "text-caption2",
-                  "color-white@60%",
-                  "margin-bottom-6",
-                ]) as ViewStyle
-              }
-            >
-              Voting end time
-            </Text>
-            <Text
-              style={
-                style.flatten(["text-caption2", "color-white"]) as ViewStyle
-              }
-            >
-              {moment(proposal.raw.voting_end_time).utc().format("ddd, DD MMM")}
-            </Text>
-          </View>
+          <GovernanceProposalStatusChip status={proposal?.proposalStatus} />
         </View>
-        <GovernanceProposalStatusChip status={proposal.proposalStatus} />
-      </View>
-    </RectButton>
-  ) : (
-    <View
-      style={
-        style.flatten([
-          "height-governance-card-body-placeholder",
-          "justify-center",
-          "items-center",
-        ]) as ViewStyle
-      }
-    >
-      <LoadingSpinner
-        color={style.get("color-loading-spinner").color}
-        size={22}
-      />
-    </View>
+      </RectButton>
+    </Skeleton>
   );
 });

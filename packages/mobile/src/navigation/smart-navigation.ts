@@ -239,7 +239,7 @@ const { SmartNavigatorProvider, useSmartNavigation } =
         addressBookConfig: AddressBookConfig;
       };
       "Governance.Details": {
-        proposalId: string;
+        proposalId?: string;
       };
       Send: {
         chainId?: string;
