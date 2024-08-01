@@ -147,15 +147,17 @@ export const SettingScreen: FunctionComponent = observer(() => {
         />
       ) : null}
       <SettingSectionTitle title="Others" />
-      <SettingItem
-        label="Proposals  "
-        left={<ProposalIcon />}
-        onPress={() => {
-          navigation.navigate("Setting", {
-            screen: "Governance",
-          });
-        }}
-      />
+      {chainStore.current.govUrl && (
+        <SettingItem
+          label="Proposals  "
+          left={<ProposalIcon />}
+          onPress={() => {
+            navigation.navigate("Setting", {
+              screen: "Governance",
+            });
+          }}
+        />
+      )}
       <SettingItem
         label="Guide"
         left={<GuideIcon />}
