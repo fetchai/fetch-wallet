@@ -1,0 +1,59 @@
+.gov-proposal-details-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: #fff;
+  margin: 0 -12px;
+  padding: 0 16px 0 16px;
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .title {
+      font-size: 24px;
+      font-weight: 400;
+      line-height: 34px;
+    }
+
+    .description {
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 25.6px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+  }
+
+  .turnout {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    .label {
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 15px;
+      color: rgba(255, 255, 255, 0.6);
+    }
+  }
+}
+
+.tally-results {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.turnout-progress {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+}

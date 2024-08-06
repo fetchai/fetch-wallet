@@ -1,0 +1,166 @@
+.gov-proposals-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.searchContainer {
+  margin: 6px 0px 0px 0px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+
+  .searchBox {
+    display: flex;
+    padding: 12px 18px;
+    flex: 1;
+    align-items: center;
+    gap: 10px;
+    img {
+      width: 16px;
+      height: 16px;
+      -webkit-user-drag: none;
+      -khtml-user-drag: none;
+      -moz-user-drag: none;
+      -o-user-drag: none;
+    }
+    input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: white;
+      &::placeholder {
+        color: rgba(255, 255, 255, 1);
+        font-weight: 400;
+      }
+      flex-grow: 1;
+    }
+  }
+}
+
+.filter-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 12px;
+}
+
+.filter {
+  color: white !important;
+  font-size: 12px;
+  height: 32px;
+  padding: 6px 12px;
+  border-radius: 100px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+}
+.filter:hover {
+  border: 1px solid white;
+}
+
+.filter-heading {
+  display: flex;
+  gap: 5px;
+}
+.dropdownItem {
+  margin-bottom: 0;
+}
+
+.activity-loading {
+  height: 310px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+}
+
+// .loader {
+//   display: inline-block;
+//   margin: 0 16px;
+//   color: white;
+// }
+
+// .loader {
+//   --path: #2f3545;
+//   --dot: #5628ee;
+//   --duration: 2s;
+//   width: 44px;
+//   height: 44px;
+//   position: relative;
+// }
+
+// .loader:before {
+//   content: "";
+//   width: 6px;
+//   height: 6px;
+//   border-radius: 50%;
+//   position: absolute;
+//   display: block;
+//   background: var(--dot);
+//   top: 37px;
+//   left: 19px;
+//   transform: translate(-18px, -18px);
+//   animation: dotRect var(--duration) cubic-bezier(0.785, 0.135, 0.15, 0.86)
+//     infinite;
+// }
+
+// .loader svg {
+//   display: block;
+//   width: 100%;
+//   height: 100%;
+// }
+
+// .loader svg rect,
+// .loader svg polygon,
+// .loader svg circle {
+//   fill: none;
+//   stroke: var(--path);
+//   stroke-width: 10px;
+//   stroke-linejoin: round;
+//   stroke-linecap: round;
+// }
+
+// .loader svg rect {
+//   stroke-dasharray: 192 64 192 64;
+//   stroke-dashoffset: 0;
+//   animation: pathRect 2s cubic-bezier(0.785, 0.135, 0.15, 0.86) infinite;
+// }
+
+// @keyframes pathRect {
+//   25% {
+//     stroke-dashoffset: 64;
+//   }
+
+//   50% {
+//     stroke-dashoffset: 128;
+//   }
+
+//   75% {
+//     stroke-dashoffset: 192;
+//   }
+
+//   100% {
+//     stroke-dashoffset: 256;
+//   }
+// }
+
+// @keyframes dotRect {
+//   25% {
+//     transform: translate(0, 0);
+//   }
+
+//   50% {
+//     transform: translate(18px, -18px);
+//   }
+
+//   75% {
+//     transform: translate(0, -36px);
+//   }
+
+//   100% {
+//     transform: translate(-18px, -18px);
+//   }
+// }

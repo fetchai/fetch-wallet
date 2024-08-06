@@ -165,13 +165,11 @@ export const NativeTab = observer(() => {
   const renderNodes = (nodes: any) => {
     const renderedNodes: JSX.Element[] = [];
     Object.values(nodes).forEach(async (node: any, index) => {
-      const currentDate = moment(node.block.timestamp).format(
-        "ddd, DD MMM YYYY"
-      );
+      const currentDate = moment(node.block.timestamp).format("MMMM DD, YYYY");
       const previousNode: any =
         index > 0 ? Object.values(nodes)[index - 1] : null;
       const previousDate = previousNode
-        ? moment(previousNode.block.timestamp).format("ddd, DD MMM YYYY")
+        ? moment(previousNode.block.timestamp).format("MMMM DD, YYYY")
         : null;
       const shouldDisplayDate = currentDate !== previousDate;
       renderedNodes.push(

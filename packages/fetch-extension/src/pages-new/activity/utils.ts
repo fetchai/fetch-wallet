@@ -143,3 +143,38 @@ export const govOptions = [
   { value: "ABSTAIN", label: "Voted Abstain" },
   { value: "NO_WITH_VETO", label: "Voted No With Veto" },
 ];
+
+export const calculatePercentages = (
+  yes: string,
+  abstain: string,
+  no: string,
+  noWithVeto: string
+) => {
+  const yesVotes = BigInt(yes);
+  const abstainVotes = BigInt(abstain);
+  const noVotes = BigInt(no);
+  const noWithVetoVotes = BigInt(noWithVeto);
+
+  const totalVotes = yesVotes + abstainVotes + noVotes + noWithVetoVotes;
+  if (totalVotes === BigInt(0)) {
+    return {
+      yesPercentage: "0",
+      abstainPercentage: "0",
+      noPercentage: "0",
+      noWithVetoPercentage: "0",
+    };
+  }
+
+  const yesPercentage = (Number(yesVotes) / Number(totalVotes)) * 100;
+  const abstainPercentage = (Number(abstainVotes) / Number(totalVotes)) * 100;
+  const noPercentage = (Number(noVotes) / Number(totalVotes)) * 100;
+  const noWithVetoPercentage =
+    (Number(noWithVetoVotes) / Number(totalVotes)) * 100;
+
+  return {
+    yesPercentage: yesPercentage.toFixed(2),
+    abstainPercentage: abstainPercentage.toFixed(2),
+    noPercentage: noPercentage.toFixed(2),
+    noWithVetoPercentage: noWithVetoPercentage.toFixed(2),
+  };
+};

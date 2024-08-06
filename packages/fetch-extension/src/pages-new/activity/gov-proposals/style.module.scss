@@ -1,7 +1,10 @@
 .rowSubtitle {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 400;
   color: rgba(255, 255, 255, 0.6);
+  display: flex;
+  column-gap: 4px;
+  align-items: center;
   // margin-left: 10px;
 }
 
@@ -20,7 +23,8 @@
 }
 
 .activityCol {
-  font-size: small;
+  font-size: 14px;
+  font-weight: 400;
   display: flex;
   align-items: center;
   margin: 3px;
@@ -46,14 +50,16 @@
   color: white;
   font-size: 14px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   cursor: pointer;
-  // justify-content: space-between;
-  height: 83px;
+  justify-content: space-between;
+  padding: 16px 0;
 }
 .middle {
   // margin-left: 15px;
   align-items: baseline;
   display: flex;
   flex-direction: column;
+  width: 60%;
+  gap: 6px;
 }

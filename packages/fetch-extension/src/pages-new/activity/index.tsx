@@ -1,13 +1,13 @@
+import { TabsPanel } from "@components-v2/tabs/tabsPanel-2";
 import { HeaderLayout } from "@layouts-v2/header-layout";
 import { observer } from "mobx-react-lite";
 import React, { FunctionComponent, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useNavigate } from "react-router";
+import { useStore } from "../../stores";
 import { GovProposalsTab } from "./gov-proposals";
 import { NativeTab } from "./native";
 import style from "./style.module.scss";
-import { useStore } from "../../stores";
-import { TabsPanel } from "@components-v2/tabs/tabsPanel-2";
 
 export const ActivityPage: FunctionComponent = observer(() => {
   const navigate = useNavigate();
@@ -43,7 +43,12 @@ export const ActivityPage: FunctionComponent = observer(() => {
         </div>
         {
           <div style={{ width: "326px" }} className={style["tabContainer"]}>
-            <TabsPanel tabs={tab} />
+            <TabsPanel
+              tabs={tab}
+              tabStyle={{
+                margin: "24px 0px 32px 0px",
+              }}
+            />
           </div>
         }
       </div>

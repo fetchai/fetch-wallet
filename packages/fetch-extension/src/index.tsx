@@ -62,15 +62,21 @@ import { ActivityPage } from "./pages-new/activity";
 import { ActivityDetails } from "./pages-new/activity/activity-details";
 import { AssetView } from "./pages-new/asset-view";
 
+import { DropdownContextProvider } from "@components-v2/dropdown/dropdown-context";
+import { BridgePage } from "./pages-new/bridge";
+import { BridgeHistoryView } from "./pages-new/bridge/bridge-history";
 import { ChangeNamePageV2 } from "./pages-new/keyring-dev/change";
 import { DeleteWallet } from "./pages-new/keyring-dev/delete";
 import { MorePage } from "./pages-new/more";
 import { AppVersion } from "./pages-new/more/app-version";
+import { ExportToMobilePage } from "./pages-new/more/export-to-mobile";
 import { MoreLanguagePage } from "./pages-new/more/language";
 import { ManageNetworks } from "./pages-new/more/manage-networks";
 import { MoreNotifications } from "./pages-new/more/notification";
 import { NotificationOrganizations } from "./pages-new/more/notification/notiphy-notification/notification-organizations";
 import { NotificationTopics } from "./pages-new/more/notification/notiphy-notification/notification-topics";
+import { Proposals } from "./pages-new/more/proposals";
+import { ProposalDetail } from "./pages-new/more/proposals/proposal-details";
 import { SecurityPrivacyPage } from "./pages-new/more/security-privacy";
 import { AutoLockPage } from "./pages-new/more/security-privacy/autolock";
 import { PermissionsGetChainInfosPage } from "./pages-new/more/security-privacy/permissions/get-chain-infos";
@@ -79,21 +85,19 @@ import { Portfolio } from "./pages-new/portfolio";
 import { Receive } from "./pages-new/receive";
 import { SignPageV2 } from "./pages-new/sign";
 import { Stake } from "./pages-new/stake";
-import { ValidatorList } from "./pages-unused/validator-list";
-import { ValidatorListPage } from "./pages-new/validator-list";
 import { Validator } from "./pages-new/validator";
+import { ValidatorListPage } from "./pages-new/validator-list";
 import { Delegate } from "./pages-new/validator/delegate";
 import { Redelegate } from "./pages-new/validator/redelegate";
 import { Unstake } from "./pages-new/validator/unstake";
 import { AxelarBridgeCosmos } from "./pages-unused/axelar-bridge/axelar-bridge-cosmos";
 import { AxelarBridgeEVM } from "./pages-unused/axelar-bridge/axelar-bridge-evm";
+import { ValidatorList } from "./pages-unused/validator-list";
 import { AgentChatSection } from "./pages/agent-chat-section";
 import { ApproveAddChainByNetworkPage } from "./pages/approveAddChainByNetwork";
 import { ApproveSwitchAccountByAddressPage } from "./pages/approveSwitchAccountPage";
 import { ApproveSwitchChainPage } from "./pages/approveSwitchChainPage";
 import { AuthZPage } from "./pages/authz";
-import { BridgePage } from "./pages-new/bridge";
-import { BridgeHistoryView } from "./pages-new/bridge/bridge-history";
 import { ChainSuggestedPage } from "./pages/chain/suggest";
 import { ChatPage } from "./pages/chat";
 import { ChatSection } from "./pages/chat-section";
@@ -110,9 +114,6 @@ import { KeystoneSignPage } from "./pages/keystone/sign";
 import { NewChat } from "./pages/new-chat";
 import { ReviewNotification } from "./pages/notiphy-notification/review-notification";
 import { GrantGlobalPermissionGetChainInfosPage } from "./pages/permission/grant";
-import { Proposals } from "./pages/proposals";
-import { ProposalDetail } from "./pages/proposals/proposal-detail";
-import { PropsalVoteStatus } from "./pages/proposals/proposal-vote-status";
 import { AddEvmChain } from "./pages/setting/addEvmChain";
 import { ChainActivePage } from "./pages/setting/chain-active";
 import { ChatSettings } from "./pages/setting/chat";
@@ -121,8 +122,6 @@ import { Privacy } from "./pages/setting/chat/privacy";
 import { ReadRecipt } from "./pages/setting/chat/readRecipt";
 import { SettingEndpointsPage } from "./pages/setting/endpoints";
 import { StakeComplete } from "./pages/validator/stake-complete";
-import { DropdownContextProvider } from "@components-v2/dropdown/dropdown-context";
-import { ExportToMobilePage } from "./pages-new/more/export-to-mobile";
 
 window.keplr = new Keplr(
   manifest.version,
@@ -453,10 +452,6 @@ ReactDOM.render(
                           element={<ProposalDetail />}
                         />
                         <Route
-                          path="/proposal-vote-status/:votedOn/:id"
-                          element={<PropsalVoteStatus />}
-                        />
-                        <Route
                           path="/setting/addEvmChain"
                           element={<AddEvmChain />}
                         />
@@ -488,7 +483,6 @@ ReactDOM.render(
                           path="/validator/:validator_address/unstake"
                           element={<Unstake />}
                         />
-
                         <Route path="*" element={<StateRenderer />} />
                       </Routes>
                     </ChatStoreProvider>

@@ -6,7 +6,7 @@ import { AddressBookData } from "@keplr-wallet/hooks";
 
 interface Props {
   searchTerm: string;
-  valuesArray: any[] | _DeepReadonlyArray<AddressBookData>;
+  valuesArray: any[] | _DeepReadonlyArray<any>;
   renderResult: (value: any, index: number) => React.ReactNode;
   onSearchTermChange: (term: string) => void;
   itemsStyleProp?: any;

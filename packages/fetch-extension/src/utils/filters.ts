@@ -13,3 +13,17 @@ export const getFilteredChainValues = (values: any[], searchTerm: string) => {
 
   return filteredValues;
 };
+
+export const getFilteredProposals = (values: any[], searchTerm: string) => {
+  const filteredValues = values.filter((proposal: any) => {
+    if (
+      proposal.content.title
+        .toLowerCase()
+        .includes(searchTerm.trim().toLowerCase()) ||
+      proposal.proposal_id.includes(searchTerm)
+    )
+      return true;
+  });
+
+  return filteredValues;
+};

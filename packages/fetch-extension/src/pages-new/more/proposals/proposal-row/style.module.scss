@@ -1,0 +1,49 @@
+.govt-proposal-row-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .top-div {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    .proposal-number {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 12px;
+      font-weight: 400;
+      text-transform: uppercase;
+    }
+
+    .proposal-title {
+      font-size: 14px;
+      font-weight: 400;
+    }
+  }
+}
+.proposal-duration-div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .proposal-duration-container {
+    display: flex;
+    gap: 16px;
+
+    .proposal-duration {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 400;
+
+      .proposal-duration-title {
+        color: rgba(255, 255, 255, 0.6);
+      }
+
+      .proposal-duration-date {
+        color: rgba(255, 255, 255, 1);
+      }
+    }
+  }
+}
