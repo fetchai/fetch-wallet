@@ -18,7 +18,7 @@ export const GovernanceProposalStatusChip: FunctionComponent<{
     case Governance.ProposalStatus.DEPOSIT_PERIOD:
       return (
         <BlurButton
-          text={"Deposit period"}
+          text={"Deposit\nperiod"}
           backgroundBlur={false}
           borderRadius={4}
           textStyle={
@@ -28,6 +28,7 @@ export const GovernanceProposalStatusChip: FunctionComponent<{
               "color-indigo-900",
               "margin-y-4",
               "margin-x-8",
+              "text-center",
             ]) as ViewStyle
           }
           containerStyle={style.flatten(["background-color-white"])}
@@ -36,7 +37,7 @@ export const GovernanceProposalStatusChip: FunctionComponent<{
     case Governance.ProposalStatus.VOTING_PERIOD:
       return (
         <BlurButton
-          text={"Avtive"}
+          text={"Active"}
           backgroundBlur={false}
           borderRadius={4}
           textStyle={

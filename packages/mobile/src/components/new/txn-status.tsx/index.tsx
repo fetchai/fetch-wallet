@@ -14,7 +14,7 @@ export const txType: txTypes = {
   delegate: "Delegation",
   undelegate: "Undelegation",
   redelegate: "Redelegation",
-  govVote: "Government Vote",
+  govVote: "Governance Vote",
   nativeBridgeSend: "Bridging",
   approval: "Approve txn",
   createSecret20ViewingKey: "Secret key creation",

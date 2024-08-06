@@ -11,11 +11,12 @@ import { useStore } from "stores/index";
 import { useStyle } from "styles/index";
 import { CardDivider } from "components/card";
 import { FilterItem } from "screens/activity";
-import { activityFilterOptions, ActivityFilterView } from "./activity-filter";
 import { ActivityRow } from "./activity-row";
 import { observer } from "mobx-react-lite";
 import { NoActivityView } from "screens/activity/activity-transaction/no-activity-view";
 import { isFeatureAvailable } from "utils/index";
+import { ActivityFilterView } from "../filter/activity-filter";
+import { txOptions } from "screens/activity/utils";
 
 const processFilters = (filters: FilterItem[]) => {
   let result: any[] = [];
@@ -39,7 +40,7 @@ export const ActivityNativeTab: FunctionComponent<{
   const [_date, setDate] = useState("");
   const [activities, setActivities] = useState<unknown[]>([]);
 
-  const [filters, setFilters] = useState<FilterItem[]>(activityFilterOptions);
+  const [filters, setFilters] = useState<FilterItem[]>(txOptions);
   const [isLoading, setIsLoading] = useState(true);
 
   const accountOrChainChanged =
@@ -61,7 +62,7 @@ export const ActivityNativeTab: FunctionComponent<{
   }, [activityStore.sortedNodes]);
 
   useEffect(() => {
-    setFilters(activityFilterOptions);
+    setFilters(txOptions);
   }, [accountOrChainChanged]);
 
   useEffect(() => {
@@ -168,6 +169,7 @@ export const ActivityNativeTab: FunctionComponent<{
         filters={filters}
         handleFilterChange={handleFilterChange}
         close={() => setIsOpenModal(false)}
+        activityFilterOptions={txOptions}
       />
     </React.Fragment>
   );

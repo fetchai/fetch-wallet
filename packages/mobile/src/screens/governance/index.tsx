@@ -136,6 +136,7 @@ export const GovernanceScreen: FunctionComponent = observer(() => {
           }
         />
       )}
+      <View style={style.flatten(["height-page-pad"]) as ViewStyle} />
       <ProposalFilterModal
         isOpen={isOpenModal}
         close={() => setIsOpenModal(false)}

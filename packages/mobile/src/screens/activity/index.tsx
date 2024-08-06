@@ -1,4 +1,4 @@
-import React, { ReactElement, useState } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
 import { PageWithViewInBottomTabView } from "components/page";
 import { Platform, ScrollView, Text, ViewStyle } from "react-native";
 import { useStyle } from "styles/index";
@@ -6,30 +6,53 @@ import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ChipButton } from "components/new/chip";
 import { FilterIcon } from "components/new/icon/filter-icon";
-import { ChatSection } from "screens/inbox/chat-section";
 import { ActivityNativeTab } from "screens/activity/activity-transaction";
 import { useStore } from "stores/index";
 import { observer } from "mobx-react-lite";
 import { isFeatureAvailable } from "utils/index";
+import { TabBarView } from "components/new/tab-bar/tab-bar";
+import { RouteProp, useRoute } from "@react-navigation/native";
+import { GovProposalsTab } from "screens/activity/gov-proposals";
 
 export interface FilterItem {
-  icon: ReactElement;
+  icon: ReactElement | null;
   isSelected: boolean;
   title: string;
   value: string;
 }
 
-enum ActivityEnum {
+export enum ActivityEnum {
   Transactions = "Transactions",
   GovProposals = "Gov Proposals",
 }
 
 export const ActivityScreen = observer(() => {
+  const route = useRoute<
+    RouteProp<
+      Record<
+        string,
+        {
+          tabId?: ActivityEnum;
+        }
+      >,
+      string
+    >
+  >();
+
+  const tabId = route?.params?.tabId || ActivityEnum.Transactions;
+
   const style = useStyle();
-  const [selectedId, _setSelectedId] = useState(ActivityEnum.Transactions);
+  const [selectedId, setSelectedId] = useState(tabId);
   const safeAreaInsets = useSafeAreaInsets();
   const [isOpenModal, setIsOpenModal] = useState(false);
-  const { analyticsStore, chainStore } = useStore();
+  const [latestBlock, _setLatestBlock] = useState<string>();
+
+  const { analyticsStore, chainStore, accountStore } = useStore();
+  const accountInfo = accountStore.getAccount(chainStore.current.chainId);
+
+  useEffect(() => {
+    setSelectedId(tabId);
+  }, [route?.params, chainStore.current.chainId, accountInfo.bech32Address]);
 
   return (
     <PageWithViewInBottomTabView
@@ -78,12 +101,12 @@ export const ActivityScreen = observer(() => {
       >
         Activity
       </Text>
-      {/*<TabBarView*/}
-      {/*  listItem={ActivityEnum}*/}
-      {/*  selected={selectedId}*/}
-      {/*  setSelected={setSelectedId}*/}
-      {/*  containerStyle={style.flatten(["margin-x-20"]) as ViewStyle}*/}
-      {/*/>*/}
+      <TabBarView
+        listItem={ActivityEnum}
+        selected={selectedId}
+        setSelected={setSelectedId}
+        containerStyle={style.flatten(["margin-x-20"]) as ViewStyle}
+      />
       <ScrollView
         indicatorStyle={"white"}
         contentContainerStyle={
@@ -102,7 +125,13 @@ export const ActivityScreen = observer(() => {
             />
           </View>
         )}
-        {selectedId === ActivityEnum.GovProposals && <ChatSection />}
+        {selectedId === ActivityEnum.GovProposals && (
+          <GovProposalsTab
+            isOpenModal={isOpenModal}
+            setIsOpenModal={setIsOpenModal}
+            latestBlock={latestBlock}
+          />
+        )}
       </ScrollView>
     </PageWithViewInBottomTabView>
   );

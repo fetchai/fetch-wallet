@@ -15,7 +15,6 @@ import {
 import { LoadingSpinner } from "components/spinner";
 import { Governance } from "@keplr-wallet/stores";
 import { IntPretty } from "@keplr-wallet/unit";
-import { useSmartNavigation } from "navigation/smart-navigation";
 import { GovernanceProposalStatusChip } from "./card";
 import { BlurBackground } from "components/new/blur-background/blur-background";
 import { GovernanceVoteModal } from "./vote-modal";
@@ -26,7 +25,14 @@ import { IconButton } from "components/new/button/icon";
 import { BlurButton } from "components/new/button/blur-button";
 import { CheckIcon } from "components/new/icon/check";
 import moment from "moment";
+import { TransactionModal } from "modals/transaction";
+import { Buffer } from "buffer";
+import { ActivityEnum } from "screens/activity";
+import Toast from "react-native-toast-message";
+import { useSmartNavigation } from "navigation/smart-navigation";
+import { txType } from "components/new/txn-status.tsx";
 
+export type VoteType = "Yes" | "No" | "NoWithVeto" | "Abstain" | "Unspecified";
 export const TallyVoteInfoView: FunctionComponent<{
   vote: "yes" | "no" | "abstain" | "noWithVeto";
   voted: boolean;
@@ -154,21 +160,15 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
       return undefined;
     }
 
+    if (proposal.proposalStatus === Governance.ProposalStatus.DEPOSIT_PERIOD) {
+      return undefined;
+    }
+
     return queries.cosmos.queryProposalVote.getVote(
       proposal.id,
       account.bech32Address
     ).vote;
   })();
-
-  // const urlRegex =
-  //   /(https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z]{2,}(\.[a-zA-Z]{2,})(\.[a-zA-Z]{2,})?\/[a-zA-Z0-9]{2,}|((https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z]{2,}(\.[a-zA-Z]{2,})(\.[a-zA-Z]{2,})?)|(https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z0-9]{2,}\.[a-zA-Z0-9]{2,}\.[a-zA-Z0-9]{2,}(\.[a-zA-Z0-9]{2,})?/g;
-  // const urlProposal = proposal?.description;
-  // let url = "";
-  // if (urlProposal) {
-  //   if (urlRegex.test(urlProposal)) {
-  //     url = urlProposal.match(urlRegex)[0];
-  //   }
-  // }
 
   return (
     <React.Fragment>
@@ -378,9 +378,10 @@ export const GovernanceDetailsCardBody: FunctionComponent<{
 });
 
 export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
-  const { chainStore, queriesStore, accountStore } = useStore();
+  const { chainStore, queriesStore, accountStore, analyticsStore } = useStore();
 
   const style = useStyle();
+  const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const smartNavigation = useSmartNavigation();
 
   const route = useRoute<
@@ -396,6 +397,12 @@ export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
   >();
 
   const proposalId = route.params.proposalId;
+
+  const [txnHash, setTxnHash] = useState<string>("");
+  const [openTxStateModal, setTxStateModal] = useState(false);
+  const [isSendingTx, setIsSendingTx] = useState(false);
+  const [vote, setVote] = useState<VoteType>("Unspecified");
+  const [openGovModel, setGovModalOpen] = useState(false);
 
   const queries = queriesStore.get(chainStore.current.chainId);
   const account = accountStore.getAccount(chainStore.current.chainId);
@@ -415,7 +422,6 @@ export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
       account.bech32Address
     ).vote;
   })();
-
   const voteText = (() => {
     if (!proposal) {
       return "Loading...";
@@ -424,13 +430,75 @@ export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
       case Governance.ProposalStatus.DEPOSIT_PERIOD:
         return "Vote Not Started";
       case Governance.ProposalStatus.VOTING_PERIOD:
-        return voted ? "Change your vote" : "Vote";
+        return voted !== "Unspecified" ? "Change your vote" : "Vote";
       default:
         return "Voting closed";
     }
   })();
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const onSubmit = async () => {
+    if (vote !== "Unspecified" && account.isReadyToSendTx) {
+      const tx = account.cosmos.makeGovVoteTx(proposalId, vote);
+
+      setIsSendingTx(true);
+
+      try {
+        let gas = account.cosmos.msgOpts.govVote.gas;
+
+        // Gas adjustment is 1.5
+        // Since there is currently no convenient way to adjust the gas adjustment on the UI,
+        // Use high gas adjustment to prevent failure.
+        try {
+          gas = (await tx.simulate()).gasUsed * 1.5;
+        } catch (e) {
+          // Some chain with older version of cosmos sdk (below @0.43 version) can't handle the simulation.
+          // Therefore, the failure is expected. If the simulation fails, simply use the default value.
+          console.log(e);
+        }
+        setGovModalOpen(false);
+        await tx.send(
+          { amount: [], gas: gas.toString() },
+          "",
+          {},
+          {
+            onBroadcasted: (txHash) => {
+              setTxnHash(Buffer.from(txHash).toString("hex"));
+              setTxStateModal(true);
+              analyticsStore.logEvent("vote_txn_broadcasted", {
+                chainId: chainStore.current.chainId,
+                chainName: chainStore.current.chainName,
+              });
+            },
+          }
+        );
+      } catch (e) {
+        if (
+          e?.message === "Request rejected" ||
+          e?.message === "Transaction rejected"
+        ) {
+          Toast.show({
+            type: "error",
+            text1: "Transaction rejected",
+          });
+          return;
+        } else {
+          Toast.show({
+            type: "error",
+            text1: e?.message,
+          });
+        }
+        console.log(e);
+        smartNavigation.navigateSmart("Home", {});
+        analyticsStore.logEvent("vote_txn_broadcasted_fail", {
+          chainId: chainStore.current.chainId,
+          chainName: chainStore.current.chainName,
+          message: e?.message ?? "",
+        });
+      } finally {
+        setIsSendingTx(false);
+      }
+    }
+  };
 
   return (
     <PageWithScrollView
@@ -451,15 +519,42 @@ export const GovernanceDetailsScreen: FunctionComponent = observer(() => {
         rippleColor="black@50%"
         disabled={!voteEnabled || !account.isReadyToSendTx}
         onPress={() => {
-          setIsModalOpen(true);
+          if (account.txTypeInProgress === "govVote") {
+            Toast.show({
+              type: "error",
+              text1: `${txType[account.txTypeInProgress]} in progress`,
+            });
+            return;
+          }
+          setGovModalOpen(true);
         }}
       />
       <View style={style.flatten(["height-page-pad"]) as ViewStyle} />
       <GovernanceVoteModal
-        isOpen={isModalOpen}
-        close={() => setIsModalOpen(false)}
-        proposalId={proposalId}
-        smartNavigation={smartNavigation}
+        isOpen={openGovModel}
+        close={() => setGovModalOpen(false)}
+        vote={vote}
+        setVote={setVote}
+        isSendingTx={isSendingTx}
+        onPress={onSubmit}
+      />
+      <TransactionModal
+        isOpen={openTxStateModal}
+        close={() => {
+          setTxStateModal(false);
+        }}
+        txnHash={txnHash}
+        chainId={chainStore.current.chainId}
+        buttonText="Go to activity screen"
+        onHomeClick={() => {
+          navigation.navigate("MainTab", {
+            screen: "ActivityTab",
+            params: {
+              tabId: ActivityEnum.GovProposals,
+            },
+          });
+        }}
+        onTryAgainClick={onSubmit}
       />
     </PageWithScrollView>
   );
