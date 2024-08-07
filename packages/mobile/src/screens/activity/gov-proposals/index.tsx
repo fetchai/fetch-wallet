@@ -28,9 +28,12 @@ export const GovProposalsTab: FunctionComponent<{
   latestBlock: any;
 }> = observer(({ isOpenModal, setIsOpenModal, latestBlock }) => {
   const style = useStyle();
-  const { chainStore, accountStore, activityStore } = useStore();
+  const { chainStore, accountStore, activityStore, queriesStore } = useStore();
   const current = chainStore.current;
   const accountInfo = accountStore.getAccount(current.chainId);
+
+  const queries = queriesStore.get(chainStore.current.chainId);
+  const proposalLoading = queries.cosmos.queryGovernance.isFetching;
 
   const [filters, setFilters] = useState<FilterItem[]>(govOptions);
   const [isLoading, setIsLoading] = useState(true);
@@ -117,7 +120,8 @@ export const GovProposalsTab: FunctionComponent<{
     <React.Fragment>
       {isFeatureAvailable(current.chainId) &&
       data.length > 0 &&
-      Object.values(nodes).length > 0 ? (
+      Object.values(nodes).length > 0 &&
+      !proposalLoading ? (
         renderList(data)
       ) : Object.values(nodes).length == 0 && isLoading ? (
         <ActivityIndicator
