@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
 
-  "name": "Fetch Wallet",
-  "description": "The official Fetch wallet for interacting with the Fetch ledger",
+  "name": "ASI Wallet",
+  "description": "The official ASI wallet for interacting with the Fetch ledger",
   "version": "0.18.1",
   "icons": {
     "16": "assets/icon-16.png",
@@ -11,7 +11,7 @@
   },
   "browser_action": {
     "default_popup": "popup.html",
-    "default_title": "Fetch Wallet"
+    "default_title": "ASI Wallet"
   },
   "background": {
     "page": "background.html",

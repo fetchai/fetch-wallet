@@ -86,7 +86,7 @@ export const RegisterPage: FunctionComponent = observer(() => {
         >
           <img
             className={style["icon"]}
-            src={require("@assets/svg/wireframe/logo-small.svg")}
+            src={require("@assets/png/ASI-Logo-Icon-white.png")}
             alt="logo"
           />
         </div>

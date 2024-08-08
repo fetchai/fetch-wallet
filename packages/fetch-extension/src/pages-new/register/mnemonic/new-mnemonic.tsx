@@ -50,11 +50,29 @@ export const NewMnemonicIntro: FunctionComponent<{
   return (
     <React.Fragment>
       {" "}
-      <img
-        style={{ width: "450px" }}
-        src={require("@assets/svg/wireframe/Title.svg")}
-        alt="logo"
-      />
+      <div className="flex flex-col">
+        <div
+          style={{
+            fontSize: "36px",
+            color: "white",
+            fontWeight: 400,
+          }}
+        >
+          Welcome to your
+        </div>
+        <div
+          style={{
+            fontSize: "36px",
+            color: "transparent",
+            fontWeight: 400,
+            background:
+              "linear-gradient(270deg, #F9774B 5.16%, #CF447B 86.63%)",
+            backgroundClip: "text",
+          }}
+        >
+          ASI Wallet
+        </div>
+      </div>
       <div className={style["titleText"]}>Choose how you want to proceed</div>
       <div
         className={style["card"]}

@@ -74,7 +74,7 @@ export const ExportToMobilePage: FunctionComponent = () => {
       onBackButton={() => {
         navigate(-1);
         analyticsStore.logEvent("back_click", {
-          pageName: "Link Fetch Mobile Wallet",
+          pageName: "Link ASI Mobile Wallet",
         });
       }}
     >
@@ -421,7 +421,7 @@ const QRCodeView: FunctionComponent<{
             textAlign: "center",
           }}
         >
-          Scan this QR code on Fetch Mobile to export your accounts.
+          Scan this QR code on ASI Mobile Wallet to export your accounts.
         </div>
         <Alert className={style["alert"]}>
           <img src={require("@assets/svg/wireframe/alert.svg")} alt="" />
@@ -432,10 +432,10 @@ const QRCodeView: FunctionComponent<{
               gap: "6px",
             }}
           >
-            <div className={style["text"]}>Only scan on Fetch Mobile</div>
+            <div className={style["text"]}>Only scan on ASI Mobile Wallet</div>
             <p className={style["lightText"]}>
-              Scanning the QR code outside of Fetch Mobile can lead to loss of
-              funds
+              Scanning the QR code outside of ASI Mobile Wallet can lead to loss
+              of funds
             </p>
           </div>
         </Alert>

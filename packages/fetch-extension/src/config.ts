@@ -2915,6 +2915,7 @@ export const EmbedChainInfos: ChainInfo[] = [
       },
     ],
     features: ["cosmwasm"],
+    chainSymbolImageUrl: require("./public/assets/png/Black-white-circle.png"),
     walletUrlForStaking: "https://explore-eridanus-1.fetch.ai/validators",
     govUrl: "https://explore-eridanus-1.fetch.ai/proposals/",
   },

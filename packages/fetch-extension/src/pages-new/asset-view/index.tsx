@@ -42,15 +42,12 @@ export const AssetView = observer(() => {
   useEffect(() => {
     const fetchTokenImage = async () => {
       if (!!tokenIcon || !tokenInfo) return;
-      if (tokenInfo?.coinImageUrl) {
-        setTokenIcon(tokenInfo.coinImageUrl);
-      } else {
-        const tokenImage = await getTokenIcon(tokenInfo?.coinGeckoId);
-        setTokenIcon(tokenImage);
-      }
+
+      const tokenImage = await getTokenIcon(tokenInfo?.coinGeckoId);
+      setTokenIcon(tokenImage);
     };
     fetchTokenImage();
-  }, [tokenInfo?.coinGeckoId, tokenInfo?.coinImageUrl]);
+  }, [tokenInfo?.coinGeckoId]);
   const { numericPart: totalNumber, denomPart: totalDenom } =
     separateNumericAndDenom(balances?.balance.toString());
 

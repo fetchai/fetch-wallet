@@ -198,7 +198,10 @@ const StateRenderer: FunctionComponent = observer(() => {
           backgroundImage: `url(${require("@assets/svg/wireframe/bg-onboarding.svg")})`,
         }}
       >
-        <Banner icon={require("@assets/svg/wireframe/LogoV2.svg")} logo={""} />
+        <Banner
+          icon={require("@assets/png/ASI-Logo-Icon-white.png")}
+          logo={""}
+        />
       </div>
     );
   } else {

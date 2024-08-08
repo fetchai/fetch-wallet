@@ -1,8 +1,8 @@
 import { AppCurrency } from "@keplr-wallet/types";
 import { shortenNumber } from "@utils/format";
-import sendIcon from "@assets/svg/wireframe/activity-send.svg";
+import sendIcon from "@assets/svg/wireframe/asi-send.svg";
 import recieveIcon from "@assets/svg/wireframe/activity-recieve.svg";
-import stakeIcon from "@assets/svg/wireframe/activity-stake.svg";
+import stakeIcon from "@assets/svg/wireframe/asi-staked.svg";
 
 const getAmount = (denom: string, amount: string, chainStore: any) => {
   const amountCurrency = chainStore.current.currencies.find(

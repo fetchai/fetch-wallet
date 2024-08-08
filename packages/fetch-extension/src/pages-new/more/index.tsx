@@ -76,7 +76,7 @@ export const MorePage: FunctionComponent = () => {
         leftImageStyle={{ background: "transparent" }}
         style={{ background: "rgba(255,255,255,0.1)", marginBottom: "6px" }}
         leftImage={require("@assets/svg/wireframe/chain-list-access.svg")}
-        heading={"Link Fetch Mobile Wallet"}
+        heading={"Link ASI Mobile Wallet"}
         onClick={() => navigate("/more/export-to-mobile")}
       />
 
@@ -154,7 +154,7 @@ export const MorePage: FunctionComponent = () => {
         leftImageStyle={{ background: "transparent" }}
         style={{ background: "rgba(255,255,255,0.1)", marginBottom: "5px" }}
         leftImage={require("@assets/svg/wireframe/wallet-version.svg")}
-        heading={"Fetch Wallet version"}
+        heading={"ASI Wallet version"}
         onClick={() => navigate("/app-version")}
       /> */}
 

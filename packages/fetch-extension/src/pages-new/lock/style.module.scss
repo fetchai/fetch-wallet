@@ -15,14 +15,18 @@
 }
 .banner {
   margin-top: 15px;
-  width: 108.996px;
-  height: 18px;
+  width: 336px;
+  height: 35px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   position: absolute;
-  right: 122.5px;
+  // right: 122.5px;
+
+  img {
+    height: 42px;
+  }
 }
 .password-field {
   margin-top: 110px;

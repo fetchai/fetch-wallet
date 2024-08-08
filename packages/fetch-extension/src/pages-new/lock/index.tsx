@@ -89,7 +89,7 @@ export const LockPage: FunctionComponent = observer(() => {
         })}
       >
         <div className={style["banner"]}>
-          <img src={require("@assets/svg/wireframe/LogoV2.svg")} alt="" />
+          <img src={require("@assets/png/ASI-Logo-Icon-white.png")} alt="" />
         </div>
 
         <div className={style["password-field"]}>
