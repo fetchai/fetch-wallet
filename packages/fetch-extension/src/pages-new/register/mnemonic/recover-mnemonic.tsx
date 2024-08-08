@@ -107,7 +107,7 @@ export const RecoverMnemonicMainPage: FunctionComponent<{
   registerConfig: RegisterConfig;
   setSelectedCard: any;
 }> = ({ registerConfig, setSelectedCard }) => {
-  const { analyticsStore } = useStore();
+  const { analyticsStore, uiConfigStore } = useStore();
   return (
     <div className={style["mainpageOuterContainer"]}>
       <div className={style["mainpageContainer"]}>
@@ -142,33 +142,35 @@ export const RecoverMnemonicMainPage: FunctionComponent<{
             leftImage={keyIcon}
             heading={"Use a seed phrase or a private key"}
           />
-          <Card
-            leftImageStyle={{
-              width: "32px",
-              height: "32px",
-            }}
-            style={{
-              backgroundColor: "rgba(255,255,255,0.1)",
-              height: "78px",
-              fontSize: "14px",
-              padding: "18px",
-            }}
-            onClick={(e: any) => {
-              e.preventDefault();
-              setSelectedCard(AccountSetupType.CONNECT_HARDWARE);
-              registerConfig.setType(TypeRecoverMnemonic);
-              analyticsStore.logEvent("Import account started", {
-                registerType: "seed",
-              });
-            }}
-            leftImage={require("@assets/svg/wireframe/hardware.svg")}
-            heading={"Connect hardware wallet"}
-            subheading={"Requires bluetooth access to pair"}
-            subheadingStyle={{
-              fontSize: "14px",
-              opacity: 0.6,
-            }}
-          />
+          {uiConfigStore.platform != "firefox" && (
+            <Card
+              leftImageStyle={{
+                width: "32px",
+                height: "32px",
+              }}
+              style={{
+                backgroundColor: "rgba(255,255,255,0.1)",
+                height: "78px",
+                fontSize: "14px",
+                padding: "18px",
+              }}
+              onClick={(e: any) => {
+                e.preventDefault();
+                setSelectedCard(AccountSetupType.CONNECT_HARDWARE);
+                registerConfig.setType(TypeRecoverMnemonic);
+                analyticsStore.logEvent("Import account started", {
+                  registerType: "seed",
+                });
+              }}
+              leftImage={require("@assets/svg/wireframe/hardware.svg")}
+              heading={"Connect hardware wallet"}
+              subheading={"Please connect via USB"}
+              subheadingStyle={{
+                fontSize: "14px",
+                opacity: 0.6,
+              }}
+            />
+          )}
           <Card
             leftImageStyle={{
               width: "32px",

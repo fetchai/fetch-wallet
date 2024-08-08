@@ -3,25 +3,25 @@ import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import classnames from "classnames";
 import styleCoinInput from "./coin-input.module.scss";
 
-import { FormGroup, Label } from "reactstrap";
-import { observer } from "mobx-react-lite";
 import {
-  EmptyAmountError,
-  InvalidNumberAmountError,
-  ZeroAmountError,
-  NegativeAmountError,
-  InsufficientAmountError,
-  IAmountConfig,
   BridgeAmountError,
+  EmptyAmountError,
+  IAmountConfig,
+  InsufficientAmountError,
+  InvalidNumberAmountError,
+  NegativeAmountError,
+  ZeroAmountError,
 } from "@keplr-wallet/hooks";
-import { CoinPretty, Dec, DecUtils, Int } from "@keplr-wallet/unit";
-import { useIntl } from "react-intl";
-import { useStore } from "../../stores";
 import { AppCurrency } from "@keplr-wallet/types";
+import { CoinPretty, Dec, DecUtils, Int } from "@keplr-wallet/unit";
+import { parseDollarAmount, parseExponential } from "@utils/format";
+import { observer } from "mobx-react-lite";
+import { useIntl } from "react-intl";
+import { FormGroup, Label } from "reactstrap";
 import { useLanguage } from "../../languages";
+import { useStore } from "../../stores";
 import { Card } from "../card";
 import { Dropdown } from "../dropdown";
-import { parseDollarAmount, parseExponential } from "@utils/format";
 
 export interface CoinInputProps {
   amountConfig: IAmountConfig;
@@ -152,12 +152,19 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
                   e.preventDefault();
 
                   if (
-                    (e.target.value < 10 ** 9 &&
-                      e.target.value >
-                        10 ** (-1 * amountConfig.sendCurrency.coinDecimals)) ||
+                    e.target.value < 10 ** 9 ||
                     e.target.value === "0" ||
                     e.target.value === ""
                   ) {
+                    if (
+                      parseExponential(
+                        amountConfig.amount,
+                        amountConfig.sendCurrency.coinDecimals
+                      ).toString().length > 1 &&
+                      isNaN(parseFloat(e.target.value))
+                    ) {
+                      return;
+                    }
                     isToggleClicked === true
                       ? parseDollarAmount(inputInUsd)
                       : amountConfig.setAmount(e.target.value);

@@ -8,6 +8,11 @@
   background: rgba(255, 255, 255, 0.08);
 }
 
+* {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none;
+}
+
 .container {
   height: 100%;
   display: flex;

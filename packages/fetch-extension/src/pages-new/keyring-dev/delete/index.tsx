@@ -78,7 +78,15 @@ export const DeleteWallet: FunctionComponent = () => {
       <div className={style["container"]}>
         <DeleteDescription />
 
-        <Form onSubmit={(e) => e.preventDefault()}>
+        <Form
+          onSubmit={(e) => e.preventDefault()}
+          onKeyDownCapture={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault(); // Prevent default form submission
+              setIsConfirmationOpen(true);
+            }
+          }}
+        >
           <PasswordInput
             labelStyle={{
               marginTop: "0px",
@@ -91,7 +99,7 @@ export const DeleteWallet: FunctionComponent = () => {
             })}
           />
 
-          <div style={{ position: "absolute", bottom: "0px" }}>
+          <div>
             {keyStore.type === "mnemonic" && (
               <Alert className={style["alert"]}>
                 <div>
@@ -192,6 +200,7 @@ export const DeleteWallet: FunctionComponent = () => {
                   });
                   navigate("/");
                 } catch (e) {
+                  setIsConfirmationOpen(false);
                   console.log("Fail to decrypt: " + e.message);
                   setError("password", {
                     message: intl.formatMessage({
@@ -203,6 +212,7 @@ export const DeleteWallet: FunctionComponent = () => {
               })}
             >
               <FormattedMessage id="setting.clear.button.confirm" />
+              {loading && <i className="fas fa-spinner fa-spin ml-2 mr-2" />}
             </ButtonV2>
           </div>
         </div>

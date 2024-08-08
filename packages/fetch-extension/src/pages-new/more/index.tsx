@@ -121,7 +121,7 @@ export const MorePage: FunctionComponent = () => {
         heading={"Guide"}
         onClick={() =>
           window.open(
-            "https://fetch.ai/docs/guides/fetch-network/fetch-wallet/fetch-wallet-getting-started",
+            "https://fetch.ai/docs/guides/fetch-network/fetch-wallet/web-wallet/get-started",
             "_blank"
           )
         }

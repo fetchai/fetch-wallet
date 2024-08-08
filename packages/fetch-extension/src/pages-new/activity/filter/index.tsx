@@ -48,6 +48,7 @@ interface FilterDropdownProps {
   handleSelectClicks: any;
   handleDeselectClicks: any;
   isSaveChangesButtonDisabled: boolean;
+  closeClicked?: any;
 }
 export const FilterDropdown: React.FC<FilterDropdownProps> = ({
   isOpen,
@@ -60,15 +61,20 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
   handleSelectClicks,
   handleDeselectClicks,
   isSaveChangesButtonDisabled,
+  closeClicked,
 }) => {
   return (
     <Dropdown
       isOpen={isOpen}
       setIsOpen={setIsOpen}
       title={"Filter"}
-      closeClicked={() => {
-        setIsOpen(false);
-      }}
+      closeClicked={
+        closeClicked
+          ? closeClicked
+          : () => {
+              setIsOpen(false);
+            }
+      }
       styleProp={{ position: "block" }}
     >
       <div className={styles["select"]}>

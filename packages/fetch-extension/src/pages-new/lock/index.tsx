@@ -107,8 +107,12 @@ export const LockPage: FunctionComponent = observer(() => {
             />
           </div>
 
-          <Button className={style["sign-in"]} block data-loading={loading}>
-            Sign in
+          <Button className={style["sign-in"]} block>
+            {loading ? (
+              <i className="fas fa-spinner fa-spin ml-2 mr-2" />
+            ) : (
+              <div>Sign in</div>
+            )}
           </Button>
         </div>
       </Form>

@@ -51,7 +51,12 @@ export const Tab = ({
           isActive ? style["active"] : disabled ? style["disabled"] : null
         }`}
       >
-        <img draggable={false} src={isActive ? activeIcon : icon} alt="tab" />
+        <img
+          draggable={false}
+          src={isActive ? activeIcon : icon}
+          alt="tab"
+          width={17}
+        />
       </div>
       <div
         className={`${style["title"]} ${
