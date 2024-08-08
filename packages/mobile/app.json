@@ -1,8 +1,8 @@
 {
   "name": "mobile",
-  "displayName": "Fetch Wallet",
+  "displayName": "ASI Wallet",
   "expo": {
-    "name": "Fetch Wallet",
+    "name": "ASI Wallet",
     "slug": "FetchWallet",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -38,13 +38,13 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow Fetch Wallet to access your camera."
+          "cameraPermission": "Allow ASI Wallet to access your camera."
         }
       ],
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Allow Fetch Wallet to use your location."
+          "locationAlwaysAndWhenInUsePermission": "Allow ASI Wallet to use your location."
         }
       ],
       [

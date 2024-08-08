@@ -62,8 +62,8 @@ export const ImportFromExtensionIntroScreen: FunctionComponent = () => {
               fadeDuration={0}
             />
           }
-          title={"Import from Fetch extension"}
-          subtitle={`Import your account(s) by going to\n‘Settings > Link Fetch Mobile’ on Fetch Extension and scanning the QR Code`}
+          title={"Import from ASI Web extension"}
+          subtitle={`Import your account(s) by going to\n‘Settings > Link ASI Mobile’ on ASI Web Extension and scanning the QR Code`}
           iconStyle={style.flatten(["margin-bottom-24"]) as ViewStyle}
           titleStyle={
             style.flatten([
@@ -140,7 +140,7 @@ export const ImportFromExtensionIntroScreen: FunctionComponent = () => {
         }
         buttonText={
           modelStatus == ModelStatus.First
-            ? "Allow Fetch to use camera"
+            ? "Allow ASI to use camera"
             : "Enable camera permission in settings"
         }
         isOpen={openCameraModel}

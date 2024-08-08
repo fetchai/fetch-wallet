@@ -128,12 +128,15 @@ export const RegisterIntroScreen: FunctionComponent = () => {
       ]}
     >
       <View style={style.flatten(["justify-between"]) as ViewStyle}>
-        <View style={style.flatten(["margin-bottom-16"]) as ViewStyle}>
+        <View
+          style={
+            style.flatten(["margin-bottom-16", "justify-center"]) as ViewStyle
+          }
+        >
           <View style={style.flatten(["items-center"]) as ViewStyle}>
             <Image
               source={require("assets/logo/logo.png")}
               style={{
-                // height: 80,
                 aspectRatio: 2.977,
               }}
               resizeMode="contain"
@@ -179,7 +182,7 @@ export const RegisterIntroScreen: FunctionComponent = () => {
                 Welcome to your
               </Text>
               <LinearGradientText
-                text="Fetch Wallet"
+                text="ASI Wallet"
                 color1="#CF447B"
                 color2="#F9774B"
                 textCenter={false}
@@ -419,7 +422,7 @@ export const ImportExistingWalletModal: FunctionComponent<{
       close={() => close()}
     >
       <TokenCardView
-        title="Import from Fetch extension"
+        title="Import from ASI Web extension"
         leadingIcon={<FetchIcon size={30} />}
         containerStyle={
           style.flatten(["margin-bottom-6", "height-80"]) as ViewStyle

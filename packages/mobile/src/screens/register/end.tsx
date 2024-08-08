@@ -69,7 +69,7 @@ export const RegisterEndScreen: FunctionComponent = observer(() => {
             ]) as ViewStyle
           }
         >
-          Your Fetch journey now begins.
+          Your ASI journey now begins.
         </Text>
       </View>
       {password && keychainStore.isBiometrySupported ? (

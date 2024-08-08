@@ -185,7 +185,7 @@ export async function registerExportedKeyRingDatas(
       continue;
     }
 
-    const name = exportKeyRingData.meta["name"] || "Fetch Account";
+    const name = exportKeyRingData.meta["name"] || "ASI Account";
     if (exportKeyRingData.type === "mnemonic") {
       await registerConfig.createMnemonic(
         name,

@@ -58,14 +58,14 @@ export const DeleteWalletScreen: FunctionComponent = () => {
     <PageWithScrollView
       backgroundMode="image"
       contentContainerStyle={style.get("flex-grow-1")}
-      style={style.flatten(["padding-x-page", "padding-y-page"]) as ViewStyle}
+      style={style.flatten(["padding-x-page", "overflow-scroll"]) as ViewStyle}
     >
       <View style={style.flatten(["margin-x-30"]) as ViewStyle}>
         <IconWithText
           icon={<DeleteWalletIcon />}
           title={"Delete wallet"}
           subtitle={
-            "You will no longer have access to\nyour wallet on Fetch Wallet"
+            "You will no longer have access to\nyour wallet on ASI Wallet"
           }
           titleStyle={style.flatten(["h3", "font-normal"]) as ViewStyle}
           subtitleStyle={style.flatten(["body3"]) as ViewStyle}
@@ -147,6 +147,7 @@ export const DeleteWalletScreen: FunctionComponent = () => {
         containerStyle={style.flatten(["border-radius-32"]) as ViewStyle}
         textStyle={style.flatten(["body2", "font-normal"]) as ViewStyle}
       />
+      <View style={style.flatten(["height-page-pad"]) as ViewStyle} />
       <KeyboardSpacerView />
       <PasswordInputModal
         isOpen={isOpenModal}

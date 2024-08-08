@@ -132,7 +132,7 @@ export const ImportFromExtensionScreen: FunctionComponent = () => {
       }}
       onBarCodeScanned={onBarCodeScanned}
       scannerBottomText={
-        "Connect to Fetch Wallet\nbrowser extension by scanning a QR code"
+        "Connect to ASI Wallet\nbrowser extension by scanning a QR code"
       }
       isLoading={isLoading}
     />

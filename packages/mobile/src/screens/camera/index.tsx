@@ -93,7 +93,7 @@ export const CameraScreen: FunctionComponent = () => {
         scannerBottomText={
           route.params.recipientConfig
             ? "Send assets by scanning a QR code"
-            : "Send assets or connect to Fetch Wallet\nbrowser extension by scanning a QR code"
+            : "Send assets or connect to ASI Wallet\nbrowser extension by scanning a QR code"
         }
         barCodeScannerSettings={{
           barCodeTypes: [BarCodeScanner.Constants.BarCodeType.qr],
