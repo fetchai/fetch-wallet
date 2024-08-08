@@ -1,5 +1,4 @@
 import React, { FunctionComponent, useState } from "react";
-import { observer } from "mobx-react-lite";
 import { useStore } from "stores/index";
 import { Text, View, ViewStyle } from "react-native";
 import { useStyle } from "styles/index";
@@ -24,7 +23,7 @@ export const DelegatedCard: FunctionComponent<{
   containerStyle?: ViewStyle;
 
   validatorAddress: string;
-}> = observer(({ containerStyle, validatorAddress }) => {
+}> = ({ containerStyle, validatorAddress }) => {
   const { chainStore, queriesStore, accountStore, analyticsStore } = useStore();
 
   const [isSendingTx, setIsSendingTx] = useState(false);
@@ -126,7 +125,7 @@ export const DelegatedCard: FunctionComponent<{
         });
       }
       console.log(e);
-      smartNavigation.navigateSmart("Home", {});
+      navigation.navigate("Home", {});
     } finally {
       setClaimModel(false);
       setIsSendingTx(false);
@@ -319,4 +318,4 @@ export const DelegatedCard: FunctionComponent<{
       />
     </React.Fragment>
   );
-});
+};

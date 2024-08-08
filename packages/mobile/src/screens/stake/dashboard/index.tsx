@@ -14,7 +14,6 @@ import { MyRewardCard } from "./reward-card";
 import { useStore } from "stores/index";
 import { Button } from "components/button";
 import { DelegationsCard } from "./delegations-card";
-import { IconButton } from "components/new/button/icon";
 import { IconWithText } from "components/new/icon-with-text/icon-with-text";
 import {
   NavigationProp,
@@ -163,52 +162,7 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
             queryDelegations={queryDelegations}
             containerStyle={style.flatten(["margin-bottom-24"]) as ViewStyle}
           />
-          <View
-            style={
-              style.flatten([
-                "flex-row",
-                "padding-y-6",
-                "margin-bottom-6",
-                "items-center",
-              ]) as ViewStyle
-            }
-          >
-            <Text
-              style={
-                [
-                  style.flatten(["color-white@60%", "body3"]),
-                  { lineHeight: 16 },
-                ] as ViewStyle
-              }
-            >
-              Staked balances
-            </Text>
-            <IconButton
-              icon={
-                <Text
-                  style={
-                    [
-                      style.flatten([
-                        "text-caption2",
-                        "color-white",
-                        "font-bold",
-                      ]),
-                      { lineHeight: 14 },
-                    ] as ViewStyle
-                  }
-                >
-                  {delegations.length}
-                </Text>
-              }
-              iconStyle={
-                style.flatten([
-                  "padding-x-12",
-                  "padding-y-4",
-                  "margin-left-6",
-                ]) as ViewStyle
-              }
-            />
-          </View>
+
           <DelegationsCard
             containerStyle={style.flatten(["margin-y-6"]) as ViewStyle}
             queries={queries}
@@ -259,6 +213,9 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
                 params: {},
               });
             }}
+          />
+          <View
+            style={style.flatten(["height-page-double-pad"]) as ViewStyle}
           />
         </View>
       )}

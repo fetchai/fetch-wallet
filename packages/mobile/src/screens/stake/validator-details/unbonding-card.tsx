@@ -1,5 +1,4 @@
 import React, { FunctionComponent } from "react";
-import { observer } from "mobx-react-lite";
 import { useStore } from "stores/index";
 import { Text, ViewStyle, View } from "react-native";
 import { useStyle } from "styles/index";
@@ -10,7 +9,7 @@ import { BlurBackground } from "components/new/blur-background/blur-background";
 export const UnbondingCard: FunctionComponent<{
   containerStyle?: ViewStyle;
   validatorAddress: string;
-}> = observer(({ containerStyle, validatorAddress }) => {
+}> = ({ containerStyle, validatorAddress }) => {
   const { chainStore, accountStore, queriesStore } = useStore();
 
   const account = accountStore.getAccount(chainStore.current.chainId);
@@ -124,4 +123,4 @@ export const UnbondingCard: FunctionComponent<{
       </View>
     </BlurBackground>
   ) : null;
-});
+};

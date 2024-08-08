@@ -51,6 +51,13 @@ export const TransactionModal: FunctionComponent<{
   const style = useStyle();
 
   useEffect(() => {
+    setTransactionState({
+      status: TransactionStatus.Pending,
+      title: "Transaction pending",
+      subTitle:
+        "Transaction has been broadcasted to blockchain and pending confirmation",
+      img: require("assets/lottie/txn-pending-icon.json"),
+    });
     const chainInfo = chainStore.getChain(chainId);
     const txTracer: TendermintTxTracer = new TendermintTxTracer(
       chainInfo.rpc,

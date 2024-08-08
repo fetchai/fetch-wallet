@@ -50,7 +50,7 @@ export const SettingChainListScreen: FunctionComponent = observer(() => {
     const searchTrim = search.trim();
     const newChainInfos = chainStore.chainInfosWithUIConfig.filter(
       (chainInfoUI) => {
-        return chainInfoUI.chainInfo.chainId
+        return chainInfoUI.chainInfo.chainName
           .toLowerCase()
           .includes(searchTrim.toLowerCase());
       }

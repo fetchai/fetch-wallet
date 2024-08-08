@@ -2564,6 +2564,7 @@ export const CommunityChainInfoRepo = {
 
 export const CHAIN_ID_DORADO = "dorado-1";
 export const CHAIN_ID_FETCHHUB = "fetchhub-4";
+export const CHAIN_ID_ERIDANUS = "eridanus-1";
 
 let SUBSCRIPTION_SERVER, MESSAGING_SERVER;
 export let NOTYPHI_BASE_URL: string;

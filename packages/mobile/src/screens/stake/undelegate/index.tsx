@@ -15,7 +15,6 @@ import { Text, View, ViewStyle } from "react-native";
 import { Button } from "components/button";
 import { Staking } from "@keplr-wallet/stores";
 import { Buffer } from "buffer/";
-import { useSmartNavigation } from "navigation/smart-navigation";
 import { StakeAmountInput } from "components/new/input/stake-amount";
 import { UseMaxButton } from "components/new/button/use-max-button";
 import { MemoInputView } from "components/new/card-view/memo-input";
@@ -46,7 +45,6 @@ export const UndelegateScreen: FunctionComponent = observer(() => {
     useStore();
 
   const style = useStyle();
-  const smartNavigation = useSmartNavigation();
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
 
   const netInfo = useNetInfo();
@@ -169,8 +167,20 @@ export const UndelegateScreen: FunctionComponent = observer(() => {
           }
         );
       } catch (e) {
-        if (e?.message === "Request rejected") {
+        if (
+          e?.message === "Request rejected" ||
+          e?.message === "Transaction rejected"
+        ) {
+          Toast.show({
+            type: "error",
+            text1: "Transaction rejected",
+          });
           return;
+        } else {
+          Toast.show({
+            type: "error",
+            text1: e?.message,
+          });
         }
         console.log(e);
         analyticsStore.logEvent("unstake_txn_broadcasted_fail", {
@@ -179,7 +189,7 @@ export const UndelegateScreen: FunctionComponent = observer(() => {
           feeType: sendConfigs.feeConfig.feeType,
           message: e?.message ?? "",
         });
-        smartNavigation.navigateSmart("Home", {});
+        navigation.navigate("Home", {});
       }
     }
   };
@@ -226,6 +236,7 @@ export const UndelegateScreen: FunctionComponent = observer(() => {
         }
         amountConfig={sendConfigs.amountConfig}
         isToggleClicked={isToggleClicked}
+        editable={!(account.txTypeInProgress === "undelegate")}
       />
       <Text
         style={
@@ -254,6 +265,8 @@ export const UndelegateScreen: FunctionComponent = observer(() => {
           ]) as ViewStyle
         }
         memoConfig={sendConfigs.memoConfig}
+        error={sendConfigs.memoConfig.error?.message}
+        editable={!(account.txTypeInProgress === "undelegate")}
       />
       <View
         style={

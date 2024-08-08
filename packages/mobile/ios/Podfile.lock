@@ -615,6 +615,9 @@ PODS:
     - React-RCTImage
   - RNScrypt (1.2.1):
     - React
+  - RNSentry (5.26.0):
+    - React-Core
+    - Sentry/HybridSDK (= 8.31.1)
   - RNSVG (13.10.0):
     - React-Core
   - SDWebImage (5.11.1):
@@ -623,6 +626,7 @@ PODS:
   - SDWebImageWebPCoder (0.8.5):
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.10)
+  - Sentry/HybridSDK (8.31.1)
   - SocketRocket (0.6.1)
   - SSZipArchive (2.2.3)
   - Yoga (1.14.0)
@@ -716,6 +720,7 @@ DEPENDENCIES:
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNScrypt (from `../node_modules/react-native-scrypt`)
+  - "RNSentry (from `../node_modules/@sentry/react-native`)"
   - RNSVG (from `../node_modules/react-native-svg`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -746,6 +751,7 @@ SPEC REPOS:
     - PromisesSwift
     - SDWebImage
     - SDWebImageWebPCoder
+    - Sentry
     - SocketRocket
     - SSZipArchive
     - ZXingObjC
@@ -915,6 +921,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-screens"
   RNScrypt:
     :path: "../node_modules/react-native-scrypt"
+  RNSentry:
+    :path: "../node_modules/@sentry/react-native"
   RNSVG:
     :path: "../node_modules/react-native-svg"
   Yoga:
@@ -1026,9 +1034,11 @@ SPEC CHECKSUMS:
   RNReanimated: bdadbf5322d7894bb6016985d8ae5c9ed5fc83d0
   RNScreens: 6a8a3c6b808aa48dca1780df7b73ea524f602c63
   RNScrypt: 95fdef077b482e9fdf8a761120cb69d129ef4016
+  RNSentry: 601e5dbb9b3fbec6bf6a6e8c8bcc249835494744
   RNSVG: 80584470ff1ffc7994923ea135a3e5ad825546b9
   SDWebImage: a7f831e1a65eb5e285e3fb046a23fcfbf08e696d
   SDWebImageWebPCoder: 908b83b6adda48effe7667cd2b7f78c897e5111d
+  Sentry: 9c1188876ea1291d1a9db4b38c3f17ebd8e6985e
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   SSZipArchive: 62d4947b08730e4cda640473b0066d209ff033c9
   Yoga: 8796b55dba14d7004f980b54bcc9833ee45b28ce

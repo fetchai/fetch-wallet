@@ -4,12 +4,10 @@ import { useStyle } from "styles/index";
 import { TransitionPresets } from "@react-navigation/stack";
 import {
   BlurHeaderOptionsPreset,
-  HeaderOnGradientScreenOptionsPreset,
   TransparentHeaderOptionsPreset,
 } from "components/header";
 import { SendScreen } from "screens/send";
 import { ReceiveScreen } from "screens/receive";
-import { TokensScreen } from "screens/tokens";
 import { CameraScreen } from "screens/camera";
 
 import { Stack } from "./navigation";
@@ -55,14 +53,6 @@ export const OtherNavigation: FunctionComponent = () => {
         }}
         name="NativeTokens"
         component={TokenDetail}
-      />
-      <Stack.Screen
-        options={{
-          ...HeaderOnGradientScreenOptionsPreset,
-          title: "Tokens",
-        }}
-        name="Tokens"
-        component={TokensScreen}
       />
       <Stack.Screen
         options={{

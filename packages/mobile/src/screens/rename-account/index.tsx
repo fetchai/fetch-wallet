@@ -1,6 +1,5 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { PageWithScrollView } from "components/page";
-import { observer } from "mobx-react-lite";
 import { useStore } from "stores/index";
 import { useStyle } from "styles/index";
 import { InputCardView } from "components/new/card-view/input-card";
@@ -14,7 +13,7 @@ import {
   useNavigation,
 } from "@react-navigation/native";
 
-export const RenameWalletScreen: FunctionComponent = observer(() => {
+export const RenameWalletScreen: FunctionComponent = () => {
   const { keyRingStore, accountStore, chainStore } = useStore();
   const style = useStyle();
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
@@ -123,4 +122,4 @@ export const RenameWalletScreen: FunctionComponent = observer(() => {
       <KeyboardSpacerView />
     </PageWithScrollView>
   );
-});
+};

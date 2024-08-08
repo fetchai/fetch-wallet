@@ -15,7 +15,7 @@ import { activityFilterOptions, ActivityFilterView } from "./activity-filter";
 import { ActivityRow } from "./activity-row";
 import { observer } from "mobx-react-lite";
 import { NoActivityView } from "screens/activity/activity-transaction/no-activity-view";
-import { CHAIN_ID_FETCHHUB, CHAIN_ID_DORADO } from "../../../config";
+import { isFeatureAvailable } from "utils/index";
 
 const processFilters = (filters: FilterItem[]) => {
   let result: any[] = [];
@@ -151,8 +151,7 @@ export const ActivityNativeTab: FunctionComponent<{
 
   return (
     <React.Fragment>
-      {(current.chainId === CHAIN_ID_FETCHHUB ||
-        current.chainId === CHAIN_ID_DORADO) &&
+      {isFeatureAvailable(current.chainId) &&
       data.length > 0 &&
       activities.length > 0 ? (
         renderList(data)

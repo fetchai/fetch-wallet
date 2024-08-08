@@ -7,7 +7,6 @@ import {
   useMemoConfig,
   useRecipientConfig,
 } from "@keplr-wallet/hooks";
-import { observer } from "mobx-react-lite";
 import { View, ViewStyle } from "react-native";
 import { useStore } from "stores/index";
 import { AddressInput } from "components/input";
@@ -16,6 +15,7 @@ import { useSmartNavigation } from "navigation/smart-navigation";
 import Toast from "react-native-toast-message";
 import { InputCardView } from "components/new/card-view/input-card";
 import { MemoInputView } from "components/new/card-view/memo-input";
+import { observer } from "mobx-react-lite";
 
 export const AddAddressBookScreen: FunctionComponent = observer(() => {
   const route = useRoute<
@@ -80,6 +80,7 @@ export const AddAddressBookScreen: FunctionComponent = observer(() => {
         label="Default memo (optional)"
         memoConfig={memoConfig}
         containerStyle={style.flatten(["margin-y-8"]) as ViewStyle}
+        error={memoConfig.error?.message}
       />
       <View style={style.flatten(["flex-1"])} />
       <Button

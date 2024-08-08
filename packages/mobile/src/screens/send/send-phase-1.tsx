@@ -31,7 +31,8 @@ interface SendConfigs {
 export const SendPhase1: FunctionComponent<{
   sendConfigs: SendConfigs;
   setIsNext: any;
-}> = observer(({ sendConfigs, setIsNext }) => {
+  noChangeAccount?: boolean;
+}> = observer(({ sendConfigs, setIsNext, noChangeAccount = false }) => {
   const [openAssetModel, setOpenAssetModel] = React.useState(false);
   const [changeWalletModal, setChangeWalletModal] = React.useState(false);
   const [inputInUsd, setInputInUsd] = useState<string | undefined>("");
@@ -131,15 +132,28 @@ export const SendPhase1: FunctionComponent<{
           containerStyle={
             style.flatten(["margin-bottom-card-gap"]) as ViewStyle
           }
+          headingrStyle={
+            style.flatten([
+              noChangeAccount ? "color-white@20%" : "color-white",
+            ]) as ViewStyle
+          }
           mainHeading="Send from"
           heading={account.name}
-          trailingIcon={<ChevronDownIcon size={12} />}
+          trailingIcon={
+            <ChevronDownIcon
+              size={12}
+              color={
+                noChangeAccount ? style.get("color-white@20%").color : "white"
+              }
+            />
+          }
           onPress={() => {
             setChangeWalletModal(true);
             analyticsStore.logEvent("send_from_click", {
               pageName: "Send",
             });
           }}
+          disable={noChangeAccount}
         />
       </View>
       <Button

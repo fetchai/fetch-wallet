@@ -1,11 +1,9 @@
 import React, { FunctionComponent, useMemo, useState } from "react";
-import { observer } from "mobx-react-lite";
 import { Text, View, ViewStyle } from "react-native";
 import { BlurBackground } from "components/new/blur-background/blur-background";
 import { useStyle } from "styles/index";
 import { GradientButton } from "components/new/button/gradient-button";
 import { useStore } from "stores/index";
-import { useSmartNavigation } from "navigation/smart-navigation";
 import { useNetInfo } from "@react-native-community/netinfo";
 import { separateNumericAndDenom } from "utils/format/format";
 import { Dec } from "@keplr-wallet/unit";
@@ -35,6 +33,7 @@ import { AnimatedNumber } from "components/new/animations/animated-number";
 import { txType } from "components/new/txn-status.tsx";
 import { VectorCharacter } from "components/vector-character";
 import { KeplrETCQueriesImpl } from "@keplr-wallet/stores-etc";
+import Skeleton from "react-native-reanimated-skeleton";
 
 interface ClaimData {
   reward: string;
@@ -53,7 +52,7 @@ export const MyRewardCard: FunctionComponent<{
   containerStyle?: ViewStyle;
   queries: DeepReadonlyObject;
   queryDelegations: ObservableQueryDelegationsInner;
-}> = observer(({ containerStyle, queries, queryDelegations }) => {
+}> = ({ containerStyle, queries, queryDelegations }) => {
   const style = useStyle();
 
   const { chainStore, accountStore, priceStore, analyticsStore } = useStore();
@@ -75,7 +74,15 @@ export const MyRewardCard: FunctionComponent<{
 
   const delegations = queryDelegations.delegations;
 
-  const smartNavigation = useSmartNavigation();
+  const queryUnbonding =
+    queries.cosmos.queryUnbondingDelegations.getQueryBech32Address(
+      account.bech32Address
+    );
+  const unbonding = queryUnbonding.total;
+
+  const delegated = queryDelegations.total;
+  const stakedSum = delegated.add(unbonding);
+
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
 
   const [showRewars, setShowRewards] = useState(false);
@@ -94,9 +101,8 @@ export const MyRewardCard: FunctionComponent<{
 
   const { numericPart: totalNumber, denomPart: totalDenom } =
     separateNumericAndDenom(
-      pendingStakableReward.shrink(true).maxDecimals(6).trim(true).toString()
+      pendingStakableReward.shrink(true).maxDecimals(8).trim(true).toString()
     );
-
   const handleAllClaim = async () => {
     if (!networkIsConnected) {
       Toast.show({
@@ -172,7 +178,7 @@ export const MyRewardCard: FunctionComponent<{
         chainName: chainStore.current.chainName,
         pageName: "Stake",
       });
-      smartNavigation.navigateSmart("Home", {});
+      navigation.navigate("Home", {});
     } finally {
       setClaimModel(false);
       setIsSendingTx(false);
@@ -208,47 +214,68 @@ export const MyRewardCard: FunctionComponent<{
           >
             Staking rewards
           </Text>
-          <View style={style.flatten(["flex-row"])}>
-            <AnimatedNumber
-              numberForAnimated={
-                pendingStakableRewardUSD
-                  ? pendingStakableRewardUSD
-                      .shrink(true)
-                      .maxDecimals(6)
-                      .trim(true)
-                      .toString()
-                  : totalNumber
-              }
-              includeComma={true}
-              decimalAmount={2}
-              gap={0}
-              colorValue={"white"}
-              fontSizeValue={14}
-              hookName={"withTiming"}
-              withTimingProps={{
-                durationValue: 1000,
-                easingValue: "linear",
-              }}
-            />
-            <Text
-              style={
-                [
-                  style.flatten(["body3", "padding-left-4", "color-gray-300"]),
-                  { lineHeight: 16 },
-                ] as ViewStyle
-              }
-            >
-              {pendingStakableRewardUSD
-                ? priceStore.defaultVsCurrency.toUpperCase()
-                : totalDenom}
-            </Text>
-          </View>
+          <Skeleton
+            isLoading={!stakedSum.isReady}
+            containerStyle={
+              style.flatten(["flex-row", "flex-wrap"]) as ViewStyle
+            }
+            layout={[
+              {
+                key: "totalClaim",
+                width: "50%",
+                height: 15,
+              },
+            ]}
+            boneColor={style.get("color-white@20%").color}
+            highlightColor={style.get("color-white@60%").color}
+          >
+            <View style={style.flatten(["flex-row", "flex-wrap"]) as ViewStyle}>
+              <AnimatedNumber
+                numberForAnimated={
+                  pendingStakableRewardUSD
+                    ? pendingStakableRewardUSD
+                        .shrink(true)
+                        .maxDecimals(8)
+                        .trim(true)
+                        .toString()
+                    : totalNumber
+                }
+                includeComma={true}
+                decimalAmount={2}
+                gap={0}
+                colorValue={"white"}
+                fontSizeValue={14}
+                hookName={"withTiming"}
+                withTimingProps={{
+                  durationValue: 1000,
+                  easingValue: "linear",
+                }}
+              />
+              <Text
+                style={
+                  [
+                    style.flatten([
+                      "body3",
+                      "padding-left-4",
+                      "color-gray-300",
+                    ]),
+                    { lineHeight: 16 },
+                  ] as ViewStyle
+                }
+              >
+                {pendingStakableRewardUSD
+                  ? priceStore.defaultVsCurrency.toUpperCase()
+                  : totalDenom}
+              </Text>
+            </View>
+          </Skeleton>
         </View>
         {!(
           !account.isReadyToSendTx ||
           pendingStakableReward.toDec().equals(new Dec(0)) ||
           stakable.toDec().lte(new Dec(0)) ||
-          queryReward.pendingRewardValidatorAddresses.length === 0
+          queryReward.pendingRewardValidatorAddresses.length === 0 ||
+          !stakedSum.isReady
         ) ? (
           <GradientButton
             text={"Claim all"}
@@ -294,7 +321,8 @@ export const MyRewardCard: FunctionComponent<{
         pendingStakableReward.toDec().equals(new Dec(0)) ||
         stakable.toDec().lte(new Dec(0)) ||
         queryReward.pendingRewardValidatorAddresses.length === 0 ||
-        delegations.length === 0
+        delegations.length === 0 ||
+        !stakedSum.isReady
       ) ? (
         <TouchableOpacity
           onPress={() => setShowRewards(!showRewars)}
@@ -355,17 +383,16 @@ export const MyRewardCard: FunctionComponent<{
       />
     </BlurBackground>
   );
-});
+};
 
 const DelegateReward: FunctionComponent<{
   queries: DeepReadonlyObject;
   queryDelegations: ObservableQueryDelegationsInner;
-}> = observer(({ queries, queryDelegations }) => {
+}> = ({ queries, queryDelegations }) => {
   const style = useStyle();
 
   const { chainStore, accountStore, analyticsStore } = useStore();
 
-  const smartNavigation = useSmartNavigation();
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
 
   const [isSendingTx, setIsSendingTx] = useState("");
@@ -487,7 +514,7 @@ const DelegateReward: FunctionComponent<{
         chainName: chainStore.current.chainName,
         pageName: "Stake",
       });
-      smartNavigation.navigateSmart("Home", {});
+      navigation.navigate("Home", {});
     } finally {
       setClaimModel(false);
       setIsSendingTx("");
@@ -660,4 +687,4 @@ const DelegateReward: FunctionComponent<{
       />
     </React.Fragment>
   );
-});
+};

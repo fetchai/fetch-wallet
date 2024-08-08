@@ -1,6 +1,5 @@
 import React, { FunctionComponent, useState } from "react";
 import { PageWithScrollView } from "components/page";
-import { observer } from "mobx-react-lite";
 import { useStore } from "stores/index";
 import { useStyle } from "styles/index";
 import { InputCardView } from "components/new/card-view/input-card";
@@ -20,7 +19,7 @@ import { useSmartNavigation } from "navigation/smart-navigation";
 import { ConfirmCardModel } from "components/new/confirm-modal";
 import { DeleteWalletIcon } from "components/new/icon/delete-wallet";
 
-export const DeleteWalletScreen: FunctionComponent = observer(() => {
+export const DeleteWalletScreen: FunctionComponent = () => {
   const { keyRingStore, keychainStore, analyticsStore } = useStore();
   const style = useStyle();
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
@@ -59,14 +58,14 @@ export const DeleteWalletScreen: FunctionComponent = observer(() => {
     <PageWithScrollView
       backgroundMode="image"
       contentContainerStyle={style.get("flex-grow-1")}
-      style={style.flatten(["padding-x-page", "padding-y-page"]) as ViewStyle}
+      style={style.flatten(["padding-x-page", "overflow-scroll"]) as ViewStyle}
     >
       <View style={style.flatten(["margin-x-30"]) as ViewStyle}>
         <IconWithText
           icon={<DeleteWalletIcon />}
           title={"Delete wallet"}
           subtitle={
-            "You will no longer have access to\nyour wallet on Fetch Wallet"
+            "You will no longer have access to\nyour wallet on ASI Wallet"
           }
           titleStyle={style.flatten(["h3", "font-normal"]) as ViewStyle}
           subtitleStyle={style.flatten(["body3"]) as ViewStyle}
@@ -148,6 +147,7 @@ export const DeleteWalletScreen: FunctionComponent = observer(() => {
         containerStyle={style.flatten(["border-radius-32"]) as ViewStyle}
         textStyle={style.flatten(["body2", "font-normal"]) as ViewStyle}
       />
+      <View style={style.flatten(["height-page-pad"]) as ViewStyle} />
       <KeyboardSpacerView />
       <PasswordInputModal
         isOpen={isOpenModal}
@@ -212,4 +212,4 @@ export const DeleteWalletScreen: FunctionComponent = observer(() => {
       />
     </PageWithScrollView>
   );
-});
+};

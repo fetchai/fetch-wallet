@@ -13,7 +13,6 @@ import { FlatList, Text, View, ViewStyle } from "react-native";
 import { useStore } from "stores/index";
 import { useDelegateTxConfig } from "@keplr-wallet/hooks";
 import { Button } from "components/button";
-import { useSmartNavigation } from "navigation/smart-navigation";
 import { Staking } from "@keplr-wallet/stores";
 import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
 import { ValidatorThumbnail } from "components/thumbnail";
@@ -54,7 +53,6 @@ export const DelegateScreen: FunctionComponent = observer(() => {
     useStore();
 
   const style = useStyle();
-  const smartNavigation = useSmartNavigation();
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
 
   const netInfo = useNetInfo();
@@ -217,8 +215,20 @@ export const DelegateScreen: FunctionComponent = observer(() => {
           }
         );
       } catch (e) {
-        if (e?.message === "Request rejected") {
+        if (
+          e?.message === "Request rejected" ||
+          e?.message === "Transaction rejected"
+        ) {
+          Toast.show({
+            type: "error",
+            text1: "Transaction rejected",
+          });
           return;
+        } else {
+          Toast.show({
+            type: "error",
+            text1: e?.message,
+          });
         }
         console.log(e);
         analyticsStore.logEvent("stake_txn_broadcasted_fail", {
@@ -227,7 +237,7 @@ export const DelegateScreen: FunctionComponent = observer(() => {
           feeType: sendConfigs.feeConfig.feeType,
           message: e?.message ?? "",
         });
-        smartNavigation.navigateSmart("Home", {});
+        navigation.navigate("Home", {});
       }
     }
   };
@@ -334,6 +344,7 @@ export const DelegateScreen: FunctionComponent = observer(() => {
         }
         amountConfig={sendConfigs.amountConfig}
         isToggleClicked={isToggleClicked}
+        editable={!(account.txTypeInProgress === "delegate")}
       />
       <Text
         style={
@@ -362,6 +373,8 @@ export const DelegateScreen: FunctionComponent = observer(() => {
           ]) as ViewStyle
         }
         memoConfig={sendConfigs.memoConfig}
+        error={sendConfigs.memoConfig.error?.message}
+        editable={!(account.txTypeInProgress === "delegate")}
       />
       <View
         style={

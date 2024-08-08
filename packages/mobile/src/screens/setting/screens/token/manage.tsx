@@ -93,7 +93,6 @@ export const SettingManageTokensScreen: FunctionComponent = observer(() => {
               });
             }}
           />
-          <View style={style.flatten(["height-page-pad"]) as ViewStyle} />
         </React.Fragment>
       )}
       <View style={style.flatten(["height-page-pad"]) as ViewStyle} />

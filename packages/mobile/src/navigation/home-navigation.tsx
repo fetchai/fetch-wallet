@@ -1,10 +1,10 @@
 import React, { FunctionComponent } from "react";
 import { TransitionPresets } from "@react-navigation/stack";
 import { TransparentHeaderOptionsPreset } from "components/header";
-import { NewHomeScreen } from "screens/home";
 import { PortfolioScreen } from "screens/portfolio";
 import { Stack } from "./navigation";
 import { InboxScreen } from "screens/inbox";
+import { HomeScreen } from "screens/home";
 
 export const HomeNavigation: FunctionComponent = () => {
   return (
@@ -21,7 +21,7 @@ export const HomeNavigation: FunctionComponent = () => {
           headerShown: false,
         }}
         name="Home"
-        component={NewHomeScreen}
+        component={HomeScreen}
       />
       <Stack.Screen
         options={{
