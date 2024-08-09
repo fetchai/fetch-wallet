@@ -14,13 +14,11 @@
       "**/react-native-*",
       "**/@react-navigation/**",
       "**/expo-*",
-      "**/@unimodules/**",
-      "**/unimodules-*",
       "**/native-base",
       "**/@react-native-async-storage/async-storage",
       "**/@ledgerhq/react-native-hw-transport-ble",
       "**/jetifier",
-      "**/@bugsnag/**"
+      "**/@Sentry/**"
     ]
   },
   "installConfig": {

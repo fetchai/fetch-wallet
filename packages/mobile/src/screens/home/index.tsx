@@ -26,7 +26,7 @@ import { LineGraphView } from "components/new/line-graph";
 import { useStyle } from "styles/index";
 import { useFocusedScreen } from "providers/focused-screen";
 
-export const NewHomeScreen: FunctionComponent = observer(() => {
+export const HomeScreen: FunctionComponent = observer(() => {
   const safeAreaInsets = useSafeAreaInsets();
   const style = useStyle();
   const windowHeight = Dimensions.get("window").height;
@@ -141,13 +141,12 @@ export const NewHomeScreen: FunctionComponent = observer(() => {
     [accountStore, chainStore, priceStore, queriesStore]
   );
 
-  /// 30 sec Auto-Refresh balances
-  useEffect(() => {
+  function autoRefreshBalances(isLoading: boolean) {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
 
-    onRefresh(false);
+    onRefresh(isLoading);
     intervalRef.current = setInterval(() => onRefresh(false), 30000);
 
     // Clean up the interval on component unmount
@@ -156,6 +155,11 @@ export const NewHomeScreen: FunctionComponent = observer(() => {
         clearInterval(intervalRef.current);
       }
     };
+  }
+
+  /// 30 sec Auto-Refresh balances
+  useEffect(() => {
+    autoRefreshBalances(false);
   }, [chainStore.current.chainId]);
 
   /// Hide Refreshing when tab change
@@ -183,7 +187,7 @@ export const NewHomeScreen: FunctionComponent = observer(() => {
         <RefreshControl
           tintColor={"white"}
           refreshing={refreshing}
-          onRefresh={() => onRefresh(true)}
+          onRefresh={() => autoRefreshBalances(true)}
           progressViewOffset={
             Platform.OS === "ios" ? safeAreaInsets.top + 10 : 48
           }

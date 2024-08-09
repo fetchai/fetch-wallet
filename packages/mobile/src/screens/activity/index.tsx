@@ -9,6 +9,8 @@ import { FilterIcon } from "components/new/icon/filter-icon";
 import { ChatSection } from "screens/inbox/chat-section";
 import { ActivityNativeTab } from "screens/activity/activity-transaction";
 import { useStore } from "stores/index";
+import { observer } from "mobx-react-lite";
+import { isFeatureAvailable } from "utils/index";
 
 export interface FilterItem {
   icon: ReactElement;
@@ -22,12 +24,12 @@ enum ActivityEnum {
   GovProposals = "Gov Proposals",
 }
 
-export const ActivityScreen = () => {
+export const ActivityScreen = observer(() => {
   const style = useStyle();
   const [selectedId, _setSelectedId] = useState(ActivityEnum.Transactions);
   const safeAreaInsets = useSafeAreaInsets();
   const [isOpenModal, setIsOpenModal] = useState(false);
-  const { analyticsStore } = useStore();
+  const { analyticsStore, chainStore } = useStore();
 
   return (
     <PageWithViewInBottomTabView
@@ -38,28 +40,32 @@ export const ActivityScreen = () => {
         flexGrow: 1,
       }}
     >
-      <View style={style.flatten(["items-end", "margin-x-page"]) as ViewStyle}>
-        <ChipButton
-          text="Filter"
-          icon={<FilterIcon />}
-          iconStyle={style.get("padding-top-2") as ViewStyle}
-          containerStyle={
-            style.flatten([
-              "border-width-1",
-              "border-color-gray-300",
-              "width-90",
-            ]) as ViewStyle
-          }
-          backgroundBlur={false}
-          onPress={() => {
-            setIsOpenModal(true);
-            analyticsStore.logEvent("filter_click", {
-              tabName: "Transactions",
-              pageName: "Activity",
-            });
-          }}
-        />
-      </View>
+      {isFeatureAvailable(chainStore.current.chainId) && (
+        <View
+          style={style.flatten(["items-end", "margin-x-page"]) as ViewStyle}
+        >
+          <ChipButton
+            text="Filter"
+            icon={<FilterIcon />}
+            iconStyle={style.get("padding-top-2") as ViewStyle}
+            containerStyle={
+              style.flatten([
+                "border-width-1",
+                "border-color-gray-300",
+                "width-90",
+              ]) as ViewStyle
+            }
+            backgroundBlur={false}
+            onPress={() => {
+              setIsOpenModal(true);
+              analyticsStore.logEvent("filter_click", {
+                tabName: "Transactions",
+                pageName: "Activity",
+              });
+            }}
+          />
+        </View>
+      )}
       <Text
         style={
           style.flatten([
@@ -101,4 +107,4 @@ export const ActivityScreen = () => {
       </ScrollView>
     </PageWithViewInBottomTabView>
   );
-};
+});

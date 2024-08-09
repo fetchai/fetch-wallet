@@ -46,6 +46,14 @@
         {
           "locationAlwaysAndWhenInUsePermission": "Allow Fetch Wallet to use your location."
         }
+      ],
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "project": "fetch-mobile",
+          "organization": "fetchai-ft"
+        }
       ]
     ]
   }

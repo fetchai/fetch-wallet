@@ -9,7 +9,6 @@ import {
   MultiKeyStoreInfoElem,
   MultiKeyStoreInfoWithSelectedElem,
 } from "@keplr-wallet/background";
-import { observer } from "mobx-react-lite";
 import { KeyRingStore } from "@keplr-wallet/stores";
 import { BlurBackground } from "../blur-background/blur-background";
 import { Bech32Address } from "@keplr-wallet/cosmos";
@@ -25,7 +24,7 @@ export const ChangeWalletCardModel: FunctionComponent<{
   onChangeAccount: (
     keyStore: MultiKeyStoreInfoWithSelectedElem
   ) => Promise<void>;
-}> = observer(({ close, title, isOpen, keyRingStore, onChangeAccount }) => {
+}> = ({ close, title, isOpen, keyRingStore, onChangeAccount }) => {
   const style = useStyle();
   const { analyticsStore, accountStore, chainStore } = useStore();
 
@@ -207,4 +206,4 @@ export const ChangeWalletCardModel: FunctionComponent<{
       })}
     </CardModal>
   );
-});
+};

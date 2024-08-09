@@ -1,5 +1,4 @@
 import React, { FunctionComponent, useMemo } from "react";
-import { observer } from "mobx-react-lite";
 import { useStore } from "stores/index";
 import { Staking } from "@keplr-wallet/stores";
 import { FlatList, Text, View, ViewStyle } from "react-native";
@@ -20,7 +19,7 @@ interface ItemData {
 export const ValidatorDetailsCard: FunctionComponent<{
   containerStyle?: ViewStyle;
   validatorAddress: string;
-}> = observer(({ containerStyle, validatorAddress }) => {
+}> = ({ containerStyle, validatorAddress }) => {
   const { chainStore, queriesStore } = useStore();
 
   const queries = queriesStore.get(chainStore.current.chainId);
@@ -232,4 +231,4 @@ export const ValidatorDetailsCard: FunctionComponent<{
       ) : null}
     </React.Fragment>
   );
-});
+};

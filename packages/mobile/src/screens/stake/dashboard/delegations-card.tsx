@@ -21,6 +21,7 @@ import {
 } from "@react-navigation/native";
 import { VectorCharacter } from "components/vector-character";
 import { KeplrETCQueriesImpl } from "@keplr-wallet/stores-etc";
+import { IconButton } from "components/new/button/icon";
 
 interface DeepReadonlyObject {
   queryBalances: ObservableQueryBalances;
@@ -65,25 +66,71 @@ export const DelegationsCard: FunctionComponent<{
       unbondedValidators.validators,
     ]);
 
-    const validatorsMap = useMemo(() => {
-      const map: Map<string, Staking.Validator> = new Map();
-
+    const validatorsData = useMemo(() => {
+      const data: Staking.Validator[] = [];
       for (const val of validators) {
-        map.set(val.operator_address, val);
+        const isAvailable = delegations.find(
+          (element) =>
+            element.delegation.validator_address == val.operator_address
+        );
+        if (isAvailable) {
+          data.push(val);
+        }
       }
 
-      return map;
-    }, [validators]);
+      return data;
+    }, [delegations, validators]);
 
     return (
       <React.Fragment>
-        {delegations.length > 0 ? (
-          delegations.map((del) => {
-            const val = validatorsMap.get(del.delegation.validator_address);
-            if (!val) {
-              return null;
+        <View
+          style={
+            style.flatten([
+              "flex-row",
+              "padding-y-6",
+              "margin-bottom-6",
+              "items-center",
+            ]) as ViewStyle
+          }
+        >
+          <Text
+            style={
+              [
+                style.flatten(["color-white@60%", "body3"]),
+                { lineHeight: 16 },
+              ] as ViewStyle
             }
-
+          >
+            Staked balances
+          </Text>
+          <IconButton
+            icon={
+              <Text
+                style={
+                  [
+                    style.flatten([
+                      "text-caption2",
+                      "color-white",
+                      "font-bold",
+                    ]),
+                    { lineHeight: 14 },
+                  ] as ViewStyle
+                }
+              >
+                {validatorsData.length}
+              </Text>
+            }
+            iconStyle={
+              style.flatten([
+                "padding-x-12",
+                "padding-y-4",
+                "margin-left-6",
+              ]) as ViewStyle
+            }
+          />
+        </View>
+        {validatorsData.length > 0 ? (
+          validatorsData.map((val) => {
             const thumbnail =
               bondedValidators.getValidatorThumbnail(val.operator_address) ||
               unbondingValidators.getValidatorThumbnail(val.operator_address) ||
@@ -107,7 +154,7 @@ export const DelegationsCard: FunctionComponent<{
             const APR = ARR.mul(new Dec(1 - validatorCom));
             return (
               <BlurBackground
-                key={del.delegation.validator_address}
+                key={val.operator_address}
                 borderRadius={12}
                 blurIntensity={20}
                 containerStyle={
@@ -123,7 +170,7 @@ export const DelegationsCard: FunctionComponent<{
                   navigation.navigate("Stake", {
                     screen: "Validator.Details",
                     params: {
-                      validatorAddress: del.delegation.validator_address,
+                      validatorAddress: val.operator_address,
                     },
                   });
                 }}

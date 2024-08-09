@@ -60,7 +60,13 @@ export const ClaimRewardsModal: FunctionComponent<{
         </Text>
         <View style={style.flatten(["flex-4", "items-end"])}>
           <Text
-            style={style.flatten(["subtitle3", "color-white"]) as ViewStyle}
+            style={
+              style.flatten([
+                "subtitle3",
+                "color-white",
+                "text-right",
+              ]) as ViewStyle
+            }
           >
             {earnedAmount}
           </Text>

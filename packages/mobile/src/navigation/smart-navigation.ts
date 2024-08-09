@@ -23,6 +23,7 @@ interface Configs {
 export interface State {
   isNext: boolean;
   configs: Configs;
+  noChangeAccount: boolean;
 }
 const { SmartNavigatorProvider, useSmartNavigation } =
   createSmartNavigatorProvider(

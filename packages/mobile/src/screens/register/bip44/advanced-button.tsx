@@ -4,7 +4,6 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { observer } from "mobx-react-lite";
 import { BIP44Option } from "./bip44-option";
 import { useStyle } from "styles/index";
 import { Text, View, ViewStyle } from "react-native";
@@ -43,7 +42,7 @@ const useZeroOrPositiveIntegerString = (initialValue: string) => {
 export const BIP44AdvancedButton: FunctionComponent<{
   bip44Option: BIP44Option;
   selected?: boolean;
-}> = observer(({ bip44Option, selected }) => {
+}> = ({ bip44Option, selected }) => {
   const style = useStyle();
   const change = useZeroOrPositiveIntegerString(bip44Option.change.toString());
   const isChangeZeroOrOne =
@@ -192,4 +191,4 @@ export const BIP44AdvancedButton: FunctionComponent<{
       ) : null}
     </React.Fragment>
   );
-});
+};

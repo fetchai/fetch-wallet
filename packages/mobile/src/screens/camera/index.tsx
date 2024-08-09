@@ -1,7 +1,6 @@
 import React, { FunctionComponent, useCallback, useState } from "react";
 import { useStyle } from "styles/index";
 import { PageWithView } from "components/page";
-import { observer } from "mobx-react-lite";
 import { useStore } from "stores/index";
 import { useSmartNavigation } from "navigation/smart-navigation";
 import { Button } from "components/button";
@@ -37,7 +36,7 @@ import {
 } from "utils/import-from-extension";
 import { AsyncKVStore } from "../../common";
 
-export const CameraScreen: FunctionComponent = observer(() => {
+export const CameraScreen: FunctionComponent = () => {
   const route = useRoute<
     RouteProp<
       Record<
@@ -243,13 +242,13 @@ export const CameraScreen: FunctionComponent = observer(() => {
       />
     </PageWithView>
   );
-});
+};
 
 export const AddressQRCodeModal: FunctionComponent<{
   isOpen: boolean;
   close: () => void;
   chainId: string;
-}> = observer(({ chainId, isOpen }) => {
+}> = ({ chainId, isOpen }) => {
   const { accountStore } = useStore();
 
   const account = accountStore.getAccount(chainId);
@@ -307,4 +306,4 @@ export const AddressQRCodeModal: FunctionComponent<{
       </View>
     </CardModal>
   );
-});
+};

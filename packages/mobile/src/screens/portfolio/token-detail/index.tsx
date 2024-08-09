@@ -14,6 +14,7 @@ import { VectorCharacter } from "components/vector-character";
 import { ActivityNativeTab } from "screens/activity/activity-transaction";
 import { ChipButton } from "components/new/chip";
 import { FilterIcon } from "components/new/icon/filter-icon";
+import { isFeatureAvailable } from "utils/index";
 
 export const TokenDetail: FunctionComponent = observer(() => {
   const size = 56;
@@ -194,30 +195,33 @@ export const TokenDetail: FunctionComponent = observer(() => {
             <Text style={style.flatten(["body1", "color-white"]) as ViewStyle}>
               Activity
             </Text>
-            <ChipButton
-              text="Filter"
-              icon={<FilterIcon />}
-              iconStyle={style.get("padding-top-2") as ViewStyle}
-              containerStyle={
-                style.flatten([
-                  "border-width-1",
-                  "border-color-gray-300",
-                  "width-90",
-                ]) as ViewStyle
-              }
-              backgroundBlur={false}
-              onPress={() => {
-                setIsOpenModal(true);
-                analyticsStore.logEvent("filter_click", {
-                  pageName: "Token Detail",
-                });
-              }}
-            />
+            {isFeatureAvailable(chainStore.current.chainId) && (
+              <ChipButton
+                text="Filter"
+                icon={<FilterIcon />}
+                iconStyle={style.get("padding-top-2") as ViewStyle}
+                containerStyle={
+                  style.flatten([
+                    "border-width-1",
+                    "border-color-gray-300",
+                    "width-90",
+                  ]) as ViewStyle
+                }
+                backgroundBlur={false}
+                onPress={() => {
+                  setIsOpenModal(true);
+                  analyticsStore.logEvent("filter_click", {
+                    pageName: "Token Detail",
+                  });
+                }}
+              />
+            )}
           </View>
           <ActivityNativeTab
             isOpenModal={isOpenModal}
             setIsOpenModal={setIsOpenModal}
           />
+          <View style={style.flatten(["height-page-pad"]) as ViewStyle} />
         </React.Fragment>
       )}
     </PageWithScrollView>

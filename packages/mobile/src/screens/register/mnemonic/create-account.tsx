@@ -5,7 +5,6 @@ import { RouteProp, useRoute } from "@react-navigation/native";
 import { IconButton } from "components/new/button/icon";
 import { InputCardView } from "components/new/card-view/input-card";
 import { PageWithScrollView } from "components/page";
-import { observer } from "mobx-react-lite";
 import { Text, ViewStyle, View } from "react-native";
 import { useStyle } from "styles/index";
 import { EyeIcon } from "components/new/icon/eye";
@@ -25,7 +24,7 @@ interface FormData {
   password: string;
 }
 
-export const CreateAccountScreen: FunctionComponent = observer(() => {
+export const CreateAccountScreen: FunctionComponent = () => {
   const route = useRoute<
     RouteProp<
       Record<
@@ -398,4 +397,4 @@ export const CreateAccountScreen: FunctionComponent = observer(() => {
       />
     </PageWithScrollView>
   );
-});
+};

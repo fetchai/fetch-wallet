@@ -82,9 +82,6 @@ import com.android.build.OutputFile
 
 apply from: "../../node_modules/react-native-code-push/android/codepush.gradle"
 
-// The following line must be inserted AFTER the React gradle plugin
-//apply plugin: "com.bugsnag.android.gradle"
-
 /**
  * Set this to true to create two separate APKs instead of one:
  *   - An APK that only works on ARM devices
@@ -100,12 +97,11 @@ def enableSeparateBuildPerCPUArchitecture = false
  */
 def reactNativeArchitectures() {
     def value = project.getProperties().get("reactNativeArchitectures")
-    return value ? value.split(",") : ["armeabi-v7a", "x86", "x86_64", "arm64-v8a"]
+    return value ? value.split(",") : ["armeabi-v7a", "x86", "arm64-v8a", "x86_64"]
 }
 
+apply from: new File(["node", "--print", "require.resolve('@sentry/react-native/package.json')"].execute().text.trim(), "../sentry.gradle")
 android {
-    ndkVersion rootProject.ext.ndkVersion
-
     compileSdkVersion rootProject.ext.compileSdkVersion
     namespace = "com.fetchai.wallet"
 
@@ -113,8 +109,8 @@ android {
         applicationId "com.fetchai.wallet"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 13
-        versionName "1.0.0"
+        versionCode 15
+        versionName "1.0.1"
 
         missingDimensionStrategy 'react-native-camera', 'general'
     }

@@ -12,6 +12,7 @@ export const DropDownCardView: FunctionComponent<{
   mainHeadingrStyle?: ViewStyle;
   containerStyle?: ViewStyle;
   onPress?: () => void;
+  disable?: boolean;
 }> = ({
   trailingIcon,
   mainHeading,
@@ -21,11 +22,15 @@ export const DropDownCardView: FunctionComponent<{
   headingrStyle,
   mainHeadingrStyle,
   onPress,
+  disable = false,
 }) => {
   const style = useStyle();
 
   return (
-    <TouchableOpacity activeOpacity={0.6} onPress={onPress}>
+    <TouchableOpacity
+      activeOpacity={disable ? 1 : 0.6}
+      onPress={disable ? undefined : onPress}
+    >
       {mainHeading ? (
         <Text
           style={

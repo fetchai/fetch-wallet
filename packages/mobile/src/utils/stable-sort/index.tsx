@@ -60,12 +60,20 @@ export const getDetails = (node: any, chainStore: any): any => {
   const { nodes } = node.transaction.messages;
   const { timestamp } = node.block;
   const { typeUrl, json } = nodes[0];
-  const status = node.transaction.status;
   const parsedJson = JSON.parse(json);
   const toAddress = parsedJson.toAddress;
   const { delegatorAddress, validatorAddress, validatorDstAddress, receiver } =
     parsedJson;
-  const { fees, memo, id: hash, signerAddress, gasUsed } = node.transaction;
+  const {
+    fees,
+    memo,
+    id: hash,
+    signerAddress,
+    gasUsed,
+    gasWanted,
+    chainId,
+    status,
+  } = node.transaction;
   const amt = parsedJson.amount;
   let currency = "afet";
   const isAmountDeducted = parseFloat(node.balanceOffset) < 0;
@@ -108,6 +116,17 @@ export const getDetails = (node: any, chainStore: any): any => {
   }
   const amount = getAmount(currency, node.balanceOffset, chainStore);
   const [amountNumber, amountAlphabetic] = parseAmount(amount);
+  const currentFees = JSON.parse(fees);
+  let fee = "";
+
+  if (currentFees.length > 0) {
+    fee = getAmount(currentFees[0].denom, currentFees[0].amount, chainStore);
+  }
+  const [feeNumber, feeAlphabetic] = parseAmount(fee);
+
+  const validatorCount =
+    Object.values(nodes).length > 1 ? Object.values(nodes).length - 1 : 0;
+
   return {
     amountNumber,
     amountAlphabetic,
@@ -119,12 +138,18 @@ export const getDetails = (node: any, chainStore: any): any => {
     hash,
     amt,
     gasUsed,
+    gasWanted,
     toAddress,
     validatorAddress,
     delegatorAddress,
     validatorDstAddress,
     receiver,
+    feeNumber,
+    feeAlphabetic,
+    chainId,
     status,
+    nodes,
+    validatorCount,
   };
 };
 

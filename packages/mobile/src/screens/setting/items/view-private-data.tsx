@@ -1,5 +1,4 @@
 import React, { FunctionComponent, useState } from "react";
-import { observer } from "mobx-react-lite";
 import { SettingItem } from "screens/setting/components";
 import { PasswordInputModal } from "modals/password-input/modal";
 import { useStore } from "stores/index";
@@ -9,7 +8,7 @@ import { useStyle } from "styles/index";
 import { ViewStyle } from "react-native";
 import { KeyIconSmall } from "components/new/icon/key";
 
-export const SettingViewPrivateDataItem: FunctionComponent = observer(() => {
+export const SettingViewPrivateDataItem: FunctionComponent = () => {
   const { keyRingStore, analyticsStore } = useStore();
 
   const style = useStyle();
@@ -51,4 +50,4 @@ export const SettingViewPrivateDataItem: FunctionComponent = observer(() => {
       />
     </React.Fragment>
   );
-});
+};

@@ -9,8 +9,16 @@ export const ConfirmCardModel: FunctionComponent<{
   close: () => void;
   title: string;
   subtitle: string;
+  confirmButtonText?: string;
   select: (confirm: boolean) => void;
-}> = ({ close, title, isOpen, select, subtitle }) => {
+}> = ({
+  close,
+  title,
+  isOpen,
+  select,
+  subtitle,
+  confirmButtonText = "Remove",
+}) => {
   const style = useStyle();
 
   if (!isOpen) {
@@ -58,7 +66,7 @@ export const ConfirmCardModel: FunctionComponent<{
           textStyle={style.flatten(["body3", "color-white"]) as ViewStyle}
         />
         <BlurButton
-          text="Remove"
+          text={confirmButtonText}
           backgroundBlur={false}
           borderRadius={32}
           onPress={() => {

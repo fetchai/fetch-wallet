@@ -30,11 +30,11 @@ export const ActivityDetails = observer(() => {
     >
   >();
 
-  const id = route.params.id;
+  const nodeId = route.params.id;
   const style = useStyle();
   const { priceStore, chainStore, activityStore } = useStore();
-
-  const details = getDetails(activityStore.getNode(id), chainStore);
+  const node = activityStore.getNode(nodeId);
+  const details = getDetails(node, chainStore);
   const [usdValue, setUsdValue] = useState<any>("$0");
   const fiatCurrency = details.fiatCurrency;
   const currency = {

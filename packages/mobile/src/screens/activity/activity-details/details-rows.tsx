@@ -47,7 +47,6 @@ export const DetailRows = ({ details }: { details: any }) => {
     coinDecimals: 18,
     coinGeckoId: "fetch-ai",
   };
-
   const handleValidatorClicked = () => {
     analyticsStore.logEvent("stake_click", {
       chainId: chainStore.current.chainId,
@@ -72,6 +71,7 @@ export const DetailRows = ({ details }: { details: any }) => {
         currency: currency,
         state: {
           isNext: true,
+          noChangeAccount: true,
           configs: {
             amount: details.amt.amount
               ? clearDecimals(
@@ -163,7 +163,7 @@ export const DetailRows = ({ details }: { details: any }) => {
     },
     {
       title: "Chain ID",
-      value: "fetchhub-4",
+      value: details.chainId,
     },
     ...decideDynamicData(),
     {

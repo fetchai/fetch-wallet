@@ -51,6 +51,8 @@ export const AddressInputCard: FunctionComponent<{
   onFocus?: any;
   onBlur?: any;
   pageName: string;
+  buttonDisable?: boolean;
+  editable?: boolean;
 }> = observer(
   ({
     label,
@@ -61,6 +63,8 @@ export const AddressInputCard: FunctionComponent<{
     onFocus,
     onBlur,
     pageName,
+    buttonDisable = false,
+    editable = true,
   }) => {
     const style = useStyle();
     const smartNavigation = useSmartNavigation();
@@ -178,6 +182,7 @@ export const AddressInputCard: FunctionComponent<{
                 placeholder={placeholderText}
                 value={recipientConfig.rawRecipient}
                 multiline={true}
+                editable={editable}
                 onChangeText={(text) => {
                   if (
                     // If icns is possible and users enters ".", complete bech32 prefix automatically.
@@ -222,9 +227,19 @@ export const AddressInputCard: FunctionComponent<{
                   containerStyle={style.flatten(["height-16"]) as ViewStyle}
                 />
                 <IconButton
-                  icon={<QRCodeIcon size={16} />}
+                  icon={
+                    <QRCodeIcon
+                      size={16}
+                      color={
+                        buttonDisable
+                          ? style.get("color-white@20%").color
+                          : "white"
+                      }
+                    />
+                  }
                   borderRadius={0}
                   backgroundBlur={false}
+                  disable={buttonDisable}
                   onPress={() => {
                     if (permission?.status == PermissionStatus.UNDETERMINED) {
                       setIsOpenCameraModel(true);
@@ -246,9 +261,19 @@ export const AddressInputCard: FunctionComponent<{
                   iconStyle={style.flatten(["margin-x-18"]) as ViewStyle}
                 />
                 <IconButton
-                  icon={<ATIcon size={16} />}
+                  icon={
+                    <ATIcon
+                      size={16}
+                      color={
+                        buttonDisable
+                          ? style.get("color-white@20%").color
+                          : "white"
+                      }
+                    />
+                  }
                   borderRadius={0}
                   backgroundBlur={false}
+                  disable={buttonDisable}
                   onPress={() => {
                     analyticsStore.logEvent("recipient_address_click", {
                       pageName,

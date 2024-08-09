@@ -1,12 +1,5 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Text,
-  TouchableOpacity,
-  View,
-  ViewStyle,
-} from "react-native";
-import { observer } from "mobx-react-lite";
+import { Text, View, ViewStyle } from "react-native";
 import { useStyle } from "styles/index";
 import { BlurBackground } from "components/new/blur-background/blur-background";
 import { ChipButton } from "components/new/chip";
@@ -40,17 +33,15 @@ import { QRCodeIcon } from "components/new/icon/qrcode-icon";
 import { NotificationIcon } from "components/new/icon/notification";
 import { CameraPermissionOffIcon } from "components/new/icon/camerapermission-off";
 import { CameraPermissionOnIcon } from "components/new/icon/camerapermission-on";
-import LinearGradient from "react-native-linear-gradient";
-import { SimpleCardView } from "components/new/card-view/simple-card";
-import { ChevronRightIcon } from "components/new/icon/chevron-right";
 import { useNetInfo } from "@react-native-community/netinfo";
 import Toast from "react-native-toast-message";
 import { TransactionModal } from "modals/transaction";
-import { StakeIcon } from "components/new/icon/stake-icon";
 import { ClaimRewardsModal } from "components/new/claim-reward-model";
-import { AnimatedNumber } from "components/new/animations/animated-number";
 import { Dec } from "@keplr-wallet/unit";
 import { TxnStatus, txType } from "components/new/txn-status.tsx";
+import { BalanceCard } from "./balance-card";
+import { ClaimCard } from "./claim-card";
+import { observer } from "mobx-react-lite";
 
 export const AccountSection: FunctionComponent<{
   containerStyle?: ViewStyle;
@@ -72,7 +63,7 @@ export const AccountSection: FunctionComponent<{
     txnStatusModal: false,
   });
   const [showClaimModel, setClaimModel] = useState(false);
-  const [loadingClaimButtom, setloadingClaimButtom] = useState(false);
+  const [loadingClaimButton, setLoadingClaimButton] = useState(false);
 
   const {
     chainStore,
@@ -134,7 +125,7 @@ export const AccountSection: FunctionComponent<{
       rewards.getDescendingPendingRewardValidatorAddresses(8);
     const tx =
       account.cosmos.makeWithdrawDelegationRewardTx(validatorAddresses);
-    setloadingClaimButtom(true);
+    setLoadingClaimButton(true);
 
     try {
       analyticsStore.logEvent("claim_click", {
@@ -164,7 +155,7 @@ export const AccountSection: FunctionComponent<{
         {},
         {
           onBroadcasted: (txHash) => {
-            setloadingClaimButtom(false);
+            setLoadingClaimButton(false);
             analyticsStore.logEvent("claim_txn_broadcasted", {
               chainId: chainStore.current.chainId,
               chainName: chainStore.current.chainName,
@@ -199,9 +190,9 @@ export const AccountSection: FunctionComponent<{
         chainName: chainStore.current.chainName,
         pageName: "Home",
       });
-      smartNavigation.navigateSmart("Home", {});
+      navigation.navigate("Home", {});
     } finally {
-      setloadingClaimButtom(false);
+      setLoadingClaimButton(false);
       setClaimModel(false);
     }
   }
@@ -350,56 +341,12 @@ export const AccountSection: FunctionComponent<{
           onPress={() => setIsOpenModal(true)}
         />
       </BlurBackground>
-      {isShowClaimOption() ? (
-        <TouchableOpacity
-          activeOpacity={0.9}
-          onPress={() => {
-            if (account.txTypeInProgress === "withdrawRewards") {
-              Toast.show({
-                type: "error",
-                text1: `${txType[account.txTypeInProgress]} in progress`,
-              });
-              return;
-            }
-            analyticsStore.logEvent("claim_all_staking_reward_click", {
-              pageName: "Home",
-            });
-            setClaimModel(true);
-          }}
-        >
-          <LinearGradient
-            colors={["#F9774B", "#CF447B"]}
-            start={{ y: 0.0, x: 0.5 }}
-            end={{ y: 1.0, x: 0.0 }}
-            style={
-              [style.flatten(["border-radius-12"]), { padding: 1 }] as ViewStyle
-            }
-          >
-            <SimpleCardView
-              backgroundBlur={false}
-              heading={"You’ve claimable staking rewards"}
-              leadingIconComponent={<StakeIcon size={14} />}
-              trailingIconComponent={
-                loadingClaimButtom ? (
-                  <ActivityIndicator
-                    size="small"
-                    color={style.get("color-white").color}
-                  />
-                ) : (
-                  <ChevronRightIcon />
-                )
-              }
-              cardStyle={
-                [
-                  style.flatten(["background-color-indigo-900"]),
-                  { borderRadius: 11 },
-                ] as ViewStyle
-              }
-              headingStyle={style.flatten(["body3"]) as ViewStyle}
-            />
-          </LinearGradient>
-        </TouchableOpacity>
-      ) : null}
+      <ClaimCard
+        account={account}
+        setClaimModel={setClaimModel}
+        loadingClaimButton={loadingClaimButton}
+        isShowClaimOption={isShowClaimOption()}
+      />
       {Object.values(activityStore.getPendingTxn).length > 0 && (
         <TxnStatus
           txnType={
@@ -413,61 +360,12 @@ export const AccountSection: FunctionComponent<{
         />
       )}
       <View style={style.flatten(["items-center"]) as ViewStyle}>
-        <View
-          style={
-            style.flatten([
-              "flex-row",
-              "margin-top-32",
-              "justify-center",
-              "width-full",
-              "items-center",
-            ]) as ViewStyle
-          }
-        >
-          <AnimatedNumber
-            numberForAnimated={parseFloat(totalNumber)}
-            includeComma={true}
-            decimalAmount={2}
-            gap={0}
-            colorValue={"white"}
-            fontSizeValue={32}
-            hookName={"withTiming"}
-            withTimingProps={{
-              durationValue: 1000,
-              easingValue: "linear",
-            }}
-          />
-          <Text
-            style={
-              [
-                style.flatten([
-                  "h1",
-                  "color-new-gray-700",
-                  "margin-left-8",
-                  "font-normal",
-                ]),
-                { lineHeight: 35 },
-              ] as ViewStyle
-            }
-          >
-            {totalDenom}
-          </Text>
-        </View>
-        <View style={style.flatten(["flex-row", "margin-y-6"]) as ViewStyle}>
-          <Text
-            style={
-              style.flatten([
-                "color-white@60%",
-                "body2",
-                "width-full",
-                "text-center",
-              ]) as ViewStyle
-            }
-          >
-            {totalPrice &&
-              ` ${totalPrice.toString()} ${priceStore.defaultVsCurrency.toUpperCase()}`}
-          </Text>
-        </View>
+        <BalanceCard
+          loading={!stakedSum.isReady}
+          totalPrice={totalPrice}
+          totalNumber={totalNumber}
+          totalDenom={totalDenom}
+        />
         {tokenState ? (
           <View
             style={
@@ -643,7 +541,7 @@ export const AccountSection: FunctionComponent<{
         close={() => setClaimModel(false)}
         earnedAmount={stakableReward.trim(true).shrink(true).toString()}
         onPress={onSubmit}
-        buttonLoading={loadingClaimButtom}
+        buttonLoading={loadingClaimButton}
       />
     </View>
   );
