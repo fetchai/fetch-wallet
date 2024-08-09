@@ -16,17 +16,7 @@ import { observer } from "mobx-react-lite";
 import { NoActivityView } from "screens/activity/activity-transaction/no-activity-view";
 import { isFeatureAvailable } from "utils/index";
 import { ActivityFilterView } from "../filter/activity-filter";
-import { txOptions } from "screens/activity/utils";
-
-const processFilters = (filters: FilterItem[]) => {
-  let result: any[] = [];
-  filters
-    .filter((filter) => filter.isSelected)
-    .map((data) => {
-      result = result.concat(data.value.split(","));
-    });
-  return result;
-};
+import { processFilters, txOptions } from "screens/activity/utils";
 
 export const ActivityNativeTab: FunctionComponent<{
   isOpenModal: boolean;

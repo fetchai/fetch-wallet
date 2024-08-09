@@ -77,3 +77,13 @@ export const txOptions: FilterItem[] = [
     isSelected: true,
   },
 ];
+
+export const processFilters = (filters: FilterItem[]) => {
+  let result: any[] = [];
+  filters
+    .filter((filter) => filter.isSelected)
+    .map((data) => {
+      result = result.concat(data.value.split(","));
+    });
+  return result;
+};

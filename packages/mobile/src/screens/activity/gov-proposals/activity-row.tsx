@@ -8,6 +8,14 @@ import {
 } from "@react-navigation/native";
 import { BlurButton } from "components/new/button/blur-button";
 import { useStore } from "stores/index";
+import { formatActivityHash } from "utils/format/format";
+
+const getHash = (proposal: any) => {
+  if (proposal && proposal.id) {
+    return formatActivityHash(proposal.id);
+  }
+  return null;
+};
 
 export const GovActivityRow: FunctionComponent<{
   node: any;
@@ -65,7 +73,7 @@ export const GovActivityRow: FunctionComponent<{
             ]) as ViewStyle
           }
         >
-          {proposal?.title}
+          {proposal ? proposal.title : getHash(node)}
         </Text>
         <Text
           style={

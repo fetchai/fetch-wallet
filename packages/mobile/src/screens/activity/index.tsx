@@ -46,6 +46,7 @@ export const ActivityScreen = observer(() => {
   const safeAreaInsets = useSafeAreaInsets();
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [latestBlock, _setLatestBlock] = useState<string>();
+  const [govProposalsNodes, setGovProposalsNodes] = useState<any>({});
 
   const { analyticsStore, chainStore, accountStore } = useStore();
   const accountInfo = accountStore.getAccount(chainStore.current.chainId);
@@ -130,6 +131,8 @@ export const ActivityScreen = observer(() => {
             isOpenModal={isOpenModal}
             setIsOpenModal={setIsOpenModal}
             latestBlock={latestBlock}
+            nodes={govProposalsNodes}
+            setNodes={setGovProposalsNodes}
           />
         )}
       </ScrollView>
