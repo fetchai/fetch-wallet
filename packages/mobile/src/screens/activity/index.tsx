@@ -1,4 +1,4 @@
-import React, { ReactElement, useState } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
 import { PageWithViewInBottomTabView } from "components/page";
 import { Platform, ScrollView, Text, ViewStyle } from "react-native";
 import { useStyle } from "styles/index";
@@ -6,28 +6,54 @@ import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ChipButton } from "components/new/chip";
 import { FilterIcon } from "components/new/icon/filter-icon";
-import { ChatSection } from "screens/inbox/chat-section";
 import { ActivityNativeTab } from "screens/activity/activity-transaction";
 import { useStore } from "stores/index";
+import { observer } from "mobx-react-lite";
+import { isFeatureAvailable } from "utils/index";
+import { TabBarView } from "components/new/tab-bar/tab-bar";
+import { RouteProp, useRoute } from "@react-navigation/native";
+import { GovProposalsTab } from "screens/activity/gov-proposals";
 
 export interface FilterItem {
-  icon: ReactElement;
+  icon: ReactElement | null;
   isSelected: boolean;
   title: string;
   value: string;
 }
 
-enum ActivityEnum {
+export enum ActivityEnum {
   Transactions = "Transactions",
   GovProposals = "Gov Proposals",
 }
 
-export const ActivityScreen = () => {
+export const ActivityScreen = observer(() => {
+  const route = useRoute<
+    RouteProp<
+      Record<
+        string,
+        {
+          tabId?: ActivityEnum;
+        }
+      >,
+      string
+    >
+  >();
+
+  const tabId = route?.params?.tabId || ActivityEnum.Transactions;
+
   const style = useStyle();
-  const [selectedId, _setSelectedId] = useState(ActivityEnum.Transactions);
+  const [selectedId, setSelectedId] = useState(tabId);
   const safeAreaInsets = useSafeAreaInsets();
   const [isOpenModal, setIsOpenModal] = useState(false);
-  const { analyticsStore } = useStore();
+  const [latestBlock, _setLatestBlock] = useState<string>();
+  const [govProposalsNodes, setGovProposalsNodes] = useState<any>({});
+
+  const { analyticsStore, chainStore, accountStore } = useStore();
+  const accountInfo = accountStore.getAccount(chainStore.current.chainId);
+
+  useEffect(() => {
+    setSelectedId(tabId);
+  }, [route?.params, chainStore.current.chainId, accountInfo.bech32Address]);
 
   return (
     <PageWithViewInBottomTabView
@@ -38,28 +64,31 @@ export const ActivityScreen = () => {
         flexGrow: 1,
       }}
     >
-      <View style={style.flatten(["items-end", "margin-x-page"]) as ViewStyle}>
-        <ChipButton
-          text="Filter"
-          icon={<FilterIcon />}
-          iconStyle={style.get("padding-top-2") as ViewStyle}
-          containerStyle={
-            style.flatten([
-              "border-width-1",
-              "border-color-gray-300",
-              "width-90",
-            ]) as ViewStyle
-          }
-          backgroundBlur={false}
-          onPress={() => {
-            setIsOpenModal(true);
-            analyticsStore.logEvent("filter_click", {
-              tabName: "Transactions",
-              pageName: "Activity",
-            });
-          }}
-        />
-      </View>
+      {isFeatureAvailable(chainStore.current.chainId) && (
+        <View
+          style={style.flatten(["items-end", "margin-x-page"]) as ViewStyle}
+        >
+          <ChipButton
+            text="Filter"
+            icon={<FilterIcon />}
+            iconStyle={style.get("padding-top-2") as ViewStyle}
+            containerStyle={
+              style.flatten([
+                "border-width-1",
+                "border-color-gray-300",
+              ]) as ViewStyle
+            }
+            backgroundBlur={false}
+            onPress={() => {
+              setIsOpenModal(true);
+              analyticsStore.logEvent("filter_click", {
+                tabName: "Transactions",
+                pageName: "Activity",
+              });
+            }}
+          />
+        </View>
+      )}
       <Text
         style={
           style.flatten([
@@ -73,12 +102,12 @@ export const ActivityScreen = () => {
       >
         Activity
       </Text>
-      {/*<TabBarView*/}
-      {/*  listItem={ActivityEnum}*/}
-      {/*  selected={selectedId}*/}
-      {/*  setSelected={setSelectedId}*/}
-      {/*  containerStyle={style.flatten(["margin-x-20"]) as ViewStyle}*/}
-      {/*/>*/}
+      <TabBarView
+        listItem={ActivityEnum}
+        selected={selectedId}
+        setSelected={setSelectedId}
+        containerStyle={style.flatten(["margin-x-20"]) as ViewStyle}
+      />
       <ScrollView
         indicatorStyle={"white"}
         contentContainerStyle={
@@ -97,8 +126,16 @@ export const ActivityScreen = () => {
             />
           </View>
         )}
-        {selectedId === ActivityEnum.GovProposals && <ChatSection />}
+        {selectedId === ActivityEnum.GovProposals && (
+          <GovProposalsTab
+            isOpenModal={isOpenModal}
+            setIsOpenModal={setIsOpenModal}
+            latestBlock={latestBlock}
+            nodes={govProposalsNodes}
+            setNodes={setGovProposalsNodes}
+          />
+        )}
       </ScrollView>
     </PageWithViewInBottomTabView>
   );
-};
+});

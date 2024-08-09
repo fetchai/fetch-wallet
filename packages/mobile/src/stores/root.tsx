@@ -24,6 +24,7 @@ import {
   ObservableQueryBase,
   DeferInitialQueryController,
   ActivityStore,
+  ProposalStore,
   TokenGraphStore,
 } from "@keplr-wallet/stores";
 import { AsyncKVStore } from "../common";
@@ -55,6 +56,7 @@ export class RootStore {
   public readonly ledgerInitStore: LedgerInitStore;
   public readonly signInteractionStore: SignInteractionStore;
   public readonly chainSuggestStore: ChainSuggestStore;
+  public readonly proposalStore: ProposalStore;
   public readonly activityStore: ActivityStore;
   public readonly tokenGraphStore: TokenGraphStore;
 
@@ -110,6 +112,7 @@ export class RootStore {
     const router = new RNRouterUI(RNEnv.produceEnv);
 
     const eventEmitter = new EventEmitter();
+    this.proposalStore = new ProposalStore();
 
     // Order is important.
     this.interactionStore = new InteractionStore(

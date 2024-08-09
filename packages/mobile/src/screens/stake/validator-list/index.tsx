@@ -238,98 +238,93 @@ const ValidatorItem: FunctionComponent<{
   prevSelectedValidator?: string;
   selectedValidator?: string;
   index: number;
-}> = observer(
-  ({ validatorAddress, prevSelectedValidator, selectedValidator }) => {
-    const { chainStore, queriesStore, analyticsStore } = useStore();
+}> = ({ validatorAddress, prevSelectedValidator, selectedValidator }) => {
+  const { chainStore, queriesStore, analyticsStore } = useStore();
 
-    const queries = queriesStore.get(chainStore.current.chainId);
+  const queries = queriesStore.get(chainStore.current.chainId);
 
-    const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(
-      Staking.BondStatus.Bonded
-    );
+  const bondedValidators = queries.cosmos.queryValidators.getQueryStatus(
+    Staking.BondStatus.Bonded
+  );
 
-    const style = useStyle();
-    let status;
-    let commisionRate;
+  const style = useStyle();
+  let status;
+  let commisionRate;
 
-    const validator = bondedValidators.getValidator(validatorAddress);
-    if (validator) {
-      status = validator.status.split("_")[2].toLowerCase();
-      commisionRate = (
-        parseFloat(validator.commission.commission_rates.rate) * 100
-      ).toFixed(2);
-    }
-
-    const inflation = queries.cosmos.queryInflation;
-    const { inflation: ARR } = inflation;
-    const validatorCom: any = parseFloat(
-      validator?.commission.commission_rates.rate || "0"
-    );
-    const APR = ARR.mul(new Dec(1 - validatorCom));
-
-    const smartNavigation = useSmartNavigation();
-
-    const prevSelectValidatorAdress = prevSelectedValidator
-      ? prevSelectedValidator
-      : "";
-
-    return validator ? (
-      prevSelectValidatorAdress !== validatorAddress ? (
-        <StakeValidatorCardView
-          containerStyle={
-            style.flatten(
-              ["margin-bottom-6"],
-
-              [
-                selectedValidator == validatorAddress &&
-                  "background-color-indigo",
-              ]
-            ) as ViewStyle
-          }
-          heading={validator.description.moniker?.trim()}
-          validatorAddress={validatorAddress}
-          thumbnailUrl={bondedValidators.getValidatorThumbnail(
-            validator.operator_address
-          )}
-          trailingIcon={
-            selectedValidator == validatorAddress ? (
-              <CheckIcon color="white" />
-            ) : (
-              <ChevronRightIcon />
-            )
-          }
-          delegated={shortenNumber(validator.delegator_shares)}
-          commission={commisionRate}
-          status={status}
-          apr={`${APR.maxDecimals(2).trim(true).toString()}%`}
-          onPress={
-            !(selectedValidator == validatorAddress)
-              ? () => {
-                  if (prevSelectedValidator) {
-                    smartNavigation.navigate("SelectorValidator.Details", {
-                      prevSelectedValidator: prevSelectValidatorAdress,
-                      validatorAddress: validatorAddress,
-                    });
-                  } else {
-                    analyticsStore.logEvent("stake_validator_click", {
-                      pageName: "Validator Detail",
-                    });
-                    smartNavigation.navigateSmart("Validator.Details", {
-                      validatorAddress,
-                    });
-                  }
-                }
-              : undefined
-          }
-          onExplorerPress={() => {
-            smartNavigation.navigateSmart("WebView", {
-              url: `${
-                STAKE_VALIDATOR_URL[chainStore.current.chainId]
-              }/${validatorAddress}`,
-            });
-          }}
-        />
-      ) : null
-    ) : null;
+  const validator = bondedValidators.getValidator(validatorAddress);
+  if (validator) {
+    status = validator.status.split("_")[2].toLowerCase();
+    commisionRate = (
+      parseFloat(validator.commission.commission_rates.rate) * 100
+    ).toFixed(2);
   }
-);
+
+  const inflation = queries.cosmos.queryInflation;
+  const { inflation: ARR } = inflation;
+  const validatorCom: any = parseFloat(
+    validator?.commission.commission_rates.rate || "0"
+  );
+  const APR = ARR.mul(new Dec(1 - validatorCom));
+
+  const smartNavigation = useSmartNavigation();
+
+  const prevSelectValidatorAdress = prevSelectedValidator
+    ? prevSelectedValidator
+    : "";
+
+  return validator ? (
+    prevSelectValidatorAdress !== validatorAddress ? (
+      <StakeValidatorCardView
+        containerStyle={
+          style.flatten(
+            ["margin-bottom-6"],
+
+            [selectedValidator == validatorAddress && "background-color-indigo"]
+          ) as ViewStyle
+        }
+        heading={validator.description.moniker?.trim()}
+        validatorAddress={validatorAddress}
+        thumbnailUrl={bondedValidators.getValidatorThumbnail(
+          validator.operator_address
+        )}
+        trailingIcon={
+          selectedValidator == validatorAddress ? (
+            <CheckIcon color="white" />
+          ) : (
+            <ChevronRightIcon />
+          )
+        }
+        delegated={shortenNumber(validator.delegator_shares)}
+        commission={commisionRate}
+        status={status}
+        apr={`${APR.maxDecimals(2).trim(true).toString()}%`}
+        onPress={
+          !(selectedValidator == validatorAddress)
+            ? () => {
+                if (prevSelectedValidator) {
+                  smartNavigation.navigate("SelectorValidator.Details", {
+                    prevSelectedValidator: prevSelectValidatorAdress,
+                    validatorAddress: validatorAddress,
+                  });
+                } else {
+                  analyticsStore.logEvent("stake_validator_click", {
+                    pageName: "Validator Detail",
+                  });
+                  smartNavigation.navigateSmart("Validator.Details", {
+                    validatorAddress,
+                  });
+                }
+              }
+            : undefined
+        }
+        onExplorerPress={() => {
+          smartNavigation.navigateSmart("WebView", {
+            url: `${
+              STAKE_VALIDATOR_URL[chainStore.current.chainId]
+            }/${validatorAddress}`,
+          });
+        }}
+      />
+    ) : null
+  ) : null;
+};

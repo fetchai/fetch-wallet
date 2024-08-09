@@ -2,15 +2,6 @@
  * @format
  */
 
-// import Bugsnag from "@bugsnag/react-native";
-// import BugsnagPluginReactNavigation from "@bugsnag/plugin-react-navigation";
-// import { codeBundleId } from "./bugsnag.env";
-
-// Bugsnag.start({
-//   plugins: [new BugsnagPluginReactNavigation()],
-//   codeBundleId,
-// });
-
 import "./shim";
 
 import "text-encoding";
@@ -22,6 +13,7 @@ import "react-native-url-polyfill/auto";
 import { AppRegistry, LogBox } from "react-native";
 
 import "./init";
+import * as Sentry from "@sentry/react-native";
 
 // The use of "require" is intentional.
 // In case of "import" statement, it is located before execution of the next line,
@@ -31,6 +23,20 @@ import "./init";
 const App = require("./src/app").App;
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const appName = require("./app.json").name;
+
+Sentry.init({
+  dsn: process.env["SENTRY_DSN"] || "",
+  // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
+  // We recommend adjusting this value in production.
+  tracesSampleRate: 1.0,
+  _experiments: {
+    // profilesSampleRate is relative to tracesSampleRate.
+    // Here, we'll capture profiles for 100% of transactions.
+    profilesSampleRate: 1.0,
+  },
+});
+// eslint-disable-next-line import/no-default-export
+export default Sentry.wrap(App);
 
 LogBox.ignoreLogs([
   "No native splash screen registered for given view controller. Call 'SplashScreen.show' for given view controller first.",

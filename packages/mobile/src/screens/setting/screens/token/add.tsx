@@ -3,12 +3,12 @@ import { PageWithScrollView } from "components/page";
 import { View, ViewStyle } from "react-native";
 import { useStyle } from "styles/index";
 import { Button } from "components/button";
-import { observer } from "mobx-react-lite";
 import { useRecipientConfig } from "@keplr-wallet/hooks";
 import { useStore } from "stores/index";
 import { InputCardView } from "components/new/card-view/input-card";
 import { TokenAddressInput } from "components/new/input/token-address";
 import { useSmartNavigation } from "navigation/smart-navigation";
+import { observer } from "mobx-react-lite";
 
 export const SettingAddTokenScreen: FunctionComponent = observer(() => {
   const { chainStore, queriesStore, tokensStore, analyticsStore } = useStore();
@@ -33,7 +33,6 @@ export const SettingAddTokenScreen: FunctionComponent = observer(() => {
       contentContainerStyle={style.get("flex-grow-1")}
       style={style.flatten(["padding-x-page"]) as ViewStyle}
     >
-      {/* <View style={style.flatten(["height-page-pad"]) as ViewStyle} /> */}
       <TokenAddressInput
         label="Contract Address"
         recipientConfig={recipientConfig}

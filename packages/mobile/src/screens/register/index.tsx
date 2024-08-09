@@ -12,7 +12,6 @@ import {
 } from "react-native";
 import { useSmartNavigation } from "navigation/smart-navigation";
 import { useRegisterConfig } from "@keplr-wallet/hooks";
-import { observer } from "mobx-react-lite";
 import { useStore } from "stores/index";
 import { CardModal } from "modals/card";
 import { DownloadIcon } from "components/icon";
@@ -90,7 +89,7 @@ const SelectWalletOptionCard: FunctionComponent<{
   );
 };
 
-export const RegisterIntroScreen: FunctionComponent = observer(() => {
+export const RegisterIntroScreen: FunctionComponent = () => {
   const { keyRingStore, analyticsStore } = useStore();
 
   const style = useStyle();
@@ -314,7 +313,7 @@ export const RegisterIntroScreen: FunctionComponent = observer(() => {
       </View>
     </PageWithView>
   );
-});
+};
 
 export const NewWalletModal: FunctionComponent<{
   isOpen: boolean;
@@ -322,71 +321,75 @@ export const NewWalletModal: FunctionComponent<{
   onSelectGoogle: () => void;
   onSelectApple: () => void;
   onSelectNewMnemonic: () => void;
-}> = observer(
-  ({ isOpen, onSelectGoogle, onSelectApple, onSelectNewMnemonic, close }) => {
-    const style = useStyle();
+}> = ({
+  isOpen,
+  onSelectGoogle,
+  onSelectApple,
+  onSelectNewMnemonic,
+  close,
+}) => {
+  const style = useStyle();
 
-    if (!isOpen) {
-      return null;
-    }
-
-    return (
-      <CardModal
-        isOpen={isOpen}
-        title="Create a new wallet"
-        close={() => close()}
-      >
-        <TokenCardView
-          title="Continue with Google"
-          leadingIcon={<GoogleIcon width={30} height={30} />}
-          subtitle={"Powered by Web3Auth"}
-          containerStyle={
-            style.flatten(["margin-bottom-6", "height-80"]) as ViewStyle
-          }
-          titleStyle={
-            style.flatten(["text-caption1", "font-medium"]) as ViewStyle
-          }
-          onPress={() => {
-            onSelectGoogle();
-          }}
-        />
-        {Platform.OS === "ios" ? (
-          <TokenCardView
-            title="Continue with Apple"
-            leadingIcon={<AppleIcon width={30} height={30} />}
-            containerStyle={
-              style.flatten(["margin-bottom-6", "height-80"]) as ViewStyle
-            }
-            titleStyle={
-              style.flatten(["text-caption1", "font-medium"]) as ViewStyle
-            }
-            onPress={() => {
-              onSelectApple();
-            }}
-          />
-        ) : null}
-
-        <TokenCardView
-          title="Create new seed phrase"
-          leadingIcon={
-            <BlurBackground blurIntensity={18}>
-              <KeyIconLarge />
-            </BlurBackground>
-          }
-          containerStyle={
-            style.flatten(["margin-bottom-6", "height-80"]) as ViewStyle
-          }
-          titleStyle={
-            style.flatten(["text-caption1", "font-medium"]) as ViewStyle
-          }
-          onPress={() => {
-            onSelectNewMnemonic();
-          }}
-        />
-      </CardModal>
-    );
+  if (!isOpen) {
+    return null;
   }
-);
+
+  return (
+    <CardModal
+      isOpen={isOpen}
+      title="Create a new wallet"
+      close={() => close()}
+    >
+      <TokenCardView
+        title="Continue with Google"
+        leadingIcon={<GoogleIcon width={30} height={30} />}
+        subtitle={"Powered by Web3Auth"}
+        containerStyle={
+          style.flatten(["margin-bottom-6", "height-80"]) as ViewStyle
+        }
+        titleStyle={
+          style.flatten(["text-caption1", "font-medium"]) as ViewStyle
+        }
+        onPress={() => {
+          onSelectGoogle();
+        }}
+      />
+      {Platform.OS === "ios" ? (
+        <TokenCardView
+          title="Continue with Apple"
+          leadingIcon={<AppleIcon width={30} height={30} />}
+          containerStyle={
+            style.flatten(["margin-bottom-6", "height-80"]) as ViewStyle
+          }
+          titleStyle={
+            style.flatten(["text-caption1", "font-medium"]) as ViewStyle
+          }
+          onPress={() => {
+            onSelectApple();
+          }}
+        />
+      ) : null}
+
+      <TokenCardView
+        title="Create new seed phrase"
+        leadingIcon={
+          <BlurBackground blurIntensity={18}>
+            <KeyIconLarge />
+          </BlurBackground>
+        }
+        containerStyle={
+          style.flatten(["margin-bottom-6", "height-80"]) as ViewStyle
+        }
+        titleStyle={
+          style.flatten(["text-caption1", "font-medium"]) as ViewStyle
+        }
+        onPress={() => {
+          onSelectNewMnemonic();
+        }}
+      />
+    </CardModal>
+  );
+};
 
 export const ImportExistingWalletModal: FunctionComponent<{
   isOpen: boolean;
@@ -395,85 +398,83 @@ export const ImportExistingWalletModal: FunctionComponent<{
   onImportFromFetch: () => void;
   onConnectLedger: () => void;
   onMigrateFromETH: () => void;
-}> = observer(
-  ({
-    isOpen,
-    onImportExistingWallet,
-    onImportFromFetch,
-    onConnectLedger,
-    onMigrateFromETH,
-    close,
-  }) => {
-    const style = useStyle();
+}> = ({
+  isOpen,
+  onImportExistingWallet,
+  onImportFromFetch,
+  onConnectLedger,
+  onMigrateFromETH,
+  close,
+}) => {
+  const style = useStyle();
 
-    if (!isOpen) {
-      return null;
-    }
-
-    return (
-      <CardModal
-        isOpen={isOpen}
-        title="Import existing wallet"
-        close={() => close()}
-      >
-        <TokenCardView
-          title="Import from Fetch extension"
-          leadingIcon={<FetchIcon size={30} />}
-          containerStyle={
-            style.flatten(["margin-bottom-6", "height-80"]) as ViewStyle
-          }
-          titleStyle={
-            style.flatten(["text-caption1", "font-medium"]) as ViewStyle
-          }
-          onPress={onImportFromFetch}
-        />
-        <TokenCardView
-          title="Use a seed phrase or a private key"
-          leadingIcon={
-            <BlurBackground blurIntensity={18}>
-              <KeyIconLarge />
-            </BlurBackground>
-          }
-          containerStyle={
-            style.flatten(["margin-bottom-6", "height-80"]) as ViewStyle
-          }
-          titleStyle={
-            style.flatten(["text-caption1", "font-medium"]) as ViewStyle
-          }
-          onPress={onImportExistingWallet}
-        />
-        <TokenCardView
-          title="Connect hardware wallet"
-          leadingIcon={
-            <BlurBackground blurIntensity={18}>
-              <BluetoothIcon width={30} height={30} />
-            </BlurBackground>
-          }
-          containerStyle={
-            style.flatten(["margin-bottom-6", "height-80"]) as ViewStyle
-          }
-          titleStyle={
-            style.flatten(["text-caption1", "font-medium"]) as ViewStyle
-          }
-          subtitle={"Requires bluetooth access to pair"}
-          onPress={onConnectLedger}
-        />
-        <TokenCardView
-          title="Migrate from ETH"
-          leadingIcon={
-            <BlurBackground blurIntensity={18}>
-              <MetaMaskIcon size={30} />
-            </BlurBackground>
-          }
-          containerStyle={
-            style.flatten(["margin-bottom-6", "height-80"]) as ViewStyle
-          }
-          titleStyle={
-            style.flatten(["text-caption1", "font-medium"]) as ViewStyle
-          }
-          onPress={onMigrateFromETH}
-        />
-      </CardModal>
-    );
+  if (!isOpen) {
+    return null;
   }
-);
+
+  return (
+    <CardModal
+      isOpen={isOpen}
+      title="Import existing wallet"
+      close={() => close()}
+    >
+      <TokenCardView
+        title="Import from Fetch extension"
+        leadingIcon={<FetchIcon size={30} />}
+        containerStyle={
+          style.flatten(["margin-bottom-6", "height-80"]) as ViewStyle
+        }
+        titleStyle={
+          style.flatten(["text-caption1", "font-medium"]) as ViewStyle
+        }
+        onPress={onImportFromFetch}
+      />
+      <TokenCardView
+        title="Use a seed phrase or a private key"
+        leadingIcon={
+          <BlurBackground blurIntensity={18}>
+            <KeyIconLarge />
+          </BlurBackground>
+        }
+        containerStyle={
+          style.flatten(["margin-bottom-6", "height-80"]) as ViewStyle
+        }
+        titleStyle={
+          style.flatten(["text-caption1", "font-medium"]) as ViewStyle
+        }
+        onPress={onImportExistingWallet}
+      />
+      <TokenCardView
+        title="Connect hardware wallet"
+        leadingIcon={
+          <BlurBackground blurIntensity={18}>
+            <BluetoothIcon width={30} height={30} />
+          </BlurBackground>
+        }
+        containerStyle={
+          style.flatten(["margin-bottom-6", "height-80"]) as ViewStyle
+        }
+        titleStyle={
+          style.flatten(["text-caption1", "font-medium"]) as ViewStyle
+        }
+        subtitle={"Requires bluetooth access to pair"}
+        onPress={onConnectLedger}
+      />
+      <TokenCardView
+        title="Migrate from ETH"
+        leadingIcon={
+          <BlurBackground blurIntensity={18}>
+            <MetaMaskIcon size={30} />
+          </BlurBackground>
+        }
+        containerStyle={
+          style.flatten(["margin-bottom-6", "height-80"]) as ViewStyle
+        }
+        titleStyle={
+          style.flatten(["text-caption1", "font-medium"]) as ViewStyle
+        }
+        onPress={onMigrateFromETH}
+      />
+    </CardModal>
+  );
+};

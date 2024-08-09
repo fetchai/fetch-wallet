@@ -8,13 +8,12 @@ import { RouteProp, useRoute } from "@react-navigation/native";
 import { useSmartNavigation } from "navigation/smart-navigation";
 import { NewMnemonicConfig } from "./hook";
 import { RegisterConfig } from "@keplr-wallet/hooks";
-import { observer } from "mobx-react-lite";
 import { RectButton } from "components/rect-button";
 import { BIP44AdvancedButton, useBIP44Option } from "screens/register/bip44";
 import { useStore } from "stores/index";
 import { BipButtons } from "screens/register/bip-button";
 
-export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
+export const VerifyMnemonicScreen: FunctionComponent = () => {
   const route = useRoute<
     RouteProp<
       Record<
@@ -204,7 +203,7 @@ export const VerifyMnemonicScreen: FunctionComponent = observer(() => {
       {/* Mock element for bottom padding */}
     </PageWithScrollView>
   );
-});
+};
 
 const WordButton: FunctionComponent<{
   word: string;

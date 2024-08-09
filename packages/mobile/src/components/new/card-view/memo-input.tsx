@@ -1,11 +1,19 @@
 import React, { FunctionComponent, useState } from "react";
-import { Platform, Text, TextInput, View, ViewStyle } from "react-native";
+import {
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  ViewStyle,
+} from "react-native";
 import { useStyle } from "styles/index";
 import { BlurBackground } from "components/new/blur-background/blur-background";
 
-import { observer } from "mobx-react-lite";
 import { IMemoConfig } from "@keplr-wallet/hooks";
 import { removeEmojis } from "utils/format/format";
+import { KeplrSignOptions } from "@keplr-wallet/types";
+import { observer } from "mobx-react-lite";
 
 export const MemoInputView: FunctionComponent<{
   label?: string;
@@ -16,6 +24,10 @@ export const MemoInputView: FunctionComponent<{
   memoConfig: IMemoConfig;
   onFocus?: any;
   onBlur?: any;
+  editable?: boolean;
+  errorLabelStyle?: ViewStyle;
+  error?: string;
+  signOptions?: KeplrSignOptions;
 }> = observer(
   ({
     label,
@@ -26,9 +38,14 @@ export const MemoInputView: FunctionComponent<{
     memoConfig,
     onFocus,
     onBlur,
+    editable = true,
+    error,
+    errorLabelStyle,
+    signOptions,
   }) => {
     const style = useStyle();
     const [isFocused, setIsFocused] = useState(false);
+    const preferNoSetMemo = signOptions?.preferNoSetMemo ?? false;
 
     return (
       <View style={containerStyle}>
@@ -51,13 +68,14 @@ export const MemoInputView: FunctionComponent<{
             [
               style.flatten(
                 ["padding-x-18", "padding-y-12", "flex-row"],
-                isFocused
+                isFocused || error
                   ? [
                       // The order is important.
                       // The border color has different priority according to state.
                       // The more in front, the lower the priority.
                       "border-width-1",
                       isFocused ? "border-color-indigo" : undefined,
+                      error ? "border-color-red-250" : undefined,
                     ]
                   : []
               ),
@@ -86,12 +104,17 @@ export const MemoInputView: FunctionComponent<{
                 Platform.OS === "ios" ? "ascii-capable" : "visible-password"
               }
               returnKeyType="done"
-              placeholder={placeholderText}
+              placeholder={
+                preferNoSetMemo && memoConfig.memo.length == 0
+                  ? "(Empty memo)"
+                  : placeholderText
+              }
               value={memoConfig.memo}
               onChangeText={(text: string) => {
                 memoConfig.setMemo(removeEmojis(text));
               }}
               maxLength={100}
+              editable={editable || !preferNoSetMemo}
               onFocus={(e) => {
                 setIsFocused(true);
 
@@ -109,6 +132,23 @@ export const MemoInputView: FunctionComponent<{
             />
           </View>
         </BlurBackground>
+        {error ? (
+          <View>
+            <Text
+              style={StyleSheet.flatten([
+                style.flatten([
+                  // "absolute",
+                  "text-caption2",
+                  "color-red-250",
+                  "margin-top-2",
+                ]) as ViewStyle,
+                errorLabelStyle,
+              ])}
+            >
+              {error}
+            </Text>
+          </View>
+        ) : null}
       </View>
     );
   }

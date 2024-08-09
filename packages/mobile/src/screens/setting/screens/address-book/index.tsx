@@ -71,6 +71,7 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
 
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [showConfirmModal, setConfirmModal] = useState(false);
+  const [selectAddress, setSelectAddress] = useState<number>(0);
 
   useEffect(() => {
     smartNavigation.setOptions({
@@ -183,58 +184,61 @@ export const AddressBookScreen: FunctionComponent = observer(() => {
                     backgroundBlur={false}
                     icon={<ThreeDotIcon />}
                     iconStyle={style.flatten(["padding-12"]) as ViewStyle}
-                    onPress={() => setIsOpenModal(true)}
-                  />
-                  <ManageAddressCardModel
-                    isOpen={isOpenModal}
-                    title="Manage address"
-                    close={() => setIsOpenModal(false)}
-                    onSelectWallet={(option: ManageAddressOption) => {
-                      switch (option) {
-                        case ManageAddressOption.renameAddress:
-                          setIsOpenModal(false);
-                          analyticsStore.logEvent("rename_address_click", {
-                            pageName: "More",
-                          });
-                          smartNavigation.navigateSmart("EditAddressBook", {
-                            chainId,
-                            addressBookConfig,
-                            i,
-                          });
-                          break;
-
-                        case ManageAddressOption.deleteAddress:
-                          setConfirmModal(true);
-                          // deleteAddress(i);
-                          setIsOpenModal(false);
-                          analyticsStore.logEvent("delete_address_click", {
-                            pageName: "More",
-                            action: "No",
-                          });
-                          break;
-                      }
-                    }}
-                  />
-                  <ConfirmCardModel
-                    isOpen={showConfirmModal}
-                    close={() => {
-                      setConfirmModal(false);
-                    }}
-                    title={"Delete address"}
-                    subtitle={"Are you sure you want to delete this address?"}
-                    select={(confirm: boolean) => {
-                      if (confirm) {
-                        addressBookConfig.removeAddressBook(i);
-                        analyticsStore.logEvent("delete_address_click", {
-                          pageName: "More",
-                          action: "Yes",
-                        });
-                      }
+                    onPress={() => {
+                      setSelectAddress(i);
+                      setIsOpenModal(true);
                     }}
                   />
                 </View>
               </View>
             </BlurBackground>
+            <ManageAddressCardModel
+              isOpen={isOpenModal}
+              title="Manage address"
+              close={() => setIsOpenModal(false)}
+              onSelectWallet={(option: ManageAddressOption) => {
+                switch (option) {
+                  case ManageAddressOption.renameAddress:
+                    setIsOpenModal(false);
+                    analyticsStore.logEvent("rename_address_click", {
+                      pageName: "More",
+                    });
+                    smartNavigation.navigateSmart("EditAddressBook", {
+                      chainId,
+                      addressBookConfig,
+                      i: selectAddress,
+                    });
+                    break;
+
+                  case ManageAddressOption.deleteAddress:
+                    setConfirmModal(true);
+                    // deleteAddress(i);
+                    setIsOpenModal(false);
+                    analyticsStore.logEvent("delete_address_click", {
+                      pageName: "More",
+                      action: "No",
+                    });
+                    break;
+                }
+              }}
+            />
+            <ConfirmCardModel
+              isOpen={showConfirmModal}
+              close={() => {
+                setConfirmModal(false);
+              }}
+              title={"Delete address"}
+              subtitle={"Are you sure you want to delete this address?"}
+              select={(confirm: boolean) => {
+                if (confirm) {
+                  addressBookConfig.removeAddressBook(selectAddress);
+                  analyticsStore.logEvent("delete_address_click", {
+                    pageName: "More",
+                    action: "Yes",
+                  });
+                }
+              }}
+            />
           </React.Fragment>
         );
       })}

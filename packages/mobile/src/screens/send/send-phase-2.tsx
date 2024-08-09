@@ -11,7 +11,13 @@ import { useStore } from "stores/index";
 import { Text, View, ViewStyle } from "react-native";
 import { useStyle } from "styles/index";
 import { Button } from "components/button";
-import { RouteProp, useRoute } from "@react-navigation/native";
+import {
+  NavigationProp,
+  ParamListBase,
+  RouteProp,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
 import { Buffer } from "buffer/";
 import { AddressInputCard } from "components/new/card-view/address-card";
 import { BlurButton } from "components/new/button/blur-button";
@@ -62,6 +68,7 @@ export const SendPhase2: FunctionComponent<{
   const style = useStyle();
 
   const smartNavigation = useSmartNavigation();
+  const navigation = useNavigation<NavigationProp<ParamListBase>>();
 
   const chainId = route.params.chainId
     ? route.params.chainId
@@ -203,7 +210,7 @@ export const SendPhase2: FunctionComponent<{
           });
         }
         console.log(e);
-        smartNavigation.navigateSmart("Home", {});
+        navigation.navigate("Home", {});
         analyticsStore.logEvent("send_txn_broadcasted_fail", {
           chainId: chainStore.current.chainId,
           chainName: chainStore.current.chainName,
@@ -251,10 +258,13 @@ export const SendPhase2: FunctionComponent<{
           containerStyle={
             style.flatten([
               "border-width-1",
-              "border-color-white@40%",
+              account.txTypeInProgress === "send"
+                ? "border-color-white@20%"
+                : "border-color-white@40%",
             ]) as ViewStyle
           }
           textStyle={style.flatten(["padding-x-14", "body3"]) as ViewStyle}
+          disable={account.txTypeInProgress === "send"}
           onPress={() => setIsNext(false)}
         />
       </View>
@@ -269,11 +279,15 @@ export const SendPhase2: FunctionComponent<{
           recipientConfig={sendConfigs.recipientConfig}
           memoConfig={sendConfigs.memoConfig}
           pageName="Send"
+          buttonDisable={account.txTypeInProgress === "send"}
+          editable={!(account.txTypeInProgress === "send")}
         />
         <MemoInputView
           label="Memo"
           placeholderText="Optional"
           memoConfig={sendConfigs.memoConfig}
+          error={sendConfigs.memoConfig.error?.message}
+          editable={!(account.txTypeInProgress === "send")}
         />
       </View>
       <View

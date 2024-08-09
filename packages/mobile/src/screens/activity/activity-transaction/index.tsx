@@ -11,21 +11,12 @@ import { useStore } from "stores/index";
 import { useStyle } from "styles/index";
 import { CardDivider } from "components/card";
 import { FilterItem } from "screens/activity";
-import { activityFilterOptions, ActivityFilterView } from "./activity-filter";
 import { ActivityRow } from "./activity-row";
 import { observer } from "mobx-react-lite";
 import { NoActivityView } from "screens/activity/activity-transaction/no-activity-view";
-import { CHAIN_ID_FETCHHUB, CHAIN_ID_DORADO } from "../../../config";
-
-const processFilters = (filters: FilterItem[]) => {
-  let result: any[] = [];
-  filters
-    .filter((filter) => filter.isSelected)
-    .map((data) => {
-      result = result.concat(data.value.split(","));
-    });
-  return result;
-};
+import { isFeatureAvailable } from "utils/index";
+import { ActivityFilterView } from "../filter/activity-filter";
+import { processFilters, txOptions } from "screens/activity/utils";
 
 export const ActivityNativeTab: FunctionComponent<{
   isOpenModal: boolean;
@@ -39,7 +30,7 @@ export const ActivityNativeTab: FunctionComponent<{
   const [_date, setDate] = useState("");
   const [activities, setActivities] = useState<unknown[]>([]);
 
-  const [filters, setFilters] = useState<FilterItem[]>(activityFilterOptions);
+  const [filters, setFilters] = useState<FilterItem[]>(txOptions);
   const [isLoading, setIsLoading] = useState(true);
 
   const accountOrChainChanged =
@@ -61,7 +52,7 @@ export const ActivityNativeTab: FunctionComponent<{
   }, [activityStore.sortedNodes]);
 
   useEffect(() => {
-    setFilters(activityFilterOptions);
+    setFilters(txOptions);
   }, [accountOrChainChanged]);
 
   useEffect(() => {
@@ -151,8 +142,7 @@ export const ActivityNativeTab: FunctionComponent<{
 
   return (
     <React.Fragment>
-      {(current.chainId === CHAIN_ID_FETCHHUB ||
-        current.chainId === CHAIN_ID_DORADO) &&
+      {isFeatureAvailable(current.chainId) &&
       data.length > 0 &&
       activities.length > 0 ? (
         renderList(data)
@@ -169,6 +159,7 @@ export const ActivityNativeTab: FunctionComponent<{
         filters={filters}
         handleFilterChange={handleFilterChange}
         close={() => setIsOpenModal(false)}
+        activityFilterOptions={txOptions}
       />
     </React.Fragment>
   );

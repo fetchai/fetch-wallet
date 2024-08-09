@@ -62,6 +62,7 @@ export const ColorPalette = {
   "red-700": "#440B17",
   "coral-red": "#FF3E3E",
   "vibrant-red-500": "#F04646",
+  "vibrant-red-600": "#C33838",
 
   "pink-50": "#FDF4F9",
   "pink-100": "#FFE9F4",
@@ -113,15 +114,19 @@ export const ColorPalette = {
   "pink-light": "#D0BCFF",
 
   indigo: "#5F38FB",
+  "indigo-20": "#fbfaff40",
   "indigo-100": "#5f38fb12",
-  "indigo-200": "#fbfaff40",
+  "indigo-200": "#CFC3FE",
   "indigo-250": "#BFAFFD",
+  "indigo-300": "#9F88FD",
   "indigo-400": "#000D3D",
+  "indigo-600": "#4219E5",
   "indigo-800": "#270E8D",
   "indigo-900": "#000D3D",
   "indigo-backdrop": "#270e8dcc",
 
   "orange-400": "#fa8f6b",
+  "orange-500": "#F9774B",
 
   "yellow-500": "#EDC32C",
 };

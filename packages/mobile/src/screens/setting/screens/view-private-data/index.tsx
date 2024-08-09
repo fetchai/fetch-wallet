@@ -23,7 +23,11 @@ export const getPrivateDataTitle = (
 };
 
 export const canShowPrivateData = (keyRingType: string): boolean => {
-  return keyRingType === "mnemonic" || keyRingType === "privateKey";
+  return (
+    keyRingType === "mnemonic" ||
+    keyRingType === "privateKey" ||
+    keyRingType === "ledger"
+  );
 };
 
 export const ViewPrivateDataScreen: FunctionComponent = () => {
@@ -54,7 +58,10 @@ export const ViewPrivateDataScreen: FunctionComponent = () => {
   const privateData = route.params.privateData;
   const privateDataType = route.params.privateDataType;
 
-  const words = privateData.split(" ");
+  const words =
+    privateDataType === "ledger"
+      ? JSON.parse(privateData)
+      : privateData.split(" ");
 
   const renderButtonItem = ({ item }: any) => {
     return (
@@ -108,17 +115,34 @@ export const ViewPrivateDataScreen: FunctionComponent = () => {
               scrollEnabled={false}
             />
           ) : (
-            <Text
-              style={
-                style.flatten([
-                  "h6",
-                  "margin-bottom-30",
-                  "color-white",
-                ]) as ViewStyle
-              }
-            >
-              {words}
-            </Text>
+            <React.Fragment>
+              {privateDataType === "ledger" ? (
+                <Text
+                  style={
+                    style.flatten([
+                      "h4",
+                      "margin-bottom-8",
+                      "color-white",
+                      "text-center",
+                      "width-full",
+                    ]) as ViewStyle
+                  }
+                >
+                  {Object.keys(words)[0]}
+                </Text>
+              ) : null}
+              <Text
+                style={
+                  style.flatten([
+                    "h6",
+                    "margin-bottom-30",
+                    "color-white",
+                  ]) as ViewStyle
+                }
+              >
+                {privateDataType === "ledger" ? words["cosmos"] : words}
+              </Text>
+            </React.Fragment>
           )}
         </View>
         <View style={style.flatten(["width-full"]) as ViewStyle}>
@@ -145,7 +169,9 @@ export const ViewPrivateDataScreen: FunctionComponent = () => {
             })}
             text="Copy to clipboard"
             onPress={async () => {
-              await Clipboard.setStringAsync(words.join(" "));
+              await Clipboard.setStringAsync(
+                privateDataType === "ledger" ? words["cosmos"] : words.join(" ")
+              );
               setTimer(3000);
             }}
           />

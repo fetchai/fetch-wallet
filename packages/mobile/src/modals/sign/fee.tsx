@@ -42,58 +42,75 @@ export const FeeInSign: FunctionComponent<{
   return (
     <React.Fragment>
       {feeConfig.feeType && canFeeEditable ? (
-        <View
-          style={
-            style.flatten([
-              "flex-row",
-              "justify-between",
-              "items-center",
-              "margin-y-12",
-            ]) as ViewStyle
-          }
-        >
-          <Text
-            style={style.flatten(["body3", "color-white@60%"]) as ViewStyle}
-          >
-            Transaction fee:
-          </Text>
+        <React.Fragment>
           <View
-            style={style.flatten(["flex-row", "items-center"]) as ViewStyle}
+            style={
+              style.flatten([
+                "flex-row",
+                "justify-between",
+                "items-center",
+                "margin-y-12",
+              ]) as ViewStyle
+            }
           >
+            <Text
+              style={style.flatten(["body3", "color-white@60%"]) as ViewStyle}
+            >
+              Transaction fee:
+            </Text>
+            <View
+              style={style.flatten(["flex-row", "items-center"]) as ViewStyle}
+            >
+              <Text
+                style={
+                  style.flatten([
+                    "body3",
+                    "color-white",
+                    "margin-right-6",
+                  ]) as ViewStyle
+                }
+              >
+                {feeConfig
+                  .getFeeTypePretty(
+                    feeConfig.feeType ? feeConfig.feeType : "average"
+                  )
+                  .hideIBCMetadata(true)
+                  .trim(true)
+                  .toMetricPrefix(isEvm)}
+              </Text>
+              <IconButton
+                backgroundBlur={false}
+                icon={<GearIcon />}
+                iconStyle={
+                  style.flatten([
+                    "width-32",
+                    "height-32",
+                    "items-center",
+                    "justify-center",
+                    "border-width-1",
+                    "border-color-white@40%",
+                  ]) as ViewStyle
+                }
+                onPress={() => setFeeModal(true)}
+              />
+            </View>
+          </View>
+          {feeConfig.error ? (
             <Text
               style={
                 style.flatten([
-                  "body3",
-                  "color-white",
-                  "margin-right-6",
+                  "text-caption1",
+                  "color-red-250",
+                  "margin-top-8",
                 ]) as ViewStyle
               }
             >
-              {feeConfig
-                .getFeeTypePretty(
-                  feeConfig.feeType ? feeConfig.feeType : "average"
-                )
-                .hideIBCMetadata(true)
-                .trim(true)
-                .toMetricPrefix(isEvm)}
+              {feeConfig.error.message == "insufficient fee"
+                ? "Insufficient available balance for transaction fee"
+                : feeConfig.error.message}
             </Text>
-            <IconButton
-              backgroundBlur={false}
-              icon={<GearIcon />}
-              iconStyle={
-                style.flatten([
-                  "width-32",
-                  "height-32",
-                  "items-center",
-                  "justify-center",
-                  "border-width-1",
-                  "border-color-white@40%",
-                ]) as ViewStyle
-              }
-              onPress={() => setFeeModal(true)}
-            />
-          </View>
-        </View>
+          ) : null}
+        </React.Fragment>
       ) : (
         <View style={style.flatten(["padding-bottom-28"]) as ViewStyle}>
           <View

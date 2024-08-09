@@ -14,7 +14,7 @@ export const txType: txTypes = {
   delegate: "Delegation",
   undelegate: "Undelegation",
   redelegate: "Redelegation",
-  govVote: "Government Vote",
+  govVote: "Governance Vote",
   nativeBridgeSend: "Bridging",
   approval: "Approve txn",
   createSecret20ViewingKey: "Secret key creation",
@@ -37,7 +37,7 @@ export const TxnStatus: FunctionComponent<{
             "padding-x-18",
             "padding-y-12",
             "border-width-1",
-            "border-color-indigo-200",
+            "border-color-indigo-20",
           ]),
           containerStyle,
         ] as ViewStyle

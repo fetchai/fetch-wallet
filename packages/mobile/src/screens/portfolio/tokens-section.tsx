@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite";
 
 import { useStore } from "stores/index";
 import { TokenCardView } from "components/new/card-view/token-card-view";
-import { CoinPretty, Dec, Int } from "@keplr-wallet/unit";
+import { CoinPretty, Dec, DecUtils, Int } from "@keplr-wallet/unit";
 import { DenomHelper } from "@keplr-wallet/common";
 import { ViewStyle } from "react-native";
 import { useStyle } from "styles/index";
@@ -77,11 +77,14 @@ export const TokensSection: FunctionComponent = observer(() => {
         tokens.map((token) => {
           const tokenInfo = token.balance.currency;
 
-          const amountInNumber =
-            parseFloat(
-              token.balance.maxDecimals(6).hideDenom(false).toString()
-            ) *
-            10 ** token.currency.coinDecimals;
+          const dec = token.balance
+            .toDec()
+            .mul(
+              DecUtils.getTenExponentNInPrecisionRange(
+                token.currency.coinDecimals
+              )
+            );
+          const amountInNumber = dec.truncate().toString();
 
           const inputValue = new CoinPretty(
             tokenInfo,

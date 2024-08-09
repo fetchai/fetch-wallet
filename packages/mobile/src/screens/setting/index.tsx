@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useState } from "react";
 import { PageWithScrollViewInBottomTabView } from "components/page";
 import { Right, SettingItem, SettingSectionTitle } from "./components";
 import { useSmartNavigation } from "navigation/smart-navigation";
@@ -19,6 +19,11 @@ import {
   ParamListBase,
   useNavigation,
 } from "@react-navigation/native";
+import { ProposalIcon } from "components/new/icon/proposal-icon";
+import { ConfirmCardModel } from "components/new/confirm-modal";
+import { useNetInfo } from "@react-native-community/netinfo";
+import Toast from "react-native-toast-message";
+import { GuideIcon } from "components/new/icon/guide-icon";
 
 export const SettingScreen: FunctionComponent = observer(() => {
   const {
@@ -33,11 +38,16 @@ export const SettingScreen: FunctionComponent = observer(() => {
   const style = useStyle();
 
   const safeAreaInsets = useSafeAreaInsets();
+  const netInfo = useNetInfo();
+  const networkIsConnected =
+    typeof netInfo.isConnected !== "boolean" || netInfo.isConnected;
 
   const smartNavigation = useSmartNavigation();
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
 
   const showPrivateData = canShowPrivateData(keyRingStore.keyRingType);
+
+  const [openConfirmModel, setConfirmModel] = useState(false);
   const showManageTokenButton = (() => {
     if (!chainStore.current.features) {
       return false;
@@ -137,6 +147,36 @@ export const SettingScreen: FunctionComponent = observer(() => {
         />
       ) : null}
       <SettingSectionTitle title="Others" />
+      {chainStore.current.govUrl && (
+        <SettingItem
+          label="Proposals  "
+          left={<ProposalIcon />}
+          onPress={() => {
+            navigation.navigate("Setting", {
+              screen: "Governance",
+            });
+          }}
+        />
+      )}
+      <SettingItem
+        label="Guide"
+        left={<GuideIcon />}
+        onPress={() => {
+          if (!networkIsConnected) {
+            Toast.show({
+              type: "error",
+              text1: "No internet connection",
+            });
+            return;
+          }
+          navigation.navigate("Others", {
+            screen: "WebView",
+            params: {
+              url: "https://fetch.ai/docs/guides/fetch-network/fetch-wallet/mobile-wallet/get-started",
+            },
+          });
+        }}
+      />
       <SettingItem
         label="Fetch Wallet version"
         left={<BranchIcon size={16} />}
@@ -149,20 +189,30 @@ export const SettingScreen: FunctionComponent = observer(() => {
       <SettingItem
         label="Sign out"
         left={<SignOutIcon size={16} />}
-        onPress={async () => {
-          await keyRingStore.lock();
-          smartNavigation.reset({
-            index: 0,
-            routes: [
-              {
-                name: "Unlock",
-              },
-            ],
-          });
-        }}
+        onPress={() => setConfirmModel(true)}
       />
       {/* Mock element for padding bottom */}
       <View style={style.get("height-32") as ViewStyle} />
+      <ConfirmCardModel
+        isOpen={openConfirmModel}
+        close={() => setConfirmModel(false)}
+        title={"Sign out"}
+        subtitle={"Are you sure you want to sign out?"}
+        confirmButtonText="Confirm"
+        select={async (confirm: boolean) => {
+          if (confirm) {
+            await keyRingStore.lock();
+            smartNavigation.reset({
+              index: 0,
+              routes: [
+                {
+                  name: "Unlock",
+                },
+              ],
+            });
+          }
+        }}
+      />
     </PageWithScrollViewInBottomTabView>
   );
 });

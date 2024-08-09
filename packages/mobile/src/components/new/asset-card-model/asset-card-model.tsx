@@ -2,7 +2,6 @@ import React, { FunctionComponent, useEffect, useState } from "react";
 import { CardModal } from "modals/card";
 import { Platform, ViewStyle } from "react-native";
 import { useStyle } from "styles/index";
-import { observer } from "mobx-react-lite";
 import { SearchIcon } from "components/new/icon/search-icon";
 import { IAmountConfig } from "@keplr-wallet/hooks";
 import { useStore } from "stores/index";
@@ -17,7 +16,7 @@ export const AssetCardModel: FunctionComponent<{
   close: () => void;
   title: string;
   amountConfig: IAmountConfig;
-}> = observer(({ close, title, isOpen, amountConfig }) => {
+}> = ({ close, title, isOpen, amountConfig }) => {
   const style = useStyle();
   const safeAreaInsets = useSafeAreaInsets();
   const { queriesStore, priceStore, analyticsStore } = useStore();
@@ -49,8 +48,7 @@ export const AssetCardModel: FunctionComponent<{
 
   const convertToUsd = (currency: any) => {
     const value = priceStore.calculatePrice(currency);
-    const inUsd = value && value.shrink(true).maxDecimals(6).toString();
-    return inUsd;
+    return value && value.shrink(true).maxDecimals(6).toString();
   };
   const balancesMap = new Map(
     queryBalances.balances.map((bal) => [
@@ -144,4 +142,4 @@ export const AssetCardModel: FunctionComponent<{
       )}
     </CardModal>
   );
-});
+};

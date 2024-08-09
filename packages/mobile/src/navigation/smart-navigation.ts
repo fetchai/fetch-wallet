@@ -12,6 +12,7 @@ import {
 } from "@keplr-wallet/hooks";
 import { NewMnemonicConfig } from "screens/register/mnemonic";
 import { BIP44HDPath, ExportKeyRingData } from "@keplr-wallet/background";
+import { ActivityEnum } from "screens/activity";
 
 interface Configs {
   amount: string;
@@ -23,6 +24,7 @@ interface Configs {
 export interface State {
   isNext: boolean;
   configs: Configs;
+  noChangeAccount: boolean;
 }
 const { SmartNavigatorProvider, useSmartNavigation } =
   createSmartNavigatorProvider(
@@ -68,6 +70,9 @@ const { SmartNavigatorProvider, useSmartNavigation } =
       },
       Home: {
         upperScreenName: "HomeTab",
+      },
+      Activity: {
+        upperScreenName: "ActivityTab",
       },
       Portfolio: {
         upperScreenName: "HomeTab",
@@ -238,7 +243,7 @@ const { SmartNavigatorProvider, useSmartNavigation } =
         addressBookConfig: AddressBookConfig;
       };
       "Governance.Details": {
-        proposalId: string;
+        proposalId?: string;
       };
       Send: {
         chainId?: string;
@@ -259,6 +264,9 @@ const { SmartNavigatorProvider, useSmartNavigation } =
       };
       WebView: {
         url: string;
+      };
+      Activity: {
+        tabId?: ActivityEnum;
       };
     }>()
   );

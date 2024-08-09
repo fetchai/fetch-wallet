@@ -24,6 +24,7 @@ export const StakeAmountInput: FunctionComponent<{
   errorLabelStyle?: TextStyle;
   label: string;
   isToggleClicked: boolean;
+  editable?: boolean;
 
   amountConfig: IAmountConfig;
 }> = observer(
@@ -35,6 +36,7 @@ export const StakeAmountInput: FunctionComponent<{
     label,
     amountConfig,
     isToggleClicked,
+    editable = true,
   }) => {
     const style = useStyle();
     const { priceStore } = useStore();
@@ -93,6 +95,7 @@ export const StakeAmountInput: FunctionComponent<{
         label={label}
         labelStyle={labelStyle}
         placeholder={"0"}
+        editable={editable}
         containerStyle={containerStyle}
         inputContainerStyle={inputContainerStyle}
         errorLabelStyle={errorLabelStyle}

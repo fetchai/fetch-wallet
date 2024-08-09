@@ -14,7 +14,6 @@ import Toast, { BaseToast, ErrorToast } from "react-native-toast-message";
 import { BaseToastProps } from "react-native-toast-message/lib/src/types";
 import { AppNavigation } from "navigation/navigation";
 import { XmarkIcon } from "components/new/icon/xmark";
-//import Bugsnag from "@bugsnag/react-native";
 
 if (Platform.OS === "android") {
   // https://github.com/web-ridge/react-native-paper-dates/releases/tag/v0.2.15
@@ -165,35 +164,14 @@ const AppBody: FunctionComponent = () => {
   );
 };
 
-//const ErrorBoundaryPlugin = Bugsnag.getPlugin("react");
-// const ErrorBoundary = (() => {
-//   if (ErrorBoundaryPlugin) {
-//     console.log("ErrorBoundaryPlugin found");
-//     return ErrorBoundaryPlugin.createErrorBoundary(React);
-//   } else {
-//     console.log(
-//       "WARNING: ErrorBoundaryPlugin is null. Fallback to use basic AppBody"
-//     );
-//     return;
-//   }
-// })();
-
 const CodePushAppBody: FunctionComponent = __DEV__
   ? AppBody
   : codePush(AppBody);
 
 export const App: FunctionComponent = () => {
-  // if (ErrorBoundary) {
-  //   return (
-  //     <ErrorBoundary>
-  //       <CodePushAppBody />
-  //     </ErrorBoundary>
-  //   );
-  // } else {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <CodePushAppBody />
     </GestureHandlerRootView>
   );
-  //}
 };

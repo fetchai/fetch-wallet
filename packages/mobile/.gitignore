@@ -79,3 +79,6 @@ injected-provider.bundle.js
 *.zip
 *.mobileprovision
 .env
+
+/android/sentry.properties
+/ios/sentry.properties

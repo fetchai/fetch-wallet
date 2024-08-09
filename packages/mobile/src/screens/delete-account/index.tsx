@@ -1,6 +1,5 @@
 import React, { FunctionComponent, useState } from "react";
 import { PageWithScrollView } from "components/page";
-import { observer } from "mobx-react-lite";
 import { useStore } from "stores/index";
 import { useStyle } from "styles/index";
 import { InputCardView } from "components/new/card-view/input-card";
@@ -20,7 +19,7 @@ import { useSmartNavigation } from "navigation/smart-navigation";
 import { ConfirmCardModel } from "components/new/confirm-modal";
 import { DeleteWalletIcon } from "components/new/icon/delete-wallet";
 
-export const DeleteWalletScreen: FunctionComponent = observer(() => {
+export const DeleteWalletScreen: FunctionComponent = () => {
   const { keyRingStore, keychainStore, analyticsStore } = useStore();
   const style = useStyle();
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
@@ -212,4 +211,4 @@ export const DeleteWalletScreen: FunctionComponent = observer(() => {
       />
     </PageWithScrollView>
   );
-});
+};
