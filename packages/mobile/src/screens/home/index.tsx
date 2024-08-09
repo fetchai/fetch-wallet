@@ -10,6 +10,7 @@ import {
   AppState,
   AppStateStatus,
   Dimensions,
+  Linking,
   Platform,
   RefreshControl,
   ScrollView,
@@ -25,6 +26,19 @@ import { usePrevious } from "hooks/use-previous";
 import { LineGraphView } from "components/new/line-graph";
 import { useStyle } from "styles/index";
 import { useFocusedScreen } from "providers/focused-screen";
+import { AppUpdateModal } from "./app-update-modal";
+import DeviceInfo from "react-native-device-info";
+import axios from "axios";
+
+interface OS {
+  version: string;
+  code: string;
+}
+interface UpdateData {
+  isForceUpdate: boolean;
+  iOS: OS;
+  android: OS;
+}
 
 export const HomeScreen: FunctionComponent = observer(() => {
   const safeAreaInsets = useSafeAreaInsets();
@@ -41,6 +55,10 @@ export const HomeScreen: FunctionComponent = observer(() => {
     type: "positive",
   });
   const [graphHeight, setGraphHeight] = useState(4.2);
+
+  const [appUpdate, setAppUpdate] = useState(false);
+  const [appVersion] = useState(() => DeviceInfo.getVersion());
+  const [buildNumber] = useState(() => DeviceInfo.getBuildNumber());
 
   const scrollViewRef = useRef<ScrollView | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -61,6 +79,16 @@ export const HomeScreen: FunctionComponent = observer(() => {
   const accountOrChainChanged =
     activityStore.getAddress !== account.bech32Address ||
     activityStore.getChainId !== chainStore.current.chainId;
+
+  async function fetchData(): Promise<UpdateData | undefined> {
+    try {
+      const apiUrl = `https://raw.githubusercontent.com/fetchai/fetch-wallet/master/packages/mobile/update.json`;
+      const response = await axios.get(apiUrl);
+      return response.data;
+    } catch {
+      return undefined;
+    }
+  }
 
   const checkAndUpdateChainInfo = useCallback(() => {
     if (!chainStoreIsInitializing) {
@@ -179,6 +207,29 @@ export const HomeScreen: FunctionComponent = observer(() => {
     }
   }, [account.bech32Address]);
 
+  useEffect(() => {
+    async function updateApp() {
+      const data = await fetchData();
+      if (data) {
+        if (data.isForceUpdate) {
+          if (Platform.OS === "ios") {
+            if (data.iOS.version > appVersion || data.iOS.code > buildNumber) {
+              setAppUpdate(true);
+            }
+          } else {
+            if (
+              data.android.version > appVersion ||
+              data.android.code > buildNumber
+            ) {
+              setAppUpdate(true);
+            }
+          }
+        }
+      }
+    }
+    updateApp();
+  }, []);
+
   return (
     <PageWithScrollViewInBottomTabView
       backgroundMode={"image"}
@@ -208,6 +259,20 @@ export const HomeScreen: FunctionComponent = observer(() => {
         setTokenState={setTokenState}
         tokenName={chainStore.current.feeCurrencies[0].coinGeckoId}
         height={windowHeight / graphHeight}
+      />
+      <AppUpdateModal
+        isOpen={appUpdate}
+        onPress={() => {
+          if (Platform.OS === "ios") {
+            Linking.openURL(
+              `https://apps.apple.com/in/app/fetch-ai-wallet/id1641087356`
+            );
+          } else {
+            Linking.openURL(
+              `https://play.google.com/store/apps/details?id=com.fetchai.wallet`
+            );
+          }
+        }}
       />
     </PageWithScrollViewInBottomTabView>
   );
