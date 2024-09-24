@@ -5,3 +5,4 @@ export * from "./utils";
 export * from "./escape";
 export * from "./json";
 export * from "./icns";
+export * from "./service-worker";

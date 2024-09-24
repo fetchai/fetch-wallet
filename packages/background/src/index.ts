@@ -16,6 +16,7 @@ import * as AutoLocker from "./auto-lock-account/internal";
 import * as Analytics from "./analytics/internal";
 import * as Messaging from "./messaging/internal";
 import * as AddressBook from "./address-book/internal";
+import * as SidePanel from "./side-panel/internal";
 import { KVStore } from "@keplr-wallet/common";
 import { ChainInfo } from "@keplr-wallet/types";
 import { CommonCrypto } from "./keyring";
@@ -37,6 +38,7 @@ export * from "./phishing-list";
 export * from "./auto-lock-account";
 export * from "./analytics";
 export * from "./address-book";
+export * from "./side-panel";
 
 export function init(
   router: Router,
@@ -142,6 +144,10 @@ export function init(
     storeCreator("keystone")
   );
 
+  const sidePanelService = new SidePanel.SidePanelService(
+    storeCreator("side-panel")
+  );
+
   const messagingService = new Messaging.MessagingService();
 
   Interaction.init(router, interactionService);
@@ -159,6 +165,7 @@ export function init(
   Tokens.init(router, tokensService);
   Ledger.init(router, ledgerService);
   Messaging.init(router, messagingService);
+  SidePanel.init(router, sidePanelService);
 
   return {
     initFn: async () => {
@@ -194,6 +201,7 @@ export function init(
       // No need to wait because user can't interact with app right after launch.
       await analyticsService.init();
       await messagingService.init(keyRingService);
+      await sidePanelService.init();
     },
   };
 }
