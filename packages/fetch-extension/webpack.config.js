@@ -262,6 +262,11 @@ const extensionConfig = () => {
       }),
       new HtmlWebpackPlugin({
         template: "./src/index.html",
+        filename: "sidePanel.html",
+        chunks: ["popup"],
+      }),
+      new HtmlWebpackPlugin({
+        template: "./src/index.html",
         filename: "blocklist.html",
         chunks: ["blocklist"],
       }),
