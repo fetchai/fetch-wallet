@@ -12,7 +12,8 @@ export const AddressCopyable: FunctionComponent<{
   style?: ViewStyle;
   address: string;
   maxCharacters: number;
-}> = ({ style: propStyle, address, maxCharacters }) => {
+  isEvm?: boolean;
+}> = ({ style: propStyle, address, maxCharacters, isEvm = false }) => {
   const style = useStyle();
   const { isTimedOut, setTimer } = useSimpleTimer();
 
@@ -31,7 +32,7 @@ export const AddressCopyable: FunctionComponent<{
       activeOpacity={0.2}
     >
       <Text style={style.flatten(["body3", "color-white@60%"]) as ViewStyle}>
-        {Bech32Address.shortenAddress(address, maxCharacters)}
+        {isEvm ? address : Bech32Address.shortenAddress(address, maxCharacters)}
       </Text>
       <View style={style.flatten(["margin-left-4", "width-20"]) as ViewStyle}>
         {isTimedOut ? (

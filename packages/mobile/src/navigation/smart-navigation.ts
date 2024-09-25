@@ -13,6 +13,7 @@ import {
 import { NewMnemonicConfig } from "screens/register/mnemonic";
 import { BIP44HDPath, ExportKeyRingData } from "@keplr-wallet/background";
 import { ActivityEnum } from "screens/activity";
+import { NetworkEnum } from "components/drawer";
 
 interface Configs {
   amount: string;
@@ -270,6 +271,9 @@ const { SmartNavigatorProvider, useSmartNavigation } =
       };
       Activity: {
         tabId?: ActivityEnum;
+      };
+      "Setting.ChainList": {
+        selectedTab: NetworkEnum;
       };
     }>()
   );

@@ -29,6 +29,7 @@ import { ViewStyle } from "react-native";
 import { StakeNavigation } from "./stake-navigation";
 import { MoreNavigation } from "./more-navigation";
 import { routingInstrumentation } from "../../index";
+import { AddEvmChain } from "screens/setting/screens/chain-list/add-evm-chain";
 
 export const Stack = createStackNavigator();
 
@@ -90,6 +91,14 @@ export const ChainListStackScreen: FunctionComponent = () => {
         }}
         name="Setting.ChainList"
         component={SettingChainListScreen}
+      />
+      <Stack.Screen
+        options={{
+          ...BlurHeaderOptionsPreset,
+          title: "Add new EVM chain",
+        }}
+        name="Setting.AddEvmChain"
+        component={AddEvmChain}
       />
     </Stack.Navigator>
   );

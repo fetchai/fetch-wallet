@@ -36,7 +36,7 @@ export const ActivityNativeTab: FunctionComponent<{
     const style = useStyle();
     const { chainStore, activityStore } = useStore();
     const current = chainStore.current;
-
+    const isEvm = chainStore.current.features?.includes("evm") ?? false;
     const [_date, setDate] = useState("");
 
     const [isLoading, setIsLoading] = useState(true);
@@ -139,7 +139,9 @@ export const ActivityNativeTab: FunctionComponent<{
         data.length > 0 &&
         activities.length > 0 ? (
           renderList(data)
-        ) : activities.length == 0 && isLoading ? (
+        ) : isEvm && activities.length === 0 ? (
+          <NoActivityView />
+        ) : activities.length === 0 && isLoading ? (
           <ActivityIndicator
             size="large"
             color={style.get("color-white").color}

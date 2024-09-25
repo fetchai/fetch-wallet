@@ -26,6 +26,8 @@ import {
   ActivityStore,
   ProposalStore,
   TokenGraphStore,
+  EthereumAccount,
+  EvmQueries,
 } from "@keplr-wallet/stores";
 import { AsyncKVStore } from "../common";
 import { APP_PORT } from "@keplr-wallet/router";
@@ -62,10 +64,10 @@ export class RootStore {
   public readonly accountBaseStore: AsyncKVStore;
 
   public readonly queriesStore: QueriesStore<
-    [CosmosQueries, CosmwasmQueries, SecretQueries, KeplrETCQueries]
+    [CosmosQueries, CosmwasmQueries, SecretQueries, KeplrETCQueries, EvmQueries]
   >;
   public readonly accountStore: AccountStore<
-    [CosmosAccount, CosmwasmAccount, SecretAccount]
+    [CosmosAccount, CosmwasmAccount, SecretAccount, EthereumAccount]
   >;
   public readonly priceStore: CoinGeckoPriceStore;
   public readonly tokensStore: TokensStore<ChainInfoWithCoreTypes>;
@@ -175,7 +177,8 @@ export class RootStore {
       }),
       KeplrETCQueries.use({
         ethereumURL: EthereumEndpoint,
-      })
+      }),
+      EvmQueries.use()
     );
 
     this.activityStore = new ActivityStore(
@@ -256,6 +259,9 @@ export class RootStore {
         queriesStore: this.queriesStore,
       }),
       SecretAccount.use({
+        queriesStore: this.queriesStore,
+      }),
+      EthereumAccount.use({
         queriesStore: this.queriesStore,
       })
     );

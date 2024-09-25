@@ -26,6 +26,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PageWithScrollView } from "components/page";
 import { observer } from "mobx-react-lite";
 import { useFocusedScreen } from "providers/focused-screen";
+import { RowFrame } from "components/new/icon/row-frame";
 
 export const StakingDashboardScreen: FunctionComponent = observer(() => {
   const route = useRoute<
@@ -44,6 +45,7 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
 
   const { chainStore, accountStore, queriesStore, priceStore, analyticsStore } =
     useStore();
+  const isEvm = chainStore.current.features?.includes("evm") ?? false;
 
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
 
@@ -71,16 +73,12 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
   }, [chainStore.current.chainId]);
 
   const onRefresh = React.useCallback(async () => {
-    // Because the components share the states related to the queries,
-    // fetching new query responses here would make query responses on all other components also refresh.
     setRefreshing(true);
     await Promise.all([
       priceStore.waitFreshResponse(),
       ...queries.queryBalances
         .getQueryBech32Address(account.bech32Address)
-        .balances.map((bal) => {
-          return bal.waitFreshResponse();
-        }),
+        .balances.map((bal) => bal.waitFreshResponse()),
       queries.cosmos.queryRewards
         .getQueryBech32Address(account.bech32Address)
         .waitFreshResponse(),
@@ -95,7 +93,6 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
     });
   }, [accountStore, chainStore, priceStore, queriesStore]);
 
-  /// Hide Refreshing when tab change
   useEffect(() => {
     if (focusedScreen.name !== "Stake" && refreshing) {
       setRefreshing(false);
@@ -122,104 +119,130 @@ export const StakingDashboardScreen: FunctionComponent = observer(() => {
       }
       ref={scrollViewRef}
     >
-      <Text
-        style={
-          style.flatten([
-            "h1",
-            "color-white",
-            "margin-top-16",
-            "margin-bottom-14",
-            "font-normal",
-          ]) as ViewStyle
-        }
-      >
-        Stake
-      </Text>
-      <StakeCard />
-      {delegations && delegations.length > 0 ? (
-        <React.Fragment>
-          <Button
-            text="Stake more"
-            containerStyle={
-              style.flatten(["border-radius-64", "margin-y-32"]) as ViewStyle
-            }
-            rippleColor="black@50%"
-            textStyle={style.flatten(["body2"]) as ViewStyle}
-            onPress={() => {
-              analyticsStore.logEvent("stake_click", {
-                chainId: chainStore.current.chainId,
-                chainName: chainStore.current.chainName,
-                pageName: "Stake",
-              });
-              navigation.navigate("Stake", {
-                screen: "Validator.List",
-                params: {},
-              });
-            }}
-          />
-          <MyRewardCard
-            queries={queries}
-            queryDelegations={queryDelegations}
-            containerStyle={style.flatten(["margin-bottom-24"]) as ViewStyle}
-          />
-
-          <DelegationsCard
-            containerStyle={style.flatten(["margin-y-6"]) as ViewStyle}
-            queries={queries}
-            queryDelegations={queryDelegations}
-            accountBech32Address={account.bech32Address}
-          />
-        </React.Fragment>
-      ) : (
+      {isEvm ? (
         <View
-          style={
-            style.flatten([
-              "margin-x-14",
-              "height-half",
-              "justify-center",
-            ]) as ViewStyle
-          }
+          style={[style.flatten(["flex-1", "justify-center"])] as ViewStyle}
         >
           <IconWithText
-            icon={
-              <Image source={require("assets/image/icon/ic_staking.png")} />
-            }
-            title={"Start staking now"}
-            subtitle={
-              "Stake your assets to earn rewards and\n contribute to maintaining the networks"
-            }
-            titleStyle={
-              [
-                style.flatten(["h3", "font-normal"]),
-                { marginTop: 3 },
-              ] as ViewStyle
-            }
-            subtitleStyle={style.flatten(["body3"]) as ViewStyle}
-          />
-          <Button
+            title={"Feature not available on this network"}
+            subtitle=""
+            icon={<RowFrame />}
+            isComingSoon={false}
+            titleStyle={style.flatten(["h3"]) as ViewStyle}
             containerStyle={
-              style.flatten(["border-radius-32", "margin-top-18"]) as ViewStyle
+              style.flatten(["items-center", "justify-center"]) as ViewStyle
             }
-            textStyle={style.flatten(["body2"]) as ViewStyle}
-            text={"Start staking"}
-            onPress={() => {
-              analyticsStore.logEvent("stake_click", {
-                chainId: chainStore.current.chainId,
-                chainName: chainStore.current.chainName,
-                pageName: "Stake",
-              });
-              navigation.navigate("Stake", {
-                screen: "Validator.List",
-                params: {},
-              });
-            }}
-          />
-          <View
-            style={style.flatten(["height-page-double-pad"]) as ViewStyle}
           />
         </View>
+      ) : (
+        <React.Fragment>
+          <Text
+            style={
+              style.flatten([
+                "h1",
+                "color-white",
+                "margin-top-16",
+                "margin-bottom-14",
+                "font-normal",
+              ]) as ViewStyle
+            }
+          >
+            Stake
+          </Text>
+          <StakeCard />
+          {delegations && delegations.length > 0 ? (
+            <React.Fragment>
+              <Button
+                text="Stake more"
+                containerStyle={
+                  style.flatten([
+                    "border-radius-64",
+                    "margin-y-32",
+                  ]) as ViewStyle
+                }
+                rippleColor="black@50%"
+                textStyle={style.flatten(["body2"]) as ViewStyle}
+                onPress={() => {
+                  analyticsStore.logEvent("stake_click", {
+                    chainId: chainStore.current.chainId,
+                    chainName: chainStore.current.chainName,
+                    pageName: "Stake",
+                  });
+                  navigation.navigate("Stake", {
+                    screen: "Validator.List",
+                    params: {},
+                  });
+                }}
+              />
+              <MyRewardCard
+                queries={queries}
+                queryDelegations={queryDelegations}
+                containerStyle={
+                  style.flatten(["margin-bottom-24"]) as ViewStyle
+                }
+              />
+              <DelegationsCard
+                containerStyle={style.flatten(["margin-y-6"]) as ViewStyle}
+                queries={queries}
+                queryDelegations={queryDelegations}
+                accountBech32Address={account.bech32Address}
+              />
+            </React.Fragment>
+          ) : (
+            <View
+              style={
+                style.flatten([
+                  "margin-x-14",
+                  "height-half",
+                  "justify-center",
+                ]) as ViewStyle
+              }
+            >
+              <IconWithText
+                icon={
+                  <Image source={require("assets/image/icon/ic_staking.png")} />
+                }
+                title={"Start staking now"}
+                subtitle={
+                  "Stake your assets to earn rewards and\n contribute to maintaining the networks"
+                }
+                titleStyle={
+                  [
+                    style.flatten(["h3", "font-normal"]),
+                    { marginTop: 3 },
+                  ] as ViewStyle
+                }
+                subtitleStyle={style.flatten(["body3"]) as ViewStyle}
+              />
+              <Button
+                containerStyle={
+                  style.flatten([
+                    "border-radius-32",
+                    "margin-top-18",
+                  ]) as ViewStyle
+                }
+                textStyle={style.flatten(["body2"]) as ViewStyle}
+                text={"Start staking"}
+                onPress={() => {
+                  analyticsStore.logEvent("stake_click", {
+                    chainId: chainStore.current.chainId,
+                    chainName: chainStore.current.chainName,
+                    pageName: "Stake",
+                  });
+                  navigation.navigate("Stake", {
+                    screen: "Validator.List",
+                    params: {},
+                  });
+                }}
+              />
+              <View
+                style={style.flatten(["height-page-double-pad"]) as ViewStyle}
+              />
+            </View>
+          )}
+          <View style={{ height: isTab ? 100 + safeAreaInsets.bottom : 0 }} />
+        </React.Fragment>
       )}
-      <View style={{ height: isTab ? 100 + safeAreaInsets.bottom : 0 }} />
     </PageWithScrollView>
   );
 });

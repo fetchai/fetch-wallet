@@ -43,6 +43,9 @@ import { BalanceCard } from "./balance-card";
 import { ClaimCard } from "./claim-card";
 import { observer } from "mobx-react-lite";
 import { fetchProposalNodes } from "screens/activity/utils";
+import { ChainIdHelper } from "@keplr-wallet/cosmos";
+import { AppCurrency } from "@keplr-wallet/types";
+import { WalletStatus } from "@keplr-wallet/stores";
 
 export const AccountSection: FunctionComponent<{
   containerStyle?: ViewStyle;
@@ -84,27 +87,43 @@ export const AccountSection: FunctionComponent<{
 
   const account = accountStore.getAccount(chainStore.current.chainId);
   const queries = queriesStore.get(chainStore.current.chainId);
-
-  const queryStakable = queries.queryBalances.getQueryBech32Address(
-    account.bech32Address
-  ).stakable;
-  const stakable = queryStakable.balance;
-
-  const queryDelegated = queries.cosmos.queryDelegations.getQueryBech32Address(
+  const balanceQuery = queries.queryBalances.getQueryBech32Address(
     account.bech32Address
   );
-  const delegated = queryDelegated.total;
+  const balanceStakableQuery = balanceQuery.stakable;
 
-  const queryUnbonding =
-    queries.cosmos.queryUnbondingDelegations.getQueryBech32Address(
-      account.bech32Address
-    );
+  const isNoble =
+    ChainIdHelper.parse(chainStore.current.chainId).identifier === "noble";
+  const hasUSDC = chainStore.current.currencies.find(
+    (currency: AppCurrency) => currency.coinMinimalDenom === "uusdc"
+  );
+  const isEvm = chainStore.current.features?.includes("evm") ?? false;
+  const stakable = (() => {
+    if (isNoble && hasUSDC) {
+      return balanceQuery.getBalanceFromCurrency(hasUSDC);
+    }
+
+    return balanceStakableQuery.balance;
+  })();
+  // const queryDelegated = queries.cosmos.queryDelegations.getQueryBech32Address(
+  //   account.bech32Address
+  // );
+  const delegated = queries.cosmos.queryDelegations
+    .getQueryBech32Address(account.bech32Address)
+    .total.upperCase(true);
+
+  // const queryUnbonding =
+  //   queries.cosmos.queryUnbondingDelegations.getQueryBech32Address(
+  //     account.bech32Address
+  //   );
   const rewards = queries.cosmos.queryRewards.getQueryBech32Address(
     account.bech32Address
   );
   const stakableReward = rewards.stakableReward;
 
-  const unbonding = queryUnbonding.total;
+  const unbonding = queries.cosmos.queryUnbondingDelegations
+    .getQueryBech32Address(account.bech32Address)
+    .total.upperCase(true);
 
   const stakedSum = delegated.add(unbonding);
 
@@ -219,7 +238,7 @@ export const AccountSection: FunctionComponent<{
 
   useEffect(() => {
     /*  this is required because accountInit sets the nodes on reload,
-        so we wait for accountInit to set the proposal nodes and then we 
+        so we wait for accountInit to set the proposal nodes and then we
         store the proposal votes from api in activity store */
     const timeout = setTimeout(async () => {
       const nodes = activityStore.sortedNodesProposals;
@@ -359,7 +378,15 @@ export const AccountSection: FunctionComponent<{
           <Text style={style.flatten(["body3", "color-white"]) as ViewStyle}>
             {account.name}
           </Text>
-          <AddressCopyable address={account.bech32Address} maxCharacters={16} />
+          <AddressCopyable
+            address={
+              isEvm || account.hasEthereumHexAddress
+                ? account.ethereumHexAddress
+                : account.bech32Address
+            }
+            isEvm={isEvm}
+            maxCharacters={16}
+          />
         </View>
         <IconButton
           backgroundBlur={false}
@@ -395,13 +422,70 @@ export const AccountSection: FunctionComponent<{
         />
       )}
       <View style={style.flatten(["items-center"]) as ViewStyle}>
-        <BalanceCard
-          loading={!stakedSum.isReady}
-          totalPrice={totalPrice}
-          totalNumber={totalNumber}
-          totalDenom={totalDenom}
-        />
-        {tokenState ? (
+        {isEvm ? (
+          <React.Fragment>
+            <BalanceCard
+              loading={
+                account.walletStatus === WalletStatus.Loading ||
+                keyRingStore.status === 0 ||
+                rewards.isFetching
+              }
+              totalPrice={totalPrice}
+              totalNumber={totalNumber}
+              totalDenom={totalDenom}
+            />
+
+            {tokenState ? (
+              <View
+                style={
+                  style.flatten([
+                    "flex-row",
+                    "items-center",
+                    "justify-center",
+                    "width-full",
+                  ]) as ViewStyle
+                }
+              >
+                <Text
+                  style={
+                    style.flatten(
+                      ["color-orange-400", "body3"],
+                      [
+                        tokenState.type === "positive" &&
+                          "color-vibrant-green-500",
+                      ]
+                    ) as ViewStyle
+                  }
+                >
+                  {tokenState.type === "positive" && "+"}
+                  {changeInDollarsValue.toFixed(4)} {totalDenom} (
+                  {tokenState.type === "positive" ? "+" : "-"}
+                  {parseFloat(tokenState.diff).toFixed(2)}%)
+                </Text>
+                <Text
+                  style={
+                    style.flatten([
+                      "color-white@60%",
+                      "body3",
+                      "margin-left-4",
+                    ]) as ViewStyle
+                  }
+                >
+                  {tokenState.time}
+                </Text>
+              </View>
+            ) : null}
+          </React.Fragment>
+        ) : (
+          <BalanceCard
+            loading={!stakedSum.isReady}
+            totalPrice={totalPrice}
+            totalNumber={totalNumber}
+            totalDenom={totalDenom}
+          />
+        )}
+
+        {tokenState && !isEvm && (
           <View
             style={
               style.flatten([
@@ -421,9 +505,9 @@ export const AccountSection: FunctionComponent<{
               }
             >
               {tokenState.type === "positive" && "+"}
-              {changeInDollarsValue.toFixed(4)} {totalDenom}(
+              {changeInDollarsValue.toFixed(4)} {totalDenom} (
               {tokenState.type === "positive" ? "+" : "-"}
-              {parseFloat(tokenState.diff).toFixed(2)} %)
+              {parseFloat(tokenState.diff).toFixed(2)}%)
             </Text>
             <Text
               style={
@@ -437,7 +521,7 @@ export const AccountSection: FunctionComponent<{
               {tokenState.time}
             </Text>
           </View>
-        ) : null}
+        )}
         <BlurButton
           backgroundBlur={false}
           containerStyle={

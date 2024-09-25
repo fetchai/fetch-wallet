@@ -12,44 +12,51 @@ import {
 } from "@react-navigation/native";
 import { Platform, Text, View, ViewStyle } from "react-native";
 import { useStyle } from "styles/index";
-import { RectButton } from "components/rect-button";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import FastImage from "react-native-fast-image";
-import { VectorCharacter } from "components/vector-character";
-import { BlurBackground } from "components/new/blur-background/blur-background";
-import { CheckIcon } from "components/new/icon/check";
 import { IconButton } from "components/new/button/icon";
 import { XmarkIcon } from "components/new/icon/xmark";
 import { SearchIcon } from "components/new/icon/search-icon";
 import { EmptyView } from "components/new/empty";
-import { titleCase } from "utils/format/format";
 import { Button } from "components/button";
 import { InputCardView } from "components/new/card-view/input-card";
+import { TabBarView } from "components/new/tab-bar/tab-bar";
+import { ChainInfosView } from "components/drawer/chain-infos-view";
+
+export enum NetworkEnum {
+  Cosmos = "Cosmos",
+  EVM = "EVM",
+}
 
 export const DrawerContent: FunctionComponent<DrawerContentComponentProps> =
   observer((props) => {
     const { chainStore, analyticsStore } = useStore();
     const navigation = useNavigation();
-
+    const [selectedTab, setSelectedTab] = useState(NetworkEnum.Cosmos);
     const safeAreaInsets = useSafeAreaInsets();
-
     const { ...rest } = props;
-
     const style = useStyle();
     const [search, setSearch] = useState("");
     const [filterChainInfos, setFilterChainInfos] = useState(
       chainStore.chainInfosInUI
     );
-
+    const mainChainList = chainStore.chainInfos.filter(
+      (chainInfo) => !chainInfo.beta && !chainInfo.features?.includes("evm")
+    );
+    const evmChainList = chainStore.chainInfos.filter((chainInfo) =>
+      chainInfo.features?.includes("evm")
+    );
     useEffect(() => {
-      const searchTrim = search.trim();
-      const newChainInfos = chainStore.chainInfosInUI.filter((chainInfo) => {
-        return chainInfo.chainName
-          .toLowerCase()
-          .includes(searchTrim.toLowerCase());
-      });
-      setFilterChainInfos(newChainInfos);
-    }, [chainStore.chainInfosInUI, search]);
+      const searchTrim = search.trim().toLowerCase();
+      const filteredChains =
+        selectedTab == NetworkEnum.Cosmos
+          ? mainChainList.filter((chainInfo) =>
+              chainInfo.chainName.toLowerCase().includes(searchTrim)
+            )
+          : evmChainList.filter((chainInfo) =>
+              chainInfo.chainName.toLowerCase().includes(searchTrim)
+            );
+      setFilterChainInfos(filteredChains);
+    }, [chainStore.chainInfosInUI, search, selectedTab]);
 
     return (
       <DrawerContentScrollView
@@ -66,11 +73,7 @@ export const DrawerContent: FunctionComponent<DrawerContentComponentProps> =
         }}
         {...rest}
       >
-        <View
-          style={{
-            marginBottom: safeAreaInsets.bottom,
-          }}
-        >
+        <View style={{ marginBottom: safeAreaInsets.bottom }}>
           <View
             style={
               style.flatten([
@@ -86,41 +89,32 @@ export const DrawerContent: FunctionComponent<DrawerContentComponentProps> =
               Change Network
             </Text>
             <View style={style.get("flex-1")} />
-            <View
-              style={
+            <IconButton
+              icon={<XmarkIcon color={"white"} />}
+              onPress={() => {
+                setSearch("");
+                navigation.dispatch(DrawerActions.closeDrawer());
+              }}
+              iconStyle={
                 style.flatten([
-                  "height-1",
-                  "justify-center",
-                  "items-center",
+                  "padding-8",
+                  "border-width-1",
+                  "border-color-gray-400",
                 ]) as ViewStyle
               }
-            >
-              <IconButton
-                icon={<XmarkIcon color={"white"} />}
-                backgroundBlur={false}
-                blurIntensity={20}
-                borderRadius={50}
-                onPress={() => {
-                  setSearch("");
-                  navigation.dispatch(DrawerActions.closeDrawer());
-                }}
-                iconStyle={
-                  style.flatten([
-                    "padding-8",
-                    "border-width-1",
-                    "border-color-gray-400",
-                  ]) as ViewStyle
-                }
-              />
-            </View>
+            />
           </View>
+          <TabBarView
+            listItem={NetworkEnum}
+            selected={selectedTab}
+            setSelected={setSelectedTab}
+            containerStyle={style.flatten(["margin-y-20"]) as ViewStyle}
+          />
           <InputCardView
             placeholder="Search"
             placeholderTextColor={"white"}
             value={search}
-            onChangeText={(text: string) => {
-              setSearch(text);
-            }}
+            onChangeText={setSearch}
             rightIcon={<SearchIcon size={12} />}
             containerStyle={style.flatten(["margin-top-24"]) as ViewStyle}
           />
@@ -139,6 +133,7 @@ export const DrawerContent: FunctionComponent<DrawerContentComponentProps> =
               navigation.dispatch(
                 StackActions.push("ChainList", {
                   screen: "Setting.ChainList",
+                  params: { selectedTab: selectedTab },
                 })
               );
               analyticsStore.logEvent("manage_networks_click", {
@@ -149,99 +144,15 @@ export const DrawerContent: FunctionComponent<DrawerContentComponentProps> =
           {filterChainInfos.length === 0 ? (
             <EmptyView />
           ) : (
-            filterChainInfos.map((chainInfo) => {
-              const selected = chainStore.current.chainId === chainInfo.chainId;
-
-              return (
-                <BlurBackground
-                  key={chainInfo.chainId}
-                  borderRadius={12}
-                  blurIntensity={15}
-                  containerStyle={style.flatten(["margin-y-2"]) as ViewStyle}
-                >
-                  <RectButton
-                    onPress={() => {
-                      setSearch("");
-                      chainStore.selectChain(chainInfo.chainId);
-                      chainStore.saveLastViewChainId();
-                      navigation.dispatch(DrawerActions.closeDrawer());
-                    }}
-                    style={
-                      style.flatten(
-                        [
-                          "flex-row",
-                          "height-62",
-                          "items-center",
-                          "padding-x-12",
-                          "justify-between",
-                        ],
-                        [
-                          selected && "background-color-indigo",
-                          "border-radius-12",
-                        ]
-                      ) as ViewStyle
-                    }
-                    activeOpacity={0.5}
-                    underlayColor={
-                      style.flatten([
-                        "color-gray-50",
-                        "dark:color-platinum-500",
-                      ]).color
-                    }
-                  >
-                    <View
-                      style={
-                        style.flatten(["flex-row", "items-center"]) as ViewStyle
-                      }
-                    >
-                      <BlurBackground
-                        backgroundBlur={true}
-                        containerStyle={
-                          style.flatten([
-                            "width-32",
-                            "height-32",
-                            "border-radius-64",
-                            "items-center",
-                            "justify-center",
-                            "margin-right-12",
-                          ]) as ViewStyle
-                        }
-                      >
-                        {chainInfo.raw.chainSymbolImageUrl ? (
-                          <FastImage
-                            style={{
-                              width: 22,
-                              height: 22,
-                            }}
-                            resizeMode={FastImage.resizeMode.contain}
-                            source={{
-                              uri: chainInfo.raw.chainSymbolImageUrl,
-                            }}
-                          />
-                        ) : (
-                          <VectorCharacter
-                            char={chainInfo.chainName[0]}
-                            color="white"
-                            height={12}
-                          />
-                        )}
-                      </BlurBackground>
-                      <Text
-                        style={
-                          style.flatten([
-                            "subtitle3",
-                            "color-white",
-                          ]) as ViewStyle
-                        }
-                      >
-                        {titleCase(chainInfo.chainName)}
-                      </Text>
-                    </View>
-                    <View>{selected ? <CheckIcon /> : null}</View>
-                  </RectButton>
-                </BlurBackground>
-              );
-            })
+            <ChainInfosView
+              chainInfos={filterChainInfos}
+              onPress={(chainInfo) => {
+                setSearch("");
+                chainStore.selectChain(chainInfo.chainId);
+                chainStore.saveLastViewChainId();
+                navigation.dispatch(DrawerActions.closeDrawer());
+              }}
+            />
           )}
         </View>
         <View style={style.flatten(["height-page-pad"]) as ViewStyle} />
