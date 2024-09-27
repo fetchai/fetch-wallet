@@ -20,7 +20,15 @@
   "background": {
     "service_worker": "background.bundle.js"
   },
-  "permissions": ["storage", "notifications", "identity", "idle", "alarms", "sidePanel", "activeTab"],
+  "permissions": [
+    "storage",
+    "notifications",
+    "identity",
+    "idle",
+    "alarms",
+    "sidePanel",
+    "activeTab"
+  ],
   "content_security_policy": {
     "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
   },

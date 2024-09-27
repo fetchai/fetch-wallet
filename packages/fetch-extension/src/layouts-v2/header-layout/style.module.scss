@@ -27,11 +27,6 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #000d3d;
-  background-image: url("../../public/assets/svg/wireframe/bg.svg");
-  background-size: 360px;
-  background-repeat: no-repeat;
-  background-position: 0 0;
   overflow-y: hidden;
   overflow-x: hidden;
 }
@@ -46,7 +41,6 @@
 .innerContainer-sidePanel {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   flex: 1;
   margin: 10px 12px 16px 12px;
   overflow-x: hidden;

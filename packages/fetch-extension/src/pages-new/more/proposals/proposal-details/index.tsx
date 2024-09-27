@@ -198,7 +198,7 @@ export const ProposalDetail = observer(() => {
           <ButtonV2
             text={voteText}
             styleProps={{
-              width: "336px",
+              width: "100%",
               padding: "12px",
               height: "56px",
               background: voted !== "Unspecified" ? "transparent" : "",
