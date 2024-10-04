@@ -68,6 +68,9 @@
   width: 100%;
   font-size: 14px;
   font-weight: 400;
+  & + div[class^="overlay-"] {
+    height: calc(100vh - 62px);
+  }
 }
 .selector:focus {
   display: flex;

@@ -35,11 +35,11 @@ html[data-register-page="true"] #app .container {
 
 .container {
   width: $container-width;
-  margin-left: ($popup-size-width - $container-width) / 2;
+  margin: 0 auto;
 
   &:global(.large) {
     width: $large-container-width;
-    margin-left: ($popup-size-width - $large-container-width) / 2;
+    margin: 0 auto;
   }
 
   display: flex;

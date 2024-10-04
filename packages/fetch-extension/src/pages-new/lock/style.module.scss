@@ -2,6 +2,8 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  width: 100%;
+  align-items: center;
 }
 
 .capslockTooltipArrow {
@@ -12,6 +14,8 @@
   background-color: #030e3b;
   box-shadow: 3.172px 3.172px 15.859px 0px rgba(255, 255, 255, 0.1) inset;
   background-image: url("../../public/assets/svg/wireframe/bg-returning-user.svg");
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 .banner {
   margin-top: 15px;
