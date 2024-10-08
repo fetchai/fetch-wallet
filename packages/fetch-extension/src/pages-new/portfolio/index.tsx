@@ -36,7 +36,7 @@ export const Portfolio = () => {
       onBackButton={() => navigate("/")}
     >
       <div className={style["title"]}>Portfolio</div>
-      <TabsPanel tabHeight="330px" tabs={tabs} />
+      <TabsPanel tabHeight="calc(100vh - 296px)" tabs={tabs} />
     </HeaderLayout>
   );
 };

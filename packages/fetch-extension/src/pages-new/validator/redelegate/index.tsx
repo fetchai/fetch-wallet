@@ -379,8 +379,8 @@ export const Redelegate = observer(() => {
           isOpen={showValidatorListDropDown}
           setIsOpen={setShowValidatorListDropDown}
           styleProp={{
-            maxHeight: "600px",
-            top: 0,
+            maxHeight: "99vh",
+            top: "1vh",
           }}
         >
           <SelectValidatorList
