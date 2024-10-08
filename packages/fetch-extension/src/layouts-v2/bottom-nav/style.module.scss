@@ -4,7 +4,8 @@
   display: flex;
   height: 86px;
   filter: drop-shadow(0px 0px 8px rgba(0, 0, 0, 0.1));
-  width: 354px;
+  width: 100%;
+  justify-content: space-between;
   overflow: hidden;
   margin-left: 5px;
   padding: 0px 12px 0px 12px;
@@ -13,7 +14,6 @@
 .tab {
   font-size: $xs;
   color: #fff;
-  flex: 1;
   display: flex;
   justify-content: center;
   flex-direction: column;
@@ -68,7 +68,7 @@
 .toggle,
 .toggle:hover {
   z-index: 300;
-  width: 335px;
+
   border: 0px;
   background: transparent;
   padding: 0px;

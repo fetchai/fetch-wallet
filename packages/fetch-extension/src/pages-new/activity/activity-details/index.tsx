@@ -177,7 +177,7 @@ export const ActivityDetails = observer(() => {
                   background: "none",
                   padding: 0,
                 }}
-                style={{ background: "transparent", width: "337px" }}
+                style={{ background: "transparent" }}
                 heading={
                   details.toAddress
                     ? "To"

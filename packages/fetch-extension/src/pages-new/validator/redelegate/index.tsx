@@ -341,7 +341,7 @@ export const Redelegate = observer(() => {
             <ButtonV2
               text=""
               styleProps={{
-                width: "336px",
+                width: "100%",
                 padding: "12px",
                 height: "56px",
                 margin: "0 auto",
@@ -379,8 +379,8 @@ export const Redelegate = observer(() => {
           isOpen={showValidatorListDropDown}
           setIsOpen={setShowValidatorListDropDown}
           styleProp={{
-            maxHeight: "600px",
-            top: 0,
+            maxHeight: "99vh",
+            top: "1vh",
           }}
         >
           <SelectValidatorList

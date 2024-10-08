@@ -14,10 +14,21 @@
     "default_popup": "popup.html",
     "default_title": "ASI Alliance Wallet"
   },
+  "side_panel": {
+    "default_path": "sidePanel.html"
+  },
   "background": {
     "service_worker": "background.bundle.js"
   },
-  "permissions": ["storage", "notifications", "identity", "idle", "alarms"],
+  "permissions": [
+    "storage",
+    "notifications",
+    "identity",
+    "idle",
+    "alarms",
+    "sidePanel",
+    "activeTab"
+  ],
   "content_security_policy": {
     "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
   },

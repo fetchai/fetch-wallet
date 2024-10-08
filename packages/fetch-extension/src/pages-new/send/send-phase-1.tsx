@@ -109,7 +109,7 @@ export const SendPhase1: React.FC<SendPhase1Props> = observer(
             navigate("/send", { state: { isFromPhase1: true } });
           }}
           styleProps={{
-            width: "336px",
+            width: "100%",
             padding: "12px",
             height: "56px",
             margin: "0 auto",

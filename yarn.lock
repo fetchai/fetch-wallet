@@ -17894,6 +17894,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/chrome@npm:^0.0.271":
+  version: 0.0.271
+  resolution: "@types/chrome@npm:0.0.271"
+  dependencies:
+    "@types/filesystem": "*"
+    "@types/har-format": "*"
+  checksum: 4cd42a31e02464b353f87311694e9b6905b4a62add7a1a192b3081d1f66d9c9d2ca527eea5f809987f2d55b196b18d68070591ddce2d89c87142d7080fa51788
+  languageName: node
+  linkType: hard
+
 "@types/classnames@npm:^2.3.1":
   version: 2.3.1
   resolution: "@types/classnames@npm:2.3.1"
@@ -18246,10 +18256,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/firefox-webext-browser@npm:^111.0.1":
-  version: 111.0.1
-  resolution: "@types/firefox-webext-browser@npm:111.0.1"
-  checksum: 1730c2e303cb502dd3e85aeb6ac645e3526c1583da0ae02ea1203ac002485ba5bf045f7183840b6bde4055f43818b366db6dd112e0d611ec1d82c86c74a4589b
+"@types/firefox-webext-browser@npm:^120.0.4":
+  version: 120.0.4
+  resolution: "@types/firefox-webext-browser@npm:120.0.4"
+  checksum: 13f5fe86e76bf71bf47b3bc72fd8c5c4cd7007b443640420416fd361b39d783699957f162e2b5fef86a9be0d5cc170caf29838aa8e48065bbfdd59899ccf1882
   languageName: node
   linkType: hard
 
@@ -18321,6 +18331,13 @@ __metadata:
   version: 2.0.41
   resolution: "@types/hammerjs@npm:2.0.41"
   checksum: d16fbd688fc9b18cc270abe8dea8d4c50ef7bd8375e593d92c233d299387933a6b003c8db69819344833052458bc5f9ef1b472001277a49f095928d184356006
+  languageName: node
+  linkType: hard
+
+"@types/har-format@npm:*":
+  version: 1.2.15
+  resolution: "@types/har-format@npm:1.2.15"
+  checksum: e3e8197e0ac74747736d13e0b54ec862e55ecf57cc962e1a24c801c7940b7b829d281dddc67f297877f1c4bc014b4ac29d35b2c6a9a1e6bc26bcff5fd7f835b0
   languageName: node
   linkType: hard
 
@@ -30766,8 +30783,9 @@ __metadata:
     "@storybook/react": ^7.6.2
     "@storybook/react-vite": ^7.6.2
     "@storybook/test": ^7.6.2
+    "@types/chrome": ^0.0.271
     "@types/filesystem": ^0.0.32
-    "@types/firefox-webext-browser": ^111.0.1
+    "@types/firefox-webext-browser": ^120.0.4
     "@types/jest": ^29.5.3
     "@types/long": ^4.0.1
     "@types/node": ^18.13.0

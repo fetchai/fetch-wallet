@@ -248,7 +248,7 @@ export const Delegate: FunctionComponent = observer(() => {
             <ButtonV2
               text=""
               styleProps={{
-                width: "336px",
+                width: "100%",
                 padding: "12px",
                 height: "56px",
                 margin: "0 auto",

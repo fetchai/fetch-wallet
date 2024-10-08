@@ -103,11 +103,11 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
               style={
                 selectedFilter.includes(option.value)
                   ? {
-                      width: "333px",
+                      width: "100%",
                       background: "var(--Indigo---Fetch, #5F38FB)",
                     }
                   : {
-                      width: "333px",
+                      width: "100%",
                       background: "rgba(255,255,255,0.1)",
                       cursor: "pointer",
                     }

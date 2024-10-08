@@ -4,6 +4,7 @@ import { useDropdown } from "@components-v2/dropdown/dropdown-context";
 import { BottomNav } from "../bottom-nav";
 import { Header, Props as HeaderProps } from "../header";
 import { MenuContext, MenuProvider } from "../menu";
+import { isRunningInSidePanel } from "@utils/side-panel";
 import style from "./style.module.scss";
 
 export interface Props extends HeaderProps {
@@ -37,14 +38,23 @@ export const HeaderLayout: FunctionComponent<Props> = (props) => {
 
   return (
     <MenuProvider value={menuContext}>
-      <div className={style["container"]} style={props.style}>
+      <div
+        className={
+          !isRunningInSidePanel()
+            ? style["container"]
+            : style["container-sidePanel"]
+        }
+        style={props.style}
+      >
         {props.showTopMenu && <Header {...props} isMenuOpen={isMenuOpen} />}
         <div
           style={{ ...headerStyle, ...props.innerStyle }}
           className={
             props.showBottomMenu && isDropdownOpen === false
               ? style["innerContainerWithMask"]
-              : style["innerContainer"]
+              : !isRunningInSidePanel()
+              ? style["innerContainer"]
+              : style["innerContainer-sidePanel"]
           }
         >
           {children}

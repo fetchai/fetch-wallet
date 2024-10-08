@@ -1,18 +1,44 @@
 import { HeaderLayout } from "@layouts-v2/header-layout";
-import React, { FunctionComponent } from "react";
+import React, { useState, useEffect, FunctionComponent } from "react";
 import { useStore } from "../../stores";
 import style from "./style.module.scss";
 // import { CHAINS } from "../../config.axl-brdige.var";
 import { Card } from "@components-v2/card";
 import { useNavigate } from "react-router";
+import { SidePanelToggle } from "./side-panel";
+import {
+  GetSidePanelEnabledMsg,
+  GetSidePanelIsSupportedMsg,
+} from "@keplr-wallet/background";
+import { InExtensionMessageRequester } from "@keplr-wallet/router-extension";
+import { BACKGROUND_PORT } from "@keplr-wallet/router";
 // import { CHAIN_ID_DORADO, CHAIN_ID_FETCHHUB } from "../../config.ui.var";
 
 export const MorePage: FunctionComponent = () => {
+  const [sidePanelSupported, setSidePanelSupported] = useState(false);
+  const [sidePanelEnabled, setSidePanelEnabled] = useState(false);
+
   const { chainStore, analyticsStore, keyRingStore } = useStore();
   const navigate = useNavigate();
   // const isAxlViewVisible = CHAINS.some((chain) => {
   //   return chain.chainId?.toString() === chainStore.current.chainId;
   // });
+  useEffect(() => {
+    const msg = new GetSidePanelIsSupportedMsg();
+    new InExtensionMessageRequester()
+      .sendMessage(BACKGROUND_PORT, msg)
+      .then((res) => {
+        setSidePanelSupported(res.supported);
+
+        const msg = new GetSidePanelEnabledMsg();
+        new InExtensionMessageRequester()
+          .sendMessage(BACKGROUND_PORT, msg)
+          .then((res) => {
+            setSidePanelEnabled(res.enabled);
+          });
+      });
+  }, []);
+
   // const isEvm = chainStore.current.features?.includes("evm") ?? false;
   return (
     <HeaderLayout
@@ -88,6 +114,42 @@ export const MorePage: FunctionComponent = () => {
       >
         Others
       </div>
+      {sidePanelSupported && (
+        <Card
+          leftImageStyle={{ background: "transparent", height: "16px" }}
+          style={{ background: "rgba(255,255,255,0.1)", marginBottom: "8px" }}
+          headingStyle={{
+            display: "flex",
+            alignItems: "center",
+          }}
+          heading={
+            <React.Fragment>
+              <div>Switch to Side Panel</div>
+              <div
+                style={{
+                  marginLeft: "10px",
+                  background: "blue",
+                  color: "white",
+                  borderRadius: "4px",
+                  fontSize: "12px",
+                  paddingLeft: "5px",
+                  paddingRight: "5px",
+                }}
+              >
+                Beta
+              </div>
+            </React.Fragment>
+          }
+          subheading={"Open ASI Wallet in a sidebar on your screen"}
+          rightContent={
+            <SidePanelToggle
+              sidePanelEnabled={sidePanelEnabled}
+              setSidePanelEnabled={setSidePanelEnabled}
+            />
+          }
+          rightContentStyle={{ marginBottom: "15px" }}
+        />
+      )}
       <Card
         leftImageStyle={{ background: "transparent", height: "16px" }}
         style={{ background: "rgba(255,255,255,0.1)", marginBottom: "8px" }}

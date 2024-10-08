@@ -59,7 +59,7 @@ export const ActivityPage: FunctionComponent = observer(() => {
           <FormattedMessage id="main.menu.activity" />
         </div>
         {
-          <div style={{ width: "326px" }} className={style["tabContainer"]}>
+          <div className={style["tabContainer"]}>
             <TabsPanel
               activeTabId={activeTabId}
               tabs={tabs}

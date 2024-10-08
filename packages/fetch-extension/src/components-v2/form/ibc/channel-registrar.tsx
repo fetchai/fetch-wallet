@@ -60,7 +60,10 @@ export const IBCChannelRegistrar: FunctionComponent<{
           setIsOpen={setIsChainDropdownOpen}
           closeClicked={() => setIsChainDropdownOpen(!isChainDropdownOpen)}
           showTopNav={true}
-          styleProp={{ top: "80px" }}
+          styleProp={{
+            top: "80px",
+            marginTop: "auto",
+          }}
         >
           {chainStore.chainInfos.map((chainInfo) => {
             if (chainStore.current.chainId !== chainInfo.chainId) {
