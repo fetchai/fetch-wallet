@@ -94,7 +94,6 @@ export const AccountSection: FunctionComponent<{
     account.bech32Address
   );
   const delegated = queryDelegated.total;
-
   const queryUnbonding =
     queries.cosmos.queryUnbondingDelegations.getQueryBech32Address(
       account.bech32Address
@@ -116,7 +115,6 @@ export const AccountSection: FunctionComponent<{
     separateNumericAndDenom(
       total.shrink(true).trim(true).maxDecimals(6).toString()
     );
-
   const changeInDollarsValue =
     tokenState.type === "positive"
       ? (parseFloat(totalNumber) * tokenState.diff) / 100

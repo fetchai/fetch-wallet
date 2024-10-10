@@ -1,6 +1,4 @@
 .cardContainer {
-  display: flex;
-  align-items: center;
   color: white;
   padding: 18px 12px;
   font-size: 14px;
@@ -11,6 +9,36 @@
 }
 .cardContainer:hover {
   background: rgba(255, 255, 255, 0.1);
+}
+.cardTopContainer {
+  display: flex;
+  align-items: center;
+}
+.cardBottomContainer {
+  display: flex;
+  margin-top: 16px;
+  align-items: center;
+
+  .pCenter {
+    display: flex;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    align-items: center;
+    padding: 6px 12px 6px 12px;
+
+    .pImage {
+      height: 12px;
+      width: 12px;
+      margin-right: 6px;
+    }
+
+    .text {
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 19px;
+      margin: 0;
+    }
+  }
 }
 .heading {
   word-break: break-all;

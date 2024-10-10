@@ -1,11 +1,7 @@
 import { observer } from "mobx-react-lite";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
-import {
-  CHAIN_ID_DORADO,
-  CHAIN_ID_ERIDANUS,
-  CHAIN_ID_FETCHHUB,
-} from "../../../config.ui.var";
+
 import { useStore } from "../../../stores";
 import { FilterActivities, FilterDropdown } from "../filter";
 import style from "../style.module.scss";
@@ -13,6 +9,7 @@ import { ActivityRow } from "./activity-row";
 import styles from "./style.module.scss";
 import { NoActivity } from "../no-activity";
 import { UnsupportedNetwork } from "../unsupported-network";
+import { isFeatureAvailable } from "@utils/index";
 
 const options = [
   {
@@ -223,12 +220,7 @@ export const NativeTab = observer(() => {
         />
       </div>
 
-      {current.chainId === CHAIN_ID_FETCHHUB ||
-      current.chainId === CHAIN_ID_DORADO ||
-      current.chainId === CHAIN_ID_ERIDANUS ? (
-        // isError ? (
-        //   <ErrorActivity />
-        // ) :
+      {isFeatureAvailable(current.chainId) ? (
         activities.length > 0 &&
         activities.filter((node: any) =>
           processFilters(selectedFilter).includes(
@@ -243,23 +235,6 @@ export const NativeTab = observer(() => {
                 )
               )
             )}
-            {/* {activityStore.getPageInfo?.hasNextPage && (
-              <ButtonV2
-                text={
-                  loadingRequest ? (
-                    <i className="fas fa-spinner fa-spin ml-2" />
-                  ) : (
-                    "Load more"
-                  )
-                }
-                disabled={
-                  !activityStore.getPageInfo?.hasNextPage ||
-                  loadingRequest === true
-                }
-                onClick={handleClick}
-                styleProps={{ width: "326px" }}
-              />
-            )} */}
           </React.Fragment>
         ) : (
           <NoActivity label="No Activity Yet" />

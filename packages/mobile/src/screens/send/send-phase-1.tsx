@@ -67,18 +67,18 @@ export const SendPhase1: FunctionComponent<{
     : chainStore.current.chainId;
 
   const account = accountStore.getAccount(chainId);
+  const queries = queriesStore.get(chainId);
 
-  const queryBalances = queriesStore
-    .get(sendConfigs.amountConfig.chainId)
-    .queryBalances.getQueryBech32Address(sendConfigs.amountConfig.sender);
+  const spendableBalances = queries.cosmos.querySpendableBalances
+    .getQueryBech32Address(account.bech32Address)
+    .balances?.find(
+      (bal) =>
+        sendConfigs.amountConfig.sendCurrency.coinMinimalDenom ===
+        bal.currency.coinMinimalDenom
+    );
 
-  const queryBalance = queryBalances.balances.find(
-    (bal) =>
-      sendConfigs.amountConfig.sendCurrency.coinMinimalDenom ===
-      bal.currency.coinMinimalDenom
-  );
-  const balance = queryBalance
-    ? queryBalance.balance
+  const balance = spendableBalances
+    ? spendableBalances
     : new CoinPretty(sendConfigs.amountConfig.sendCurrency, new Int(0));
 
   const convertToCurrency = (currency: any) => {
@@ -111,7 +111,10 @@ export const SendPhase1: FunctionComponent<{
   return (
     <React.Fragment>
       <View style={style.flatten(["height-page-pad"]) as ViewStyle} />
-      <AmountInputSection amountConfig={sendConfigs.amountConfig} />
+      <AmountInputSection
+        amountConfig={sendConfigs.amountConfig}
+        spendableBalance={balance.shrink(true).hideDenom(true).toString()}
+      />
       {/* This is a send component */}
       <View style={style.flatten(["margin-y-20"]) as ViewStyle}>
         <DropDownCardView

@@ -5,10 +5,11 @@ import activityIcon from "@assets/icon/lightning-bolt.svg";
 import moreIcon from "@assets/icon/more.svg";
 import { NotificationSetup } from "@notificationTypes";
 import React, { useEffect, useState } from "react";
-import { CHAIN_ID_FETCHHUB } from "../../config.ui.var";
+
 import { useStore } from "../../stores";
 import style from "./style.module.scss";
 import { Tab } from "./tab";
+import { isFeatureAvailable } from "@utils/index";
 
 interface WalletConfig {
   notiphyWhitelist: string[] | undefined;
@@ -152,12 +153,12 @@ const ActivityTab = () => {
   const [activityDisabled, setActivityDisabled] = useState(false);
 
   useEffect(() => {
-    if (![CHAIN_ID_FETCHHUB].includes(current.chainId)) {
-      setActivityTooltip("Feature not available on this network");
-      setActivityDisabled(true);
-    } else {
+    if (isFeatureAvailable(current.chainId)) {
       setActivityTooltip("");
       setActivityDisabled(false);
+    } else {
+      setActivityTooltip("Feature not available on this network");
+      setActivityDisabled(true);
     }
   }, [current.chainId]);
 

@@ -8,15 +8,12 @@ import selectedMoreTabIcon from "@assets/svg/wireframe/selected-more.svg";
 import selectedStakeTabIcon from "@assets/svg/wireframe/selected-stake.svg";
 import stakeTabIcon from "@assets/svg/wireframe/stake-bottom-icon-new.svg";
 import React, { useEffect, useState } from "react";
-import {
-  CHAIN_ID_DORADO,
-  CHAIN_ID_ERIDANUS,
-  CHAIN_ID_FETCHHUB,
-} from "../../config.ui.var";
+
 import { WalletActions } from "../../pages-new/main/wallet-actions";
 import { useStore } from "../../stores";
 import style from "./style.module.scss";
 import { Tab } from "./tab";
+import { isFeatureAvailable } from "@utils/index";
 
 const bottomNav = [
   {
@@ -65,11 +62,7 @@ const StakeTab = () => {
   const [stakingTooltip, setStakingTooltip] = useState("");
   const [stakingDisabled, setStakingDisabled] = useState(false);
   useEffect(() => {
-    if (
-      current.chainId == CHAIN_ID_DORADO ||
-      current.chainId == CHAIN_ID_FETCHHUB ||
-      current.chainId == CHAIN_ID_ERIDANUS
-    ) {
+    if (isFeatureAvailable(current.chainId)) {
       setStakingDisabled(false);
       setStakingTooltip("");
     } else {

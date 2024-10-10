@@ -6,7 +6,7 @@ import { TabsPanel } from "@components-v2/tabs/tabsPanel-2";
 import { TokensView } from "../main/tokens";
 import { Stats } from "./stats";
 import { useStore } from "../../stores";
-import { CHAIN_ID_ERIDANUS } from "../../config.ui.var";
+import { isFeatureAvailable } from "@utils/index";
 
 export const Portfolio = () => {
   const navigate = useNavigate();
@@ -17,10 +17,7 @@ export const Portfolio = () => {
     { id: "Tokens", component: <TokensView /> },
     {
       id: "Stats",
-      disabled:
-        chainStore.current.chainId !== "fetchhub-4" &&
-        chainStore.current.chainId !== "dorado-1" &&
-        chainStore.current.chainId !== CHAIN_ID_ERIDANUS,
+      disabled: !isFeatureAvailable(chainStore.current.chainId),
       component: (
         <Stats
           isClaimRewardsOpen={isClaimRewardsOpen}

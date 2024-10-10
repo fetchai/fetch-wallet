@@ -12,12 +12,14 @@ export const UseMaxButton: FunctionComponent<{
   setIsToggleClicked: any;
   containerStyle?: ViewStyle;
   disable?: boolean;
+  onPress?: () => void;
 }> = ({
   amountConfig,
   isToggleClicked,
   setIsToggleClicked,
   containerStyle,
   disable = false,
+  onPress,
 }) => {
   const style = useStyle();
   const { priceStore } = useStore();
@@ -86,7 +88,7 @@ export const UseMaxButton: FunctionComponent<{
           borderRadius={32}
           disable={disable}
           onPress={() => {
-            amountConfig.toggleIsMax();
+            onPress ? onPress() : amountConfig.toggleIsMax();
           }}
           containerStyle={
             style.flatten([

@@ -1,6 +1,6 @@
 import React from "react";
 import { Doughnut } from "react-chartjs-2";
-import { separateNumericAndDenom } from "@utils/format";
+import { isVestingExpired, separateNumericAndDenom } from "@utils/format";
 
 import { ChainIdHelper } from "@keplr-wallet/cosmos";
 import { AppCurrency } from "@keplr-wallet/types";
@@ -10,9 +10,10 @@ import { useStore } from "../../../stores";
 import { EmptyStake } from "./empty-stake";
 import { MyStakes } from "./my-stake/my-stakes";
 import { observer } from "mobx-react-lite";
-import { WalletStatus } from "@keplr-wallet/stores";
+import { VestingType, WalletStatus } from "@keplr-wallet/stores";
 import { Skeleton } from "@components-v2/skeleton-loader";
 import { useLanguage } from "../../../languages";
+import { clearDecimals } from "../../sign/decimals";
 
 export const Dashboard = observer(() => {
   const { chainStore, accountStore, queriesStore, priceStore } = useStore();
@@ -72,15 +73,77 @@ export const Dashboard = observer(() => {
   const { numericPart: rewardsBalNumber, denomPart: rewardDenom } =
     separateNumericAndDenom(rewardsBal);
 
+  const isVesting = queries.cosmos.queryAccount.getQueryBech32Address(
+    accountInfo.bech32Address
+  ).isVestingAccount;
+
+  const vestingInfo = queries.cosmos.queryAccount.getQueryBech32Address(
+    accountInfo.bech32Address
+  ).vestingAccount;
+  const latestBlockTime = queries.cosmos.queryRPCStatus.latestBlockTime;
+
+  const vestingEndTimeStamp = Number(
+    vestingInfo.base_vesting_account?.end_time
+  );
+  const vestingStartTimeStamp = Number(vestingInfo.start_time);
+
+  const spendableBalances =
+    queries.cosmos.querySpendableBalances.getQueryBech32Address(
+      accountInfo.bech32Address
+    );
+
+  const { numericPart: spendableNumber, denomPart: spendableDenom } =
+    separateNumericAndDenom(spendableBalances.balances.toString());
+
+  function getVestingBalance(balance: number) {
+    return clearDecimals((balance / 10 ** 18).toFixed(20).toString());
+  }
+
+  const vestingBalance = () => {
+    if (vestingInfo["@type"] == VestingType.Continuous.toString()) {
+      if (stakableBalNumber > spendableNumber) {
+        return (Number(stakableBalNumber) - Number(spendableNumber)).toString();
+      } else if (
+        latestBlockTime &&
+        vestingEndTimeStamp > latestBlockTime &&
+        spendableNumber === stakableBalNumber
+      ) {
+        const ov = Number(
+          vestingInfo.base_vesting_account?.original_vesting[0].amount
+        );
+        const vested =
+          ov *
+          ((latestBlockTime - vestingStartTimeStamp) /
+            (vestingEndTimeStamp - vestingStartTimeStamp));
+        return getVestingBalance(ov - vested);
+      }
+
+      return "0";
+    }
+    return vestingInfo.base_vesting_account
+      ? getVestingBalance(
+          Number(vestingInfo.base_vesting_account?.original_vesting[0].amount)
+        )
+      : "0";
+  };
+
   const stakableBalInUI = parseFloat(stakableBalNumber);
   const stakedBalInUI = parseFloat(stakedBalNumber);
   const rewardsBalInUI = parseFloat(rewardsBalNumber);
+  const vestingBalInUI =
+    isVesting && !isVestingExpired(vestingEndTimeStamp)
+      ? parseFloat(vestingBalance().toString())
+      : 0;
 
   const total = stakableBalInUI + stakedBalInUI + rewardsBalInUI;
 
-  const stakablePercentage = total ? (stakableBalInUI / total) * 100 : 0;
+  const stakablePercentage = total ? (spendableNumber / total) * 100 : 0;
   const stakedPercentage = total ? (stakedBalInUI / total) * 100 : 0;
   const rewardsPercentage = total ? (rewardsBalInUI / total) * 100 : 0;
+  const vestingPercentage =
+    isVesting && !isVestingExpired(vestingEndTimeStamp)
+      ? (Number(vestingBalance()) / total) * 100
+      : 0;
 
   const stakableInFiatCurrency = priceStore
     .calculatePrice(stakable, fiatCurrency)
@@ -98,12 +161,12 @@ export const Dashboard = observer(() => {
     !rewards.isFetching;
 
   const doughnutData = {
-    labels: ["Balance", "Staked", "Rewards"],
+    labels: ["Balance", "Staked", "Rewards", "vesting"],
     datasets: [
       {
-        data: [stakableBalInUI, stakedBalInUI, rewardsBalInUI],
-        backgroundColor: ["#CFC3FE", "#5F38FB", "#F9774B"],
-        hoverBackgroundColor: ["#CFC3FE", "#5F38FB", "#F9774B"],
+        data: [spendableNumber, stakedBalInUI, rewardsBalInUI, vestingBalInUI],
+        backgroundColor: ["#CFC3FE", "#5F38FB", "#F9774B", "#FAB29B"],
+        hoverBackgroundColor: ["#CFC3FE", "#5F38FB", "#F9774B", "#FAB29B"],
         borderColor: "transparent",
       },
     ],
@@ -263,6 +326,39 @@ export const Dashboard = observer(() => {
                 )}
               </div>
             </div>
+            {isVesting && !isVestingExpired(vestingEndTimeStamp) && (
+              <div className={style["legend"]}>
+                <img
+                  src={
+                    rewardsInFiatCurrency !== undefined &&
+                    rewardsInFiatCurrency > "$0"
+                      ? require("@assets/svg/wireframe/legend-light-orange.svg")
+                      : require("@assets/svg/wireframe/legend-light-orange.svg")
+                  }
+                  alt=""
+                />
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "3px",
+                  }}
+                >
+                  <div className={style["label"]}>Vesting</div>
+                  {isLoaded ? (
+                    <div className={style["value"]}>
+                      {Number(vestingBalance()).toFixed(2)}{" "}
+                      {` ${spendableDenom} `}
+                      <span className={style["label"]}>
+                        ({vestingPercentage.toFixed(1)}%)
+                      </span>
+                    </div>
+                  ) : (
+                    <Skeleton height="17.5px" />
+                  )}
+                </div>
+              </div>
+            )}
           </div>
           <div className={style["doughnut-graph"]}>
             <Doughnut data={doughnutData} options={doughnutData.options} />

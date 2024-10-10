@@ -1,5 +1,6 @@
 import { AGENT_ADDRESS } from "../config.ui.var";
 import { isToday, isYesterday, format } from "date-fns";
+import moment from "moment";
 
 export const formatAddress = (address: string) => {
   if (Object.values(AGENT_ADDRESS).includes(address)) return "Fetchbot";
@@ -174,4 +175,41 @@ export const getDate = (timestamp: number): string => {
 export const formatPendingTxn = (amount: any) => {
   const curr = Number(amount) * 10 ** 18;
   return `-${curr}`;
+};
+
+export const getEnumKeyByEnumValue = <T extends Record<string, string>>(
+  value: string,
+  _enum: T
+) => {
+  return Object.keys(_enum).find(
+    (key) => _enum[key as keyof typeof _enum] === value
+  );
+};
+
+export const convertEpochToDate = (
+  epochTime: number,
+  formatType: string = "DD MMM YYYY"
+) => {
+  const date = new Date(epochTime * 1000); // Multiply by 1000 to convert seconds to milliseconds
+  return moment(date).format(formatType);
+};
+
+export const isVestingExpired = (timestamp: number) =>
+  Math.floor(Date.now() / 1000) > timestamp;
+
+export const removeTrailingZeros = (number: string) => {
+  const splitNumber = number.split(".");
+  const countStartNumber = splitNumber[0].length;
+  const decimal =
+    countStartNumber > 3
+      ? 2
+      : countStartNumber == 3
+      ? 3
+      : countStartNumber > 1
+      ? 4
+      : 6;
+  return Number(number)
+    .toFixed(decimal)
+    .toString()
+    .replace(/([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, "$1");
 };

@@ -8,6 +8,41 @@ import { AuthAccount } from "./types";
 import { computed, makeObservable } from "mobx";
 import { BaseAccount } from "@keplr-wallet/cosmos";
 
+interface PubKey {
+  "@type": string;
+  key: string;
+}
+
+interface Base_Account {
+  account_number: string;
+  address: string;
+  pub_key: PubKey;
+  sequence: string;
+}
+
+interface Delegated {
+  amount: string;
+  denom: string;
+}
+
+interface BaseVestingAccount {
+  base_account: Base_Account;
+  delegated_free: Delegated[];
+  delegated_vesting: Delegated[];
+  end_time: string;
+  original_vesting: Delegated[];
+}
+interface VestingAccount {
+  "@type"?: string;
+  base_vesting_account?: BaseVestingAccount;
+  start_time?: string;
+}
+
+export enum VestingType {
+  Continuous = "/cosmos.vesting.v1beta1.ContinuousVestingAccount",
+  Delayed = "/cosmos.vesting.v1beta1.DelayedVestingAccount",
+}
+
 export class ObservableQueryAccountInner extends ObservableChainQuery<AuthAccount> {
   constructor(
     kvStore: KVStore,
@@ -59,6 +94,15 @@ export class ObservableQueryAccountInner extends ObservableChainQuery<AuthAccoun
     }
 
     return !!this.response.data?.account.base_vesting_account;
+  }
+
+  @computed
+  get vestingAccount(): VestingAccount {
+    if (!this.response) {
+      return {};
+    }
+
+    return this.response.data?.account;
   }
 }
 

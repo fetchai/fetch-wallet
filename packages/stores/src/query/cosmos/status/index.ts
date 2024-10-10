@@ -2,6 +2,7 @@ import { KVStore } from "@keplr-wallet/common";
 import { ChainGetter } from "../../../common";
 import { ObservableChainQueryRPC } from "../../chain-rpc-query";
 import { Int } from "@keplr-wallet/unit";
+import { convertToEpoch } from "./utils";
 
 type RPCStatusResult = {
   node_info: {
@@ -76,5 +77,19 @@ export class ObservableQueryRPCStatus extends ObservableChainQueryRPC<
     }
 
     return new Int(this.response.data.sync_info.latest_block_height);
+  }
+
+  get latestBlockTime(): number | undefined {
+    if (!this.response) {
+      return undefined;
+    }
+
+    if ("result" in this.response.data) {
+      return convertToEpoch(
+        this.response.data.result.sync_info.latest_block_time
+      );
+    }
+
+    return convertToEpoch(this.response.data.sync_info.latest_block_time);
   }
 }

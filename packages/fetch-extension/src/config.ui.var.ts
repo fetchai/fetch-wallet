@@ -30,6 +30,8 @@ export const FNS_TEST_ADDRESS = "fetch1s84mudgmjfjmkef7ludqnwy0fchh3mf4p4rmll";
 export const CHAIN_ID_DORADO = "dorado-1";
 export const CHAIN_ID_ERIDANUS = "eridanus-1";
 export const CHAIN_ID_FETCHHUB = "fetchhub-4";
+export const CHAIN_ID_LOCAL_TEST_NETWORK = "test-local";
+export const CHAIN_ID_REMOTE_TEST_NETWORK = "test";
 export const GROUP_PAGE_COUNT = 30;
 export const CHAT_PAGE_COUNT = 30;
 

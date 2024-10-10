@@ -14,6 +14,9 @@ import {
   ParamListBase,
   useNavigation,
 } from "@react-navigation/native";
+import { BlurButton } from "components/new/button/blur-button";
+import { LockIcon } from "components/new/icon/lock";
+import { StakeIcon } from "components/new/icon/stake-icon";
 
 export const NativeTokensSection: FunctionComponent = observer(() => {
   const style = useStyle();
@@ -24,6 +27,10 @@ export const NativeTokensSection: FunctionComponent = observer(() => {
   const queries = queriesStore.get(current.chainId);
 
   const accountInfo = accountStore.getAccount(current.chainId);
+
+  const isVesting = queries.cosmos.queryAccount.getQueryBech32Address(
+    accountInfo.bech32Address
+  ).isVestingAccount;
 
   const balanceQuery = queries.queryBalances.getQueryBech32Address(
     accountInfo.bech32Address
@@ -44,9 +51,7 @@ export const NativeTokensSection: FunctionComponent = observer(() => {
 
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const { numericPart: totalNumber, denomPart: totalDenom } =
-    separateNumericAndDenom(
-      stakable.shrink(true).trim(true).maxDecimals(6).toString()
-    );
+    separateNumericAndDenom(stakable.shrink(true).trim(true).toString());
   const totalPrice = priceStore.calculatePrice(stakable);
 
   const NativeTokenDetailsString = encodeURIComponent(
@@ -88,6 +93,57 @@ export const NativeTokensSection: FunctionComponent = observer(() => {
       subtitle={stakable.shrink(true).maxDecimals(6).toString()}
       trailingStart={totalPrice ? `${totalPrice.toString()}` : ""}
       trailingEnd={totalPrice ? priceStore.defaultVsCurrency.toUpperCase() : ""}
+      bottomContent={
+        isVesting ? (
+          <React.Fragment>
+            <BlurButton
+              text={"Staked"}
+              backgroundBlur={false}
+              leftIcon={<StakeIcon size={12} />}
+              borderRadius={8}
+              containerStyle={
+                style.flatten([
+                  "border-width-1",
+                  "padding-x-12",
+                  "padding-y-6",
+                  "margin-right-8",
+                  "justify-center",
+                  "border-color-white@20%",
+                ]) as ViewStyle
+              }
+              textStyle={
+                style.flatten([
+                  "text-caption2",
+                  "color-white",
+                  "margin-0",
+                ]) as ViewStyle
+              }
+            />
+            <BlurButton
+              text={"Vesting"}
+              backgroundBlur={false}
+              leftIcon={<LockIcon />}
+              borderRadius={8}
+              containerStyle={
+                style.flatten([
+                  "border-width-1",
+                  "padding-x-12",
+                  "padding-y-6",
+                  "justify-center",
+                  "border-color-white@20%",
+                ]) as ViewStyle
+              }
+              textStyle={
+                style.flatten([
+                  "text-caption2",
+                  "color-white",
+                  "margin-0",
+                ]) as ViewStyle
+              }
+            />
+          </React.Fragment>
+        ) : null
+      }
     />
   );
 });

@@ -451,5 +451,15 @@
   "search.no-result-found": "No results found.",
   "search.refine.search": "Please refine your search.",
   "sign.in.google": "Continue with Google",
-  "sign.in.auth-powered": "Powered by Web3Auth"
+  "sign.in.auth-powered": "Powered by Web3Auth",
+
+  "portfolio.detail.vesting-card.paragraph": "Your balance includes {vestingBalance} {balanceDenom} that are still locked due to your vesting schedule",
+  "portfolio.detail.vesting-card.calendar.vesting.type": "Vesting type",
+  "portfolio.detail.vesting-card.calendar.start.time": "Start time",
+  "portfolio.detail.vesting-card.calendar.end.time": "End time",
+  "portfolio.detail.vesting-card.calendar.originally.locked": "Originally locked",
+  "portfolio.detail.vesting-card.calendar.currently.locked": "Currently locked",
+  "portfolio.detail.vesting-card.calendar.already.unlocked": "Already unlocked",
+  "portfolio.detail.vesting-card.calendar.learn.more": "Learn more",
+  "portfolio.detail.vesting-card.calendar.show/hide.calendar": "{calendarType} calendar"
 }

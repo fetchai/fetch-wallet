@@ -10,6 +10,7 @@ import { ButtonV2 } from "@components-v2/buttons/button";
 import { Label } from "reactstrap";
 import { observer } from "mobx-react-lite";
 import { useNavigate } from "react-router";
+import { CoinPretty, Int } from "@keplr-wallet/unit";
 
 interface SendPhase1Props {
   sendConfigs: any;
@@ -20,7 +21,8 @@ interface SendPhase1Props {
 export const SendPhase1: React.FC<SendPhase1Props> = observer(
   ({ setIsNext, sendConfigs, setFromPhase1 }) => {
     const [isChangeWalletOpen, setIsChangeWalletOpen] = useState(false);
-    const { chainStore, accountStore } = useStore();
+    const { chainStore, accountStore, queriesStore } = useStore();
+    const queries = queriesStore.get(chainStore.current.chainId);
     const accountInfo = accountStore.getAccount(chainStore.current.chainId);
     const navigate = useNavigate();
     const intl = useIntl();
@@ -29,9 +31,25 @@ export const SendPhase1: React.FC<SendPhase1Props> = observer(
       setFromPhase1(true);
     }, []);
 
+    const spendableBalances = queries.cosmos.querySpendableBalances
+      .getQueryBech32Address(accountInfo.bech32Address)
+      .balances?.find(
+        (bal) =>
+          sendConfigs.amountConfig.sendCurrency.coinMinimalDenom ===
+          bal.currency.coinMinimalDenom
+      );
+    const balance = spendableBalances
+      ? spendableBalances
+      : new CoinPretty(sendConfigs.amountConfig.sendCurrency, new Int(0));
+
     return (
       <div>
         <CoinInput
+          onPress={() =>
+            sendConfigs.amountConfig.setAmount(
+              balance.shrink(true).hideDenom(true).toString()
+            )
+          }
           amountConfig={sendConfigs.amountConfig}
           label={intl.formatMessage({ id: "send.input.amount" })}
           balanceText={intl.formatMessage({

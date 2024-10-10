@@ -113,3 +113,80 @@
 .increaseInPer {
   color: white;
 }
+.alert {
+  padding: 18px;
+
+  border: transparent;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  margin-top: 24px;
+  margin-bottom: 24px;
+  color: white;
+
+  .topContent {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    align-self: stretch;
+  }
+
+  img {
+    margin-top: 4px;
+    height: 12px;
+    width: 12px;
+  }
+
+  .lightText {
+    color: #fff;
+    font-family: Lexend;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 160%;
+  }
+  .link-row {
+    display: flex;
+    gap: 12px;
+
+    span {
+      font-size: 12px;
+      color: #bfaffd;
+      padding-right: 5px;
+    }
+    img {
+      height: 11px;
+      width: 11px;
+      margin: 0;
+    }
+  }
+  .show-calendar-text {
+    font-family: Lexend;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 17.5px;
+  }
+
+  .calendar-container {
+    margin-top: 28px;
+    .row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+
+      .box-1 {
+        flex: 1;
+        overflow-wrap: anywhere;
+      }
+
+      .box-2 {
+        display: flex;
+        gap: 2px;
+        flex: 2;
+        text-align: end;
+        justify-content: end;
+        flex-wrap: wrap;
+        overflow-wrap: anywhere;
+      }
+    }
+  }
+}

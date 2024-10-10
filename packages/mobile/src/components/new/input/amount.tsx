@@ -20,7 +20,8 @@ import { observer } from "mobx-react-lite";
 
 export const AmountInputSection: FunctionComponent<{
   amountConfig: IAmountConfig;
-}> = observer(({ amountConfig }) => {
+  spendableBalance: string;
+}> = observer(({ amountConfig, spendableBalance }) => {
   const style = useStyle();
   const { priceStore } = useStore();
   const [isToggleClicked, setIsToggleClicked] = useState<boolean>(false);
@@ -199,6 +200,7 @@ export const AmountInputSection: FunctionComponent<{
         amountConfig={amountConfig}
         isToggleClicked={isToggleClicked}
         setIsToggleClicked={setIsToggleClicked}
+        onPress={() => amountConfig.setAmount(spendableBalance)}
         containerStyle={style.flatten(["margin-top-28"]) as ViewStyle}
       />
     </React.Fragment>

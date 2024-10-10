@@ -16,6 +16,8 @@ export interface CardProps {
   rightContentStyle?: any;
   inActiveBackground?: any;
   disabled?: boolean;
+  bottomContent?: any;
+  bottomContentStyle?: any;
 }
 
 export const Card: React.FC<CardProps> = ({
@@ -25,6 +27,8 @@ export const Card: React.FC<CardProps> = ({
   subheading,
   rightContent,
   rightContentStyle,
+  bottomContent,
+  bottomContentStyle,
   isActive,
   style,
   subheadingStyle,
@@ -54,63 +58,76 @@ export const Card: React.FC<CardProps> = ({
       className={styles["cardContainer"]}
       onClick={!disabled && onClick}
     >
-      {leftImage &&
-        (leftImage.length > 1 ? (
-          <img
-            src={leftImage.length > 1 && leftImage}
-            alt={leftImage[0]}
-            className={styles["leftImage"]}
-            style={leftImageStyle}
-          />
-        ) : (
-          <div className={styles["leftImage"]} style={leftImageStyle}>
-            {leftImage}
-          </div>
-        ))}
-
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          width: "100%",
-        }}
-      >
-        <div className={styles["middleSection"]}>
-          <div
-            style={{ ...headingStyle }}
-            className={`${styles["heading"]} ${styles["wordBreak"]}`}
-          >
-            {heading}
-          </div>
-          {subheading && (
-            <div
-              className={styles["subHeading"]}
-              style={{ ...subheadingStyle }}
-            >
-              {subheading}
-            </div>
-          )}
-        </div>
-
-        <div className={styles["rightSection"]}>
-          {React.isValidElement(rightContent) ? (
-            <div style={rightContentStyle}> {rightContent}</div>
-          ) : rightContent && rightContent.includes("extension://") ? (
+      <div className={styles["cardTopContainer"]}>
+        {leftImage &&
+          (leftImage.length > 1 ? (
             <img
-              onClick={rightContentOnClick}
-              src={rightContent}
-              alt="Right Section"
-              className={styles["rightImage"]}
-              style={rightContentStyle}
+              src={leftImage.length > 1 && leftImage}
+              alt={leftImage[0]}
+              className={styles["leftImage"]}
+              style={leftImageStyle}
             />
           ) : (
-            <div onClick={rightContentOnClick} className={styles["rightText"]}>
-              {rightContent}
+            <div className={styles["leftImage"]} style={leftImageStyle}>
+              {leftImage}
             </div>
-          )}
+          ))}
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            width: "100%",
+          }}
+        >
+          <div className={styles["middleSection"]}>
+            <div
+              style={{ ...headingStyle }}
+              className={`${styles["heading"]} ${styles["wordBreak"]}`}
+            >
+              {heading}
+            </div>
+            {subheading && (
+              <div
+                className={styles["subHeading"]}
+                style={{ ...subheadingStyle }}
+              >
+                {subheading}
+              </div>
+            )}
+          </div>
+
+          <div className={styles["rightSection"]}>
+            {React.isValidElement(rightContent) ? (
+              <div style={rightContentStyle}> {rightContent}</div>
+            ) : rightContent && rightContent.includes("extension://") ? (
+              <img
+                onClick={rightContentOnClick}
+                src={rightContent}
+                alt="Right Section"
+                className={styles["rightImage"]}
+                style={rightContentStyle}
+              />
+            ) : (
+              <div
+                onClick={rightContentOnClick}
+                className={styles["rightText"]}
+              >
+                {rightContent}
+              </div>
+            )}
+          </div>
         </div>
       </div>
+      {bottomContent && (
+        <div
+          className={styles["cardBottomContainer"]}
+          style={bottomContentStyle}
+        >
+          {bottomContent}
+        </div>
+      )}
     </div>
   );
 };

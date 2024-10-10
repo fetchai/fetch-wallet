@@ -8,6 +8,7 @@ import { useNavigate } from "react-router";
 import { separateNumericAndDenom } from "@utils/format";
 import { getTokenIcon } from "@utils/get-token-icon";
 import { observer } from "mobx-react-lite";
+import styles from "@components-v2/card/style.module.scss";
 export const NativeTokens = observer(() => {
   const { chainStore, accountStore, queriesStore, priceStore } = useStore();
   const [nativeToken, setNativeToken] = useState<any>("");
@@ -35,6 +36,10 @@ export const NativeTokens = observer(() => {
   }, []);
   const isEvm = chainStore.current.features?.includes("evm") ?? false;
   const accountInfo = accountStore.getAccount(current.chainId);
+
+  const isVesting = queries.cosmos.queryAccount.getQueryBech32Address(
+    accountInfo.bech32Address
+  ).isVestingAccount;
 
   const balanceQuery = queries.queryBalances.getQueryBech32Address(
     accountInfo.bech32Address
@@ -134,6 +139,35 @@ export const NativeTokens = observer(() => {
                   {fiatCurrency.toUpperCase()}
                 </span>
               </div>
+            )
+          }
+          bottomContent={
+            isVesting && (
+              <React.Fragment>
+                <div
+                  className={styles["pCenter"]}
+                  style={{ marginRight: "8px" }}
+                >
+                  <img
+                    src={require(`@assets/svg/wireframe/stake.svg`)}
+                    className={styles["pImage"]}
+                    alt={"Stake_icon"}
+                  />
+                  <p className={styles["text"]} style={{ color: "white" }}>
+                    {`Staked`}
+                  </p>
+                </div>
+                <div className={styles["pCenter"]}>
+                  <img
+                    src={require(`@assets/svg/wireframe/lock.svg`)}
+                    className={styles["pImage"]}
+                    alt={"Vesting_lock_icon"}
+                  />
+                  <p className={styles["text"]} style={{ color: "white" }}>
+                    {`Vesting`}
+                  </p>
+                </div>
+              </React.Fragment>
             )
           }
         />

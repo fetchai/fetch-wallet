@@ -32,10 +32,11 @@ export interface CoinInputProps {
   disableAllBalance?: boolean;
   overrideSelectableCurrencies?: AppCurrency[];
   dropdownDisabled?: boolean;
+  onPress?: () => void;
 }
 
 export const CoinInput: FunctionComponent<CoinInputProps> = observer(
-  ({ amountConfig, disableAllBalance }) => {
+  ({ amountConfig, disableAllBalance, onPress }) => {
     const intl = useIntl();
     const [inputInFiatCurrency, setInputInFiatCurrency] = useState<
       string | undefined
@@ -225,7 +226,7 @@ export const CoinInput: FunctionComponent<CoinInputProps> = observer(
                 className={styleCoinInput["widgetButton"]}
                 onClick={(e) => {
                   e.preventDefault();
-                  amountConfig.toggleIsMax();
+                  onPress ? onPress() : amountConfig.toggleIsMax();
                 }}
               >
                 Use max available
@@ -252,7 +253,9 @@ export const TokenSelectorDropdown: React.FC<TokenDropdownProps> = ({
     string | undefined
   >("");
 
-  const { queriesStore, priceStore } = useStore();
+  const { queriesStore, priceStore, accountStore, chainStore } = useStore();
+  const accountInfo = accountStore.getAccount(chainStore.current.chainId);
+  const queries = queriesStore.get(chainStore.current.chainId);
   const queryBalances = queriesStore
     .get(amountConfig.chainId)
     .queryBalances.getQueryBech32Address(amountConfig.sender);
@@ -267,14 +270,15 @@ export const TokenSelectorDropdown: React.FC<TokenDropdownProps> = ({
     .sort((a, b) => {
       return a.coinDenom < b.coinDenom ? -1 : 1;
     });
-
-  const queryBalance = queryBalances.balances.find(
-    (bal) =>
-      amountConfig.sendCurrency.coinMinimalDenom ===
-      bal.currency.coinMinimalDenom
-  );
-  const balance = queryBalance
-    ? queryBalance.balance
+  const spendableBalances = queries.cosmos.querySpendableBalances
+    .getQueryBech32Address(accountInfo.bech32Address)
+    .balances?.find(
+      (bal) =>
+        amountConfig.sendCurrency.coinMinimalDenom ===
+        bal.currency.coinMinimalDenom
+    );
+  const balance = spendableBalances
+    ? spendableBalances
     : new CoinPretty(amountConfig.sendCurrency, new Int(0));
 
   const language = useLanguage();
