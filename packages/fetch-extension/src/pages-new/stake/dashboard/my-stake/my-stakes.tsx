@@ -446,9 +446,6 @@ const DelegateReward: FunctionComponent = observer(() => {
       );
     } catch (err) {
       console.error(err);
-      if (err.toString().includes("Error: Request rejected")) {
-        navigate(`/validators/${validatorAddress}`);
-      }
     } finally {
       setIsWithdrawingRewards(false);
       const txnNavigationOptions = {
