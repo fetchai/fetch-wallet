@@ -44,6 +44,7 @@ export const SendPhase2: React.FC<SendPhase2Props> = observer(
       priceStore,
       analyticsStore,
       activityStore,
+      keyRingStore,
     } = useStore();
     const accountInfo = accountStore.getAccount(chainStore.current.chainId);
     const navigate = useNavigate();
@@ -322,6 +323,9 @@ export const SendPhase2: React.FC<SendPhase2Props> = observer(
                         },
                       };
                       navigateOnTxnEvents(txnNavigationOptions);
+                      if (keyRingStore.keyRingType === "ledger") {
+                        navigate("/send");
+                      }
                     },
                     onFulfill: (tx: any) => {
                       const istxnSuccess = tx.code ? false : true;
